@@ -14,7 +14,6 @@
 #define _CANDRIVE166_H
 #include "WPILib.h"
 #include "Robot.h"
-#include "CANJaguar.h"
 
 //
 // This constant defines how often we want this task to run in the form
