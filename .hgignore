@@ -1,0 +1,9 @@
+glob:.metadata\
+glob:*.o
+glob:*.d
+glob:ctdt.*
+glob:*.out
+glob:Makefile
+glob:*.csv
+glob:*\PPC603gnu\*
+glob:*.lnk
