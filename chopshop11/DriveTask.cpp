@@ -26,10 +26,10 @@ struct abuf166
 
 //  Memory Log
 // <<CHANGEME>>
-class DriveLog : public MemoryLog166
+class DriveLog : public MemoryLog
 {
 public:
-	DriveLog() : MemoryLog166(
+	DriveLog() : MemoryLog(
 			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "template",
 			"Seconds,Nanoseconds,Elapsed Time,X,Y,Z\n" // Put the names of the values in here, comma-seperated
 			) {
@@ -122,7 +122,10 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-		
+	
+	drive.SetInvertedMotor(drive.kFrontRightMotor,true);
+	drive.SetInvertedMotor(drive.kRearRightMotor,true);
+	
     // General main loop (while in Autonomous or Tele mode)
 	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
 			(lHandle->RobotMode == T166_OPERATOR)) {

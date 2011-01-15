@@ -21,10 +21,9 @@
 #define NUMBER_OF_JOY_BUTTONS (12)
 
 //
-// This constant defines how often we want this task to run in the form
-// of miliseconds. Max allowed time is 999 miliseconds.
+//This is how often the Driver Station sends back data.
 //
-#define PROXY_CYCLE_TIME (25) // 25ms
+#define PROXY_CYCLE_TIME (20) // 20ms
 
 /**
  * @brief Proxy class to store cached values for joysticks and switches.
@@ -44,12 +43,11 @@ class Proxy : public Team166Task{
 		float set(string, float);
 		bool del(string);
 		
-		void RegisterCounter(int,int);
-		void UnregisterCounter(int,int);
-		int GetPendingCount(int,int);
-		bool IsRegistered(int,int);
+		bool RegisterCounter(string);
+		bool UnregisterCounter(string);
+		int GetPendingCount(string);
+		bool IsRegistered(string);
 		
-		Proxy(void);
 		~Proxy(void);
 		
 		bool AreSettingJoysticks();
@@ -60,6 +58,7 @@ class Proxy : public Team166Task{
 		virtual int Main(int a2, int a3, int a4, int a5,
 					int a6, int a7, int a8, int a9, int a10);
 	private:
+		Proxy(void);
 		// Handle to the proxy
 		static Proxy *ProxyHandle;
 		
@@ -72,16 +71,15 @@ class Proxy : public Team166Task{
 		 * ints in this tuple: first, the joystick number, second, the button number,
 		 * and third, the number of times it has been pressed.
 		*/
-		vector<int> tracker;
+		//vector<int> tracker;
+		static map<string,int> tracker;
+		static short newpress_values[NUMBER_OF_JOYSTICKS][NUMBER_OF_JOY_BUTTONS];
 
 		// The physical joysticks
 		Joystick stick1;
 		Joystick stick2;
 		Joystick stick3;
 		Joystick stick4;
-		
-		// Battery level
-		float Battery;
 				
 		bool areSettingJoysticks;
 };

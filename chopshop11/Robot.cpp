@@ -29,8 +29,6 @@ Team166Task *Team166Task::ActiveTasks[T166_MAXTASK + 1] = {0};
 // Create the robot handle that's used by all the other classes
 Robot *Robot::RobotHandle = NULL;
 
-// This task has to always be started first or the system will crash
-Proxy Team166ProxyObject;
 // Declare external tasks inside Tasks.h
 #include "Tasks.h"
 
@@ -144,7 +142,7 @@ Robot *Robot::getInstance(void)
 /**
  * Register a log object
  */
-void Robot::RegisterLogger(MemoryLog166 *ml)
+void Robot::RegisterLogger(MemoryLog *ml)
 {
 	
 	// Has this handler been registered already?
@@ -163,7 +161,7 @@ void Robot::RegisterLogger(MemoryLog166 *ml)
  */
 void Robot::DumpLoggers(int dnum)
 {
-	MemoryLog166 *ml;
+	MemoryLog *ml;
 	
 	// Iterate through the list of loggers
 	ml = mlHead;

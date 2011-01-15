@@ -12,7 +12,6 @@
 #include "wpilib.h"
 #include "Robot.h"
 #include <string>
-#include <sstream>
 
 // Enable proxy logging?
 #define LoggingProxy (0)
@@ -21,6 +20,8 @@
 #define DPRINTF if(false)dprintf
 
 map<string,pair<float, SEM_ID> > Proxy::data = map<string,pair<float, SEM_ID> >();
+map<string,int> Proxy::tracker = map<string,int>();
+short Proxy::newpress_values[NUMBER_OF_JOYSTICKS][NUMBER_OF_JOY_BUTTONS];
 
 Proxy *Proxy::ProxyHandle = 0;
 
@@ -38,35 +39,30 @@ Proxy::Proxy(void):
 	if (runonce == 0) {
 		ProxyHandle = this;
 		for (int switchid=1; switchid < NUMBER_OF_SWITCHES+1; switchid++) {
-			string switchwid = "Switch";
-			stringstream switchtochar;
-			//turn the switch number into a string
-			switchtochar << switchid;
-			//concat the switch number with "switch"
-			switchwid += switchtochar.str();
+			char tmp[32];
+			sprintf(tmp, "Switch%d", switchid);
+			string switchwid = tmp;
 			//Add switches to storage
 			add(switchwid);
 		}
 		// Lets do this the easy way:
 		for (int joyid=1; joyid <NUMBER_OF_JOYSTICKS+1; joyid++) {
-			//Define string for holding joyid
-			string joywid = "Joy";
-			std::stringstream numtochar;
-			numtochar << joyid;
-			joywid += numtochar.str();
+			char tmp[32];
+			sprintf(tmp, "Joy%d", joyid);
+			string joywid = tmp;
 			add(joywid + "X");
 			add(joywid + "Y");
 			add(joywid + "Z");
+			add(joywid + "R");
 			add(joywid + "T");
 			add(joywid + "BT");
 			//Add Buttons, and newpress
 			for (int buttonid=1;buttonid<NUMBER_OF_JOY_BUTTONS+1;buttonid++) {
-				string butwid = "B";
-				stringstream buttochar;
-				buttochar << buttonid;
-				butwid += buttochar.str();
-				add(joywid + butwid);
-				add(joywid + butwid + "N");
+				char tmp[32];
+				sprintf(tmp, "%sB%d", joywid.c_str(), buttonid);
+				string butwid = tmp;
+				add(butwid);
+				add(butwid + "N");
 			}
 		}
 		//Make sure they're only added once
@@ -93,15 +89,9 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 					int a6, int a7, int a8, int a9, int a10) {
 
 	Robot *lHandle = NULL;
-#if LoggingProxy
-	ProxyLog sl;
-#endif
 	WaitForGoAhead();
 	
 	lHandle = Robot::getInstance();
-#if LoggingProxy
-	lHandle->RegisterLogger(&sl);
-#endif
 	
 	Timer debugTimer;
 	debugTimer.Start();
@@ -109,10 +99,10 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 	while(MyTaskInitialized) {
 		setNewpress();
 		if(lHandle->IsOperatorControl() && true == AreSettingJoysticks()) {
-			SetJoystick(0, stick1);
-			SetJoystick(1, stick2);
-			SetJoystick(2, stick3);
-			SetJoystick(3, stick4);
+			SetJoystick(1, stick1);
+			SetJoystick(2, stick2);
+			SetJoystick(3, stick3);
+			SetJoystick(4, stick4);
 			
 			if(debugTimer.HasPeriodPassed(1.0)) {
 				// Debug info
@@ -129,15 +119,25 @@ void Proxy::setNewpress()
 {
 	for(unsigned joy_id=1;joy_id < NUMBER_OF_JOYSTICKS+1; joy_id++) {
 		for(unsigned btn_id=1;btn_id < NUMBER_OF_JOY_BUTTONS+1; btn_id++) {
-			string name;
-			stringstream ss;
-			ss << "Joy" << joy_id << "B" << btn_id;
-			ss >> name;
-			if(get(name+"N") || !get(name)) {
-				// Either there's an old "newpress", or the new value is "false"
-				set(name+"N",false);
+			char tmp[32];
+			sprintf(tmp, "Joy%dB%d", joy_id, btn_id);
+			string name = tmp;
+			bool buttonval = (bool)get(name);
+			if(buttonval) {
+				newpress_values[joy_id-1][btn_id-1]++;
 			} else {
-				set(name+"N",true);
+				newpress_values[joy_id-1][btn_id-1] = 0;
+			}
+			if(newpress_values[joy_id-1][btn_id-1]==1) {
+				set(name + "N", 1.0);
+				if(tracker.find(name) != tracker.end()) {
+					tracker[name]++;
+				}
+			} else {
+				set(name + "N", 0.0);
+			}
+			if(newpress_values[joy_id-1][btn_id-1]>1) {
+				newpress_values[joy_id-1][btn_id-1] = 2;
 			}
 		}
 	}
@@ -148,6 +148,9 @@ void Proxy::setNewpress()
 // This must be called to add values to the data field
 bool Proxy::add(string name)
 {
+	for(unsigned i=0;i<name.size();i++) {
+		name[i] = toupper(name[i]);
+	}
 	if(data.find(name) == data.end()) {
 		data[name] = make_pair(0.0,semBCreate(SEM_Q_PRIORITY, SEM_FULL));
 		return true;
@@ -159,6 +162,9 @@ bool Proxy::add(string name)
 // This will get a Proxy value
 float Proxy::get(string name, bool reset)
 {
+	for(unsigned i=0;i<name.size();i++) {
+		name[i] = toupper(name[i]);
+	}
 	wpi_assert(data.find(name) != data.end());
 	semTake(data[name].second, WAIT_FOREVER);
 	float ret = data[name].first;
@@ -170,6 +176,9 @@ float Proxy::get(string name, bool reset)
 // Set a new proxy value
 float Proxy::set(string name, float val)
 {
+	for(unsigned i=0;i<name.size();i++) {
+		name[i] = toupper(name[i]);
+	}
 	wpi_assert(data.find(name) != data.end());
 	semTake(data[name].second, WAIT_FOREVER);
 	data[name].first = val;
@@ -180,6 +189,9 @@ float Proxy::set(string name, float val)
 // Stop tracking a variable in Proxy
 bool Proxy::del(string name)
 {
+	for(unsigned i=0;i<name.size();i++) {
+		name[i] = toupper(name[i]);
+	}
 	if(data.find(name) != data.end()) {
 		semTake(data[name].second, WAIT_FOREVER);
 		semDelete(data[name].second);
@@ -190,8 +202,6 @@ bool Proxy::del(string name)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-
 /**
  * @brief Sets a cached joystick value.
  * @param joy_id Which joystick to set the cached value for.
@@ -199,20 +209,23 @@ bool Proxy::del(string name)
  */
 void Proxy::SetJoystick(int joy_id, Joystick & stick)
 {
-	wpi_assert(joy_id < NUMBER_OF_JOYSTICKS && joy_id >= 0);
-	std::stringstream ss;
+	wpi_assert(joy_id < NUMBER_OF_JOYSTICKS+1 && joy_id >= 0);
 	string name;
-	ss << "Joy" << joy_id+1;
-	ss >> name;
+	char tmp[32];
+	sprintf(tmp, "Joy%d", joy_id);
+	name = tmp;
 	set(name + 'X', stick.GetX());
 	set(name + 'Y', stick.GetY());
 	set(name + 'Z', stick.GetZ());
+	set(name + 'R', stick.GetTwist());
 	set(name + 'T', stick.GetThrottle());
 	string bname;
-	for(unsigned i=0;i<NUMBER_OF_JOY_BUTTONS;i++) {
-		ss << name << "B" << i+1;
-		ss >> bname;
+	for(unsigned i=1;i<NUMBER_OF_JOY_BUTTONS+1;i++) {
+		char tmp1[32];
+		sprintf(tmp1, "%sB%d", name.c_str(), i);
+		bname = tmp1;
 		set(bname,stick.GetRawButton(i));
+		
 	}
 	set(name+"BT", stick.GetTrigger());
 }
@@ -223,22 +236,16 @@ void Proxy::SetJoystick(int joy_id, Joystick & stick)
  * @param button_id Which button on the joystick to check
  * @return How many times the button was pressed and released since last call.
  */
-int Proxy::GetPendingCount(int joystick_id, int button_id) {
-	wpi_assert(joystick_id < NUMBER_OF_JOYSTICKS && joystick_id >= 0);
-	wpi_assert(button_id < NUMBER_OF_JOY_BUTTONS && button_id >= 0);
-	
-	if(tracker.size() == 0)
-		wpi_assertWithMessage(false, "Tried to fetch pending count for a non-registered button.");
-	vector<int>::iterator it = tracker.begin();
-	while(it != tracker.end())
-	{
-		if(*it == joystick_id && *(it+1) == button_id) {
-			return *(it+2);
-		}
-		it += 3;
+int Proxy::GetPendingCount(string JoyButton) {
+	for(unsigned i=0;i<JoyButton.size();i++) {
+		JoyButton[i] = toupper(JoyButton[i]);
 	}
-	wpi_assertWithMessage(false, "Tried to fetch pending count for a non-registered button.");
-	return 0;
+	wpi_assertWithMessage(tracker.size() == 0, "Tried to fetch pending count for a non-registered button.");
+	map<string,int>::iterator it = tracker.find(JoyButton);
+	wpi_assertWithMessage(it != tracker.end(), "Tried to fetch pending count for a non-registered button.");
+	int tmp=(it->second);
+	it->second = 0;
+	return (tmp);
 }
 
 /**
@@ -246,70 +253,46 @@ int Proxy::GetPendingCount(int joystick_id, int button_id) {
  * @param joystick_id Which joystick to track a button on
  * @param button_idd Which button on the joystick to track
  */
-void Proxy::RegisterCounter(int joystick_id, int button_id) {
-	wpi_assert(joystick_id < NUMBER_OF_JOYSTICKS && joystick_id >= 0);
-	wpi_assert(button_id < NUMBER_OF_JOY_BUTTONS && button_id >= 0);
-	
-	if(tracker.size() != 0) {
-		vector<int>::iterator it = tracker.begin();
-		while(it >= tracker.end())
-		{
-			if(*it == joystick_id && *(it+1) == button_id) {
-				return;
-			}
-			it+=3;
-		}
+bool Proxy::RegisterCounter(string JoyButton) {
+	for(unsigned i=0;i<JoyButton.size();i++) {
+		JoyButton[i] = toupper(JoyButton[i]);
 	}
-	tracker.push_back(joystick_id);
-	tracker.push_back(button_id);
-	tracker.push_back(0);
+	if(tracker.find(JoyButton) == tracker.end()) {
+		tracker[JoyButton] = 0;
+		return true;
+	} else {
+		return false;
+	}
 }
 
 /**
- * @brief Unregister a button to track the number of times it was pressed.
+ * @brief Unregister a button being tracked.
  * @param joystick_id Which joystick to track a button on
  * @param button_idd Which button on the joystick to track
  */
-void Proxy::UnregisterCounter(int joystick_id, int button_id) {
-	wpi_assert(joystick_id < NUMBER_OF_JOYSTICKS && joystick_id >= 0);
-	wpi_assert(button_id < NUMBER_OF_JOY_BUTTONS && button_id >= 0);
-	
-	if(tracker.size() == 0)
-		return;
-	vector<int>::iterator it = tracker.begin();
-	while(it >= tracker.end())
-	{
-		if(*it == joystick_id && *(it+1) == button_id) {
-			tracker.erase(it, it+2);
-		}
-		it+=3;
+bool Proxy::UnregisterCounter(string JoyButton) {
+	for(unsigned i=0;i<JoyButton.size();i++) {
+		JoyButton[i] = toupper(JoyButton[i]);
 	}
+	return tracker.erase(JoyButton);
 }
 /**
  * @brief Whether a joystick is registered for tracking
- * @param joystick_id What joystick to check
- * @param button_id What button on the joystick to check.
+ * @param JoyButton Joystick and Button 
  * @return Whether it is registered.
  */
-bool Proxy::IsRegistered(int joystick_id, int button_id) {
-	wpi_assert(joystick_id < NUMBER_OF_JOYSTICKS && joystick_id >= 0);
-	wpi_assert(button_id < NUMBER_OF_JOY_BUTTONS && button_id >= 0);
-	
-	if(tracker.size() == 0)
-		return false;
-	vector<int>::iterator it = tracker.begin();
-	while(it >= tracker.end())
-	{
-		if(*it == joystick_id && *(it+1) == button_id) {
-			return true;
-		}
-		it+=3;
+bool Proxy::IsRegistered(string JoyButton) {
+	for(unsigned i=0;i<JoyButton.size();i++) {
+		JoyButton[i] = toupper(JoyButton[i]);
 	}
-	return false;
+	return (tracker.find(JoyButton) != tracker.end());
 }
 
 Proxy* Proxy::getInstance(void)
 {
+	if(ProxyHandle == 0) {
+		ProxyHandle = new Proxy;
+	}
 	return ProxyHandle;
 }
 
