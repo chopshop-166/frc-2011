@@ -246,9 +246,9 @@
         </mapAttribute>
     </attributes>
     <buildtargets>
-        <buildtarget buildtool="Linker" name="framework166" passed="false" targetname="framework166">
+        <buildtarget buildtool="Linker" name="chopshop11" passed="false" targetname="chopshop11">
             <contents>
-                <folder name="/framework166" recursive="true"/>
+                <folder name="/chopshop11" recursive="true"/>
             </contents>
         </buildtarget>
     </buildtargets>
