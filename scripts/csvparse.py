@@ -72,7 +72,6 @@ def graph_robolog(dol, filename):
 def parse_latest():
     global max_foldername, filename
     base_foldername = raw_input("What is the base log folder name?\n==>")
-    output_foldername = raw_input("What is the output folder name?\n==>")
     # The initial timestamp of all 0s
     # All timestamps are guaranteed to be greater than this!
     max_foldername = "00000000.00.00.00"
@@ -84,22 +83,24 @@ def parse_latest():
     pngaddress = output_foldername + "\\" + max_foldername
     try:
         os.mkdir(pngaddress)
-    except:
+    except WindowsError:
         print("Directory `" + pngaddress + "` already exists.")
         go = raw_input("Redraw graphs? (Y/N)\n==>")
-        if go != "Y":
+        if go == "N"or go == "n":
             return
     for filename in os.listdir(address):
         # Check each file in the latest folder
         # Attempt to graph each file
+        r = os.path.join(address, filename)
         try:
-            lod = parse_robolog(address + "\\" + filename)
+            lod = parse_robolog(r)
         except:
             diagnostics()
             raw_input();
             return
         data = lod2dol(lod)
-        graph_robolog(data, pngaddress + "\\" + filename)
+        f = os.path.join(pngaddress + filename)
+        graph_robolog(data, f)
         lod = ()
         data = {}
         
