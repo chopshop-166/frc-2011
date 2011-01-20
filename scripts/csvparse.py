@@ -43,7 +43,7 @@ def lod2dol(lod):
             dol[key].append(dictset[key])
     return dol
 
-def graph_robolog(dol, filename):
+def graph_robolog(dol, filename, path):
     try:
         import matplotlib.pyplot as plt
     except:
@@ -77,41 +77,56 @@ def parse_latest():
     max_foldername = "00000000.00.00.00"
     for filename in os.listdir(base_foldername):
         # Find the latest files
-        if filename > max_foldername:
-            max_foldername = filename
-    address = base_foldername + "\\" + max_foldername
-    pngaddress = output_foldername + "\\" + max_foldername
-    try:
-        os.mkdir(pngaddress)
-    except WindowsError:
+        if not filename=="output":
+            if filename > max_foldername:
+                max_foldername = filename
+    address = os.path.join(base_foldername, max_foldername)
+    pngaddress = os.path.join(base_foldername, max_foldername, 'output')
+
+    x = os.path.join(base_foldername, max_foldername, 'output')
+    
+    if os.path.isdir(os.path.join(base_foldername, max_foldername, 'output'))==False:
+        os.mkdir(os.path.join(base_foldername, max_foldername, 'output'))
+    else:
         print("Directory `" + pngaddress + "` already exists.")
         go = raw_input("Redraw graphs? (Y/N)\n==>")
-        if go == "N"or go == "n":
+        if go == "N" or go == "n":
             return
     for filename in os.listdir(address):
         # Check each file in the latest folder
         # Attempt to graph each file
         r = os.path.join(address, filename)
-        try:
-            lod = parse_robolog(r)
-        except:
-            diagnostics()
-            raw_input();
-            return
-        data = lod2dol(lod)
-        f = os.path.join(pngaddress + filename)
-        graph_robolog(data, f)
-        lod = ()
-        data = {}
+        z = os.path.splitext(filename)
+        if z[1] == ".csv":    
+            try:
+                lod = parse_robolog(r)
+            except:
+                diagnostics(pngaddress)
+                raw_input();
+                return
+            data = lod2dol(lod)
+            f = os.path.join(pngaddress, filename)
+            graph_robolog(data, f, x)
+            lod = ()
+            data = {}
+    print "\n\nGraphing complete. Outputted graphs to " + pngaddress
         
-def diagnostics():
-    global linenum, ln, name, filename
+def diagnostics(pngaddress):
+    global linenum, ln, name, filename, log
     # Error in the CSV
+    log = open(os.path.join(pngaddress, 'error.log'), 'w')
+    log.write("Error: invalid data on line " + str(linenum))
+    log.write("\nIn file: " + str(max_foldername + '\\' + filename))
+    log.write("\nWith key: " + keyname)
+    log.close()
+    # log.write("\tLine contents:")
+    # log.write(ln)
     print("\tError: invalid data on line " + str(linenum))
     print("\tIn file: " + str(max_foldername + '\\' + filename))
     print("\tWith key: " + keyname)
-    print("\tLine contents:")
-    print(ln)
+    # print("\tLine contents:")
+    # print(ln)
+    print("\n\n\tError was outputted to file \"error.log\" \n\tat " + pngaddress + "\\error.log")
 
 if __name__ == "__main__":
     parse_latest()
