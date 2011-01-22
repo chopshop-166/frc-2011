@@ -127,9 +127,9 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
 		// Use .Get to get the value of the sensor
-		bool l = left.Get();
-		bool c = center.Get();
-		bool r = right.Get();
+		bool l = !left.Get();
+		bool c = !center.Get();
+		bool r = !right.Get();
 		int result=0;
 		/* 0 means dead on
 			1 means to the right
@@ -138,7 +138,7 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		*/
 		// Figure out if 1 is "on the line" or "off the line"
 		if(l&&r) {
-			result=-2;
+			result=2;
 		} else if(l) {
 			result=1;
 		} else if(r) {
