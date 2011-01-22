@@ -19,7 +19,7 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 // You should rename this when you copy it into a new file
 // <<CHANGEME>>
-#define DRIVE_TASK_CYCLE_TIME (10) // 10ms
+#define DRIVE_TASK_CYCLE_TIME (20) // 20ms
 
 // Rename this, too, or you'll run into collisions
 // <<CHANGEME>>
@@ -41,7 +41,9 @@ public:
 private:
 	// Any variables that the task has as members go here
 	// <<CHANGEME>>
+	float m_maxOutput;
+	int syncGroup;
 	CANJaguar fl, fr, bl, br;
-	RobotDrive drive;
 	double x,y,z;
+	double wheelSpeeds[4];
 };
