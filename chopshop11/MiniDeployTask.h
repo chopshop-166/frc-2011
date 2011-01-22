@@ -4,7 +4,7 @@
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 21, 2011
 *  File Description	: Header file for MiniDeploy task
-*******************************************************************************/ 
+*******************************************************************************/
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
@@ -14,11 +14,9 @@
 #include "WPILib.h"
 #include "Robot.h"
 
-//
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
 #define MINIDEPLOY_CYCLE_TIME (10) // 10ms
-
 
 class MiniDeploy166 : public Team166Task
 {
