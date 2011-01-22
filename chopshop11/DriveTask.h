@@ -44,6 +44,6 @@ private:
 	float m_maxOutput;
 	int syncGroup;
 	CANJaguar fl, fr, bl, br;
-	double x,y,z;
+	double x,y,r;
 	double wheelSpeeds[4];
 };
