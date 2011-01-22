@@ -9,12 +9,12 @@
 // tasks that run everywhere
 
 
-#if not SUITCASE_BOT
+#if SUITCASE_BOT
+//suitcase only tasks here
+
+#else
 // tasks that cannot run on suitcase
 DriveTask DriveObject;
 PhotoElectricTask PhotoElectricObject;
-
-#else
-//suitcase only tasks here
 
 #endif

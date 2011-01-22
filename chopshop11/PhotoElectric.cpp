@@ -104,7 +104,7 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	PhotoElectricLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Retroreflective task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Photoelectric task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -125,12 +125,7 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	DigitalInput right(3);
 		
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) {
-		
-		// <<CHANGEME>>
-		// Insert your own logic here
-		
+	while (1) {
 		// Use .Get to get the value of the sensor
 		bool l = left.Get();
 		bool c = center.Get();
@@ -155,7 +150,6 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		} 
 		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
 		// Store that result in proxy
-		printf("%d\r",result);
 		proxy->set("LineDirection",result);
 		
         // Logging any values
