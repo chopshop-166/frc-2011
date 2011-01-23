@@ -5,5 +5,6 @@
 // Add any #defines for your .h files for each seperate task
 #include "DriveTask.h"
 #include "PhotoElectric.h"
+#include "SonarTask.h"
 
 #endif

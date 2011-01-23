@@ -29,6 +29,9 @@ AutonomousTask::AutonomousTask() {
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
 	
+	AnalogChannel cmd_switch(3);
+	int auto_choice = (int)cmd_switch.GetVoltage();
+	
 	while( lHandle->IsAutonomous() ) {
 		proxy->set(DRIVER_AUTOASSIST,true);
 		

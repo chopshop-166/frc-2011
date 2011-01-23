@@ -39,8 +39,7 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	// Any variables that the task has as members go here
-	// <<CHANGEME>>
+	void Normalize(double*);
 	float m_maxOutput;
 	int syncGroup;
 	CANJaguar fl, fr, bl, br;
