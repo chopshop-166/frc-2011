@@ -123,11 +123,8 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 	DigitalOutput white(5); // Use 4-6
 	DigitalOutput blue(6); // Use 4-6
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) 
+	while (1) 
 	{
-		// <<CHANGEME>>
-		// Insert your own logic here, OK MAYBE I WILL!
 		if(proxy->get("Joy3B4N")) //red
 		{
 			red.Set(true);
@@ -140,7 +137,7 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 		{
 			blue.Set(true);
 		}
-		if(proxy->get("Joy3B2N")) //clear
+		if(proxy->get("Joy3B2N")) //clear all
 		{
 			red.Set(false);
 			white.Set(false);
@@ -149,7 +146,7 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
         // Logging any values
 		// <<CHANGEME>>
 		// Make this match the declaraction above
-		sl.PutOne();//part of loging
+		sl.PutOne();//part of logging
 		
 		// Wait for our next lap
 		WaitForNextLoop();//'donate' spare processing power
