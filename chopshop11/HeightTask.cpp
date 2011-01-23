@@ -9,14 +9,10 @@
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
-/*------------------------------------------------------------------------------*/
-/* Find & Replace "Template" with the name you would like to give this task     */
-/* Find & Replace "Testing" with the name you would like to give this task      */
-/* Find & Replace "TaskTemplate" with the name you would like to give this task */
-/*------------------------------------------------------------------------------*/
-
 #include "WPILib.h"
 #include "HeightTask.h"
+#include "AnalogChannel.h"
+#include "AnalogModule.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -119,16 +115,27 @@ int HeightTask166::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
+	
+	// Set the analog channel of the potentiometer
+	AnalogChannel Height(2);
+	
+	// add a proxy variable
+	proxy->add("ElevatorHeight");
+	// set it to zero
+	proxy->set("ElevatorHeight",0);
+	
+	// Set variable values
+	HowHigh = 0;
+	InchesPerVolt = -10;  // Change this when we get the potentiometer!!!!!!!!!
 		
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
 		
-		// <<CHANGEME>>
-		// Insert your own logic here
+		// set howhigh to the height of the elevator
+		HowHigh = InchesPerVolt*Height.GetVoltage();
+		// tell proxy how high we are
+		proxy->set("ElevatorHeight",HowHigh);
 		
-        // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaraction above
 		sl.PutOne();
 		
 		// Wait for our next lap
