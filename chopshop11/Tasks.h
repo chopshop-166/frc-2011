@@ -11,6 +11,7 @@
 
 #if SUITCASE_BOT
 //suitcase only tasks here
+CameraTask CameraObject;
 
 #else
 // tasks that cannot run on suitcase
