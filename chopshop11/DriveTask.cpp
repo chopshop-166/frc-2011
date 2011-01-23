@@ -90,7 +90,7 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
  * Normalize all wheel speeds if the magnitude of any wheel is greater than 1.0.
  * Taken from RobotDrive
  */
-void Normalize(double *wheelSpeeds)
+void DriveTask::Normalize(double *wheelSpeeds)
 {
 	double maxMagnitude = fabs(wheelSpeeds[0]);
 	INT32 i;
