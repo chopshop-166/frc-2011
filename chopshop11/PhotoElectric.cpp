@@ -1,6 +1,6 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: TaskTemplate.cpp     
+*  File Name  		: PhotoElectric.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
 *  File Description	: Template source file for tasks, with template functions
@@ -9,20 +9,14 @@
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
-/*------------------------------------------------------------------------------*/
-/* Find & Replace "Template" with the name you would like to give this task     */
-/* Find & Replace "Testing" with the name you would like to give this task      */
-/* Find & Replace "TaskTemplate" with the name you would like to give this task */
-/*------------------------------------------------------------------------------*/
-
 #include "WPILib.h"
-#include "TaskTemplate.h"
+#include "PhotoElectric.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
 
 // Sample in memory buffer
-struct abuf
+struct abuf166
 {
 	struct timespec tp;               // Time of snapshot
 	// Any values that need to be logged go here
@@ -31,16 +25,16 @@ struct abuf
 
 //  Memory Log
 // <<CHANGEME>>
-class TemplateLog : public MemoryLog
+class PhotoElectricLog : public MemoryLog
 {
 public:
-	TemplateLog() : MemoryLog(
-			sizeof(struct abuf), TEMPLATE_CYCLE_TIME, "template",
+	PhotoElectricLog() : MemoryLog(
+			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "template",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~TemplateLog() {return;};
+	~PhotoElectricLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
@@ -50,18 +44,18 @@ public:
 
 // Write one buffer into memory
 // <<CHANGEME>>
-unsigned int TemplateLog::PutOne(void)
+unsigned int PhotoElectricLog::PutOne(void)
 {
-	struct abuf *ob;               // Output buffer
+	struct abuf166 *ob;               // Output buffer
 	
 	// Get output buffer
-	if ((ob = (struct abuf *)GetNextBuffer(sizeof(struct abuf)))) {
+	if ((ob = (struct abuf166 *)GetNextBuffer(sizeof(struct abuf166)))) {
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		// Add any values to be logged here
 		// <<CHANGEME>>
-		return (sizeof(struct abuf));
+		return (sizeof(struct abuf166));
 	}
 	
 	// Did not get a buffer. Return a zero length
@@ -69,9 +63,9 @@ unsigned int TemplateLog::PutOne(void)
 }
 
 // Format the next buffer for file output
-unsigned int TemplateLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 {
-	struct abuf *ab = (struct abuf *)nptr;
+	struct abuf166 *ab = (struct abuf166 *)nptr;
 	
 	// Output the data into the file
 	fprintf(ofile, "%u,%u,%4.5f\n",
@@ -82,35 +76,35 @@ unsigned int TemplateLog::DumpBuffer(char *nptr, FILE *ofile)
 	);
 	
 	// Done
-	return (sizeof(struct abuf));
+	return (sizeof(struct abuf166));
 }
 
 
 // task constructor
-Template166::Template166(void)
+PhotoElectricTask::PhotoElectricTask(void)
 {
-	Start((char *)"166TemplateTask", TEMPLATE_CYCLE_TIME);
+	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
 	return;
 };
 	
 // task destructor
-Template166::~Template166(void)
+PhotoElectricTask::~PhotoElectricTask(void)
 {
 	return;
 };
 	
 // Main function of the task
-int Template166::Main(int a2, int a3, int a4, int a5,
+int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
-	TemplateLog sl;                   // log
+	PhotoElectricLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Photoelectric task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -121,15 +115,46 @@ int Template166::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
+	
+	// Set up the proxy value
+	proxy->add("LineDirection");
+	
+	// Create three DigitalInputs - one for each sensor
+	DigitalInput left(1);
+	DigitalInput center(2);
+	DigitalInput right(3);
 		
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
-		// <<CHANGEME>>
-		// Insert your own logic here
+		// Use .Get to get the value of the sensor
+		bool l = !left.Get();
+		bool c = !center.Get();
+		bool r = !right.Get();
+		int result=0;
+		/* 0 means dead on
+			1 means to the right
+			-1 means to the left
+			-2 means it's not on the line at all
+		*/
+		// Figure out if 1 is "on the line" or "off the line"
+		if(l&&r) {
+			result=2;
+		} else if(l) {
+			result=1;
+		} else if(r) {
+			result=-1;
+		} else if(c) {
+			result=0;
+		} else {
+			result=-2;
+		} 
+		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
+		// Store that result in proxy
+		proxy->set("LineDirection",result);
 		
         // Logging any values
 		// <<CHANGEME>>
-		// Make this match the declaraction above
+		// Make this match the declaration above
 		sl.PutOne();
 		
 		// Wait for our next lap

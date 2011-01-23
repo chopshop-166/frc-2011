@@ -1,12 +1,12 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: TaskTemplate.h     
+*  File Name  		: HeightTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
+*  Creation Date	: January 23, 2011
 *  File Description	: Template header file for tasks, with template functions
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #pragma once
@@ -19,30 +19,26 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 // You should rename this when you copy it into a new file
 // <<CHANGEME>>
-#define DRIVE_TASK_CYCLE_TIME (20) // 20ms
+#define HEIGHTTASK_CYCLE_TIME (10) // 10ms
 
 // Rename this, too, or you'll run into collisions
 // <<CHANGEME>>
-class DriveTask : public Team166Task
+class HeightTask166 : public Team166Task
 {
 	
 public:
 	
 	// task constructor
-	DriveTask(void);
+	HeightTask166(void);
 
 	// task destructor
-	virtual ~DriveTask(void);
+	virtual ~HeightTask166(void);
 
 	// Main function of the task
 	virtual int Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	void Normalize(double*);
-	float m_maxOutput;
-	int syncGroup;
-	CANJaguar fl, fr, bl, br;
-	double x,y,r;
-	double wheelSpeeds[4];
+	// Any variables that the task has as members go here
+	// <<CHANGEME>>
 };

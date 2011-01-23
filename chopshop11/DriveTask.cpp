@@ -86,12 +86,34 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 	return (sizeof(struct abuf166));
 }
 
+/**
+ * Normalize all wheel speeds if the magnitude of any wheel is greater than 1.0.
+ * Taken from RobotDrive
+ */
+void DriveTask::Normalize(double *wheelSpeeds)
+{
+	double maxMagnitude = fabs(wheelSpeeds[0]);
+	INT32 i;
+	for (i=1; i<4; i++)
+	{
+		double temp = fabs(wheelSpeeds[i]);
+		if (maxMagnitude < temp) maxMagnitude = temp;
+	}
+	if (maxMagnitude > 1.0)
+	{
+		for (i=0; i<4; i++)
+		{
+			wheelSpeeds[i] = wheelSpeeds[i] / maxMagnitude;
+		}
+	}
+}
 
 // task constructor
-DriveTask::DriveTask(void): fl(10), fr(5), bl(7), br(9), drive(fl,bl,fr,br)
+DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(10), fr(5), bl(7), br(9)
 {
 	Start((char *)"166DriveTask", DRIVE_TASK_CYCLE_TIME);
 	// ^^^ Rename those ^^^
+	wheelSpeeds[0] = wheelSpeeds[1] = wheelSpeeds[2] = wheelSpeeds[3] = 0;
 	// <<CHANGEME>>
 	return;
 };
@@ -111,7 +133,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	DriveLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Drive task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -122,34 +144,63 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	
-	drive.SetInvertedMotor(drive.kFrontRightMotor,true);
-	drive.SetInvertedMotor(drive.kRearRightMotor,true);
+	int curr_value=0;
 	
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) {
+	while (1) {
+		if(proxy->get(DRIVER_AUTOASSIST)) {
+			curr_value = (int)proxy->get("LineDirection");
+			x=0;
+			switch(curr_value) {
+				case 2:
+					y = 0;
+					r = 0;
+					break;
+				case 1:
+					y = 0;
+					r = -AUTO_SPEED_TURN;
+					break;
+				case 0:
+					y = AUTO_SPEED_FORWARD;
+					r = 0;
+					break;
+				case -1:
+					y = 0;
+					r = AUTO_SPEED_TURN;
+					break;
+				case -2:
+					break;
+				default:
+					r=y=0;
+					break;
+			}
+		} else {
+			x=proxy->get("Joy1X");
+			y=proxy->get("Joy1Y");
+			r=proxy->get("Joy1R");
+		}
 		
-		// <<CHANGEME>>
-		// Insert your own logic here
+		wheelSpeeds[0] = x - y + r;
+		wheelSpeeds[1] = -x - y - r;
+		wheelSpeeds[2] = -x - y + r;
+		wheelSpeeds[3] = x - y - r;
 		
-		x=proxy->get("Joy1X");
-		y=proxy->get("Joy1Y");
-		z=proxy->get("Joy1R");
+		Normalize(wheelSpeeds);
 		
-		printf("%1.5f\t%1.5f\t%1.5f\r",x,y,z);
+		fl.Set(wheelSpeeds[0]* m_maxOutput, syncGroup);
+		fr.Set(-wheelSpeeds[1]* m_maxOutput, syncGroup);
+		bl.Set(wheelSpeeds[2]* m_maxOutput, syncGroup);
+		br.Set(-wheelSpeeds[3]* m_maxOutput, syncGroup);
 		
-		drive.MecanumDrive_Cartesian(x,y,z,0);
+		CANJaguar::UpdateSyncGroup(syncGroup);
 		
         // Logging any values
 		// <<CHANGEME>>
 		// Make this match the declaration above
-		sl.PutOne(x,y,z);
+		sl.PutOne(x,y,r);
 		
 		// Wait for our next lap
 		WaitForNextLoop();
 	}
-	
 	return (0);
-	
 };

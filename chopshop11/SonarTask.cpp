@@ -138,8 +138,7 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 	int i = 0;
 		
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) {
+	while (1) {
 		// Get the adjusted voltage of each sensor
 		double volts = ac.GetVoltage();
 		double voltsleft = acl.GetVoltage();

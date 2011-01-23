@@ -19,30 +19,26 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 // You should rename this when you copy it into a new file
 // <<CHANGEME>>
-#define DRIVE_TASK_CYCLE_TIME (20) // 20ms
+#define COLORLIGHT_CYCLE_TIME (10) // 10ms
 
 // Rename this, too, or you'll run into collisions
 // <<CHANGEME>>
-class DriveTask : public Team166Task
+class ColorLightTask : public Team166Task
 {
 	
 public:
 	
 	// task constructor
-	DriveTask(void);
+	ColorLightTask(void);
 
 	// task destructor
-	virtual ~DriveTask(void);
+	virtual ~ColorLightTask(void);
 
 	// Main function of the task
 	virtual int Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	void Normalize(double*);
-	float m_maxOutput;
-	int syncGroup;
-	CANJaguar fl, fr, bl, br;
-	double x,y,r;
-	double wheelSpeeds[4];
+	// Any variables that the task has as members go here
+	// <<CHANGEME>>
 };

@@ -1,6 +1,6 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: TaskTemplate.cpp     
+*  File Name  		: CameraTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
 *  File Description	: Template source file for tasks, with template functions
@@ -16,10 +16,11 @@
 /*------------------------------------------------------------------------------*/
 
 #include "WPILib.h"
-#include "TaskTemplate.h"
+#include "Robot.h"
+#include "CameraTask.h"
 
 // To locally enable debug printing: set true, to disable false
-#define DPRINTF if(false)dprintf
+#define DPRINTF if(true)dprintf
 
 // Sample in memory buffer
 struct abuf
@@ -30,17 +31,16 @@ struct abuf
 };
 
 //  Memory Log
-// <<CHANGEME>>
-class TemplateLog : public MemoryLog
+class CameraLog : public MemoryLog
 {
 public:
-	TemplateLog() : MemoryLog(
-			sizeof(struct abuf), TEMPLATE_CYCLE_TIME, "template",
+	CameraLog() : MemoryLog(
+			sizeof(struct abuf), CAMERA_CYCLE_TIME, "camera",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~TemplateLog() {return;};
+	~CameraLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
@@ -49,8 +49,7 @@ public:
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
-unsigned int TemplateLog::PutOne(void)
+unsigned int CameraLog::PutOne(void)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -69,7 +68,7 @@ unsigned int TemplateLog::PutOne(void)
 }
 
 // Format the next buffer for file output
-unsigned int TemplateLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int CameraLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf *ab = (struct abuf *)nptr;
 	
@@ -87,41 +86,48 @@ unsigned int TemplateLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-Template166::Template166(void)
+CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 {
-	Start((char *)"166TemplateTask", TEMPLATE_CYCLE_TIME);
+	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
+	this->MyTaskIsEssential=0;
+	SetDebugFlag ( DEBUG_SCREEN_ONLY  ) ;
+	camera.WriteResolution(AxisCamera::kResolution_320x240);
+	//camera.WriteCompression(20);
+	//camera.WriteBrightness(0);
 	return;
 };
 	
 // task destructor
-Template166::~Template166(void)
+CameraTask::~CameraTask(void)
 {
 	return;
 };
 	
 // Main function of the task
-int Template166::Main(int a2, int a3, int a4, int a5,
+int CameraTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
-	TemplateLog sl;                   // log
+	CameraLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_INFO,"In the 166 Camera task\n");
 	
-	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
-	WaitForGoAhead();
-	
+	WaitForGoAhead(); // THIS IS VERY IMPORTANT
+
 	// Register our logger
-	lHandle = Robot::getInstance();
+	lHandle = Robot::getInstance();	
 	lHandle->RegisterLogger(&sl);
+	DPRINTF(LOG_INFO,"CameraTask registered logger");
+	
+	lHandle->DriverStationDisplay("Camera Task...");
+	DPRINTF(LOG_INFO,"CameraTask informed DS");
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-		
+	DPRINTF(LOG_INFO,"CameraTask got proxy");
+	
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
 		// <<CHANGEME>>
@@ -129,12 +135,61 @@ int Template166::Main(int a2, int a3, int a4, int a5,
 		
         // Logging any values
 		// <<CHANGEME>>
-		// Make this match the declaraction above
-		sl.PutOne();
+		// Make this match the declaration above
+		//sl.PutOne();
 		
 		// Wait for our next lap
-		WaitForNextLoop();		
+		WaitForNextLoop();
+		
+		/* When this works, store a picture to cRIO */
+		//TakeSnapshot("testShot.jpg");
+		
+		DPRINTF(LOG_INFO,"CameraTask::Main loop...");
+		
+		/* Look for target */
+		ProcessImage();
+		Wait(10.0);
 	}
 	return (0);
 	
+};
+
+void CameraTask::ProcessImage()  {
+	/* TBD  
+	 * */
+	lHandle->DriverStationDisplay("ProcessIMage:%0.6f",GetTime());
+};
+
+void CameraTask::TakeSnapshot(char* imageName)  {
+	/* Warning - getting a write error when this is tried 
+	 * ERR_WRITE_FILE_NOT_SUPPORTED  -1074395313   
+	 * */
+	
+	//lHandle->DriverStationDisplay("C:%0.6f",GetTime());
+	lHandle->DriverStationDisplay("storing %s",imageName);
+	DPRINTF(LOG_DEBUG, "taking a SNAPSHOT ");
+
+	/* allow writing to vxWorks target */
+	//Priv_SetWriteFileAllowed(1);   	
+	
+	Image* cameraImage = frcCreateImage(IMAQ_IMAGE_HSL);
+	if (!cameraImage) {
+		DPRINTF (LOG_INFO,"frcCreateImage failed - errorcode %i",GetLastVisionError()); 
+	}
+	
+	if ( !camera.GetImage(cameraImage) ) {
+		DPRINTF (LOG_INFO,"\nImage Acquisition from camera failed %i", GetLastVisionError());
+	} else { 
+		DPRINTF (LOG_DEBUG, "calling frcWriteImage for %s", imageName);
+		if (!frcWriteImage(cameraImage, imageName) ) { 
+			int errCode = GetLastVisionError();
+			DPRINTF (LOG_INFO,"frcWriteImage failed - errorcode %i", errCode);
+			char *errString = GetVisionErrorText(errCode);
+			DPRINTF (LOG_INFO,"errString= %s", errString);
+		} else { 
+			DPRINTF (LOG_INFO,"\n>>>>> Saved image to %s", imageName);	
+			// always dispose of image objects when done
+			frcDispose(cameraImage);
+		}
+	}
 };

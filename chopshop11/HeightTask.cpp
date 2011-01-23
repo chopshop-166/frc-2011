@@ -1,8 +1,8 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: TaskTemplate.cpp     
+*  File Name  		: HeightTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
+*  Creation Date	: January 23, 2011
 *  File Description	: Template source file for tasks, with template functions
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
@@ -16,7 +16,7 @@
 /*------------------------------------------------------------------------------*/
 
 #include "WPILib.h"
-#include "TaskTemplate.h"
+#include "HeightTask.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -31,16 +31,16 @@ struct abuf
 
 //  Memory Log
 // <<CHANGEME>>
-class TemplateLog : public MemoryLog
+class HeightTaskLog : public MemoryLog
 {
 public:
-	TemplateLog() : MemoryLog(
-			sizeof(struct abuf), TEMPLATE_CYCLE_TIME, "template",
+	HeightTaskLog() : MemoryLog(
+			sizeof(struct abuf), HEIGHTTASK_CYCLE_TIME, "Height Task",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~TemplateLog() {return;};
+	~HeightTaskLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
@@ -50,7 +50,7 @@ public:
 
 // Write one buffer into memory
 // <<CHANGEME>>
-unsigned int TemplateLog::PutOne(void)
+unsigned int HeightTaskLog::PutOne(void)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -69,7 +69,7 @@ unsigned int TemplateLog::PutOne(void)
 }
 
 // Format the next buffer for file output
-unsigned int TemplateLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int HeightTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf *ab = (struct abuf *)nptr;
 	
@@ -87,30 +87,28 @@ unsigned int TemplateLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-Template166::Template166(void)
+HeightTask166::HeightTask166(void)
 {
-	Start((char *)"166TemplateTask", TEMPLATE_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	Start((char *)"166HeightTask", HEIGHTTASK_CYCLE_TIME);
 	return;
 };
 	
 // task destructor
-Template166::~Template166(void)
+HeightTask166::~HeightTask166(void)
 {
 	return;
 };
 	
 // Main function of the task
-int Template166::Main(int a2, int a3, int a4, int a5,
+int HeightTask166::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
-	TemplateLog sl;                   // log
+	Robot *lHandle;             // Local handle
+	HeightTaskLog sl;           // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Height task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -124,6 +122,7 @@ int Template166::Main(int a2, int a3, int a4, int a5,
 		
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
+		
 		// <<CHANGEME>>
 		// Insert your own logic here
 		
