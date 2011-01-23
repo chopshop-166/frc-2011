@@ -12,6 +12,7 @@
 
 #include "WPILib.h"
 #include "MiniDeployTask.h"
+#include "Solenoid.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -114,13 +115,21 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
+	
+	// Create a solenoid
+	Solenoid MiniBotOut(1);
+	Solenoid MiniBotIn(2);
+	
+	proxy->add("MiniDeploy");
+	proxy->set("MiniDeploy",0);
 		
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) {
+	while (1){
 		
-		// <<CHANGEME>>
-		// Insert your own logic here
+		
+		if (proxy->get("MiniDeploy",0)>0){
+			MiniBotOut.Set(1);
+		}
 		
         // Logging any values
 		// <<CHANGEME>>
