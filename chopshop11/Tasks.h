@@ -4,4 +4,5 @@
 // Example:
 // DriveClass DriveObject;
 // No need for pointers, or anything else, if it's derived from Team166Task
-DriveTask DriveObject;
+//DriveTask DriveObject;
+ColorLightTask ColorLightObject;
