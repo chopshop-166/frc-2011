@@ -3,7 +3,7 @@
 *  File Name  		: HeightTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 23, 2011
-*  File Description	: Template header file for tasks, with template functions
+*  File Description	: Header file for the Height Task
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
@@ -13,6 +13,8 @@
 
 #include "WPILib.h"
 #include "Robot.h"
+#include "AnalogChannel.h"
+#include "AnalogModule.h"
 
 //
 // This constant defines how often we want this task to run in the form
@@ -39,6 +41,8 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	// Any variables that the task has as members go here
-	// <<CHANGEME>>
+	// declare variables
+	float HowHigh;
+	float InchesPerVolt;
+	
 };
