@@ -1,22 +1,24 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: PhotoElectric.cpp     
+*  File Name  		: MiniDeployTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Template source file for tasks, with template functions
+*  Creation Date	: January 21, 2011
+*  File Description	: Source file for MiniDeploy task
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
+
 #include "WPILib.h"
-#include "PhotoElectric.h"
+#include "MiniDeployTask.h"
+#include "Solenoid.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
 
 // Sample in memory buffer
-struct abuf166
+struct abuf
 {
 	struct timespec tp;               // Time of snapshot
 	// Any values that need to be logged go here
@@ -25,16 +27,16 @@ struct abuf166
 
 //  Memory Log
 // <<CHANGEME>>
-class PhotoElectricLog : public MemoryLog
+class MiniDeployLog : public MemoryLog
 {
 public:
-	PhotoElectricLog() : MemoryLog(
-			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "template",
+	MiniDeployLog() : MemoryLog(
+			sizeof(struct abuf), MINIDEPLOY_CYCLE_TIME, "MiniDeploy",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~PhotoElectricLog() {return;};
+	~MiniDeployLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
@@ -44,18 +46,18 @@ public:
 
 // Write one buffer into memory
 // <<CHANGEME>>
-unsigned int PhotoElectricLog::PutOne(void)
+unsigned int MiniDeployLog::PutOne(void)
 {
-	struct abuf166 *ob;               // Output buffer
+	struct abuf *ob;               // Output buffer
 	
 	// Get output buffer
-	if ((ob = (struct abuf166 *)GetNextBuffer(sizeof(struct abuf166)))) {
+	if ((ob = (struct abuf *)GetNextBuffer(sizeof(struct abuf)))) {
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		// Add any values to be logged here
 		// <<CHANGEME>>
-		return (sizeof(struct abuf166));
+		return (sizeof(struct abuf));
 	}
 	
 	// Did not get a buffer. Return a zero length
@@ -63,9 +65,9 @@ unsigned int PhotoElectricLog::PutOne(void)
 }
 
 // Format the next buffer for file output
-unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 {
-	struct abuf166 *ab = (struct abuf166 *)nptr;
+	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
 	fprintf(ofile, "%u,%u,%4.5f\n",
@@ -76,35 +78,33 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 	);
 	
 	// Done
-	return (sizeof(struct abuf166));
+	return (sizeof(struct abuf));
 }
 
 
 // task constructor
-PhotoElectricTask::PhotoElectricTask(void)
+MiniDeploy166::MiniDeploy166(void)
 {
-	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	return;
 };
 	
 // task destructor
-PhotoElectricTask::~PhotoElectricTask(void)
+MiniDeploy166::~MiniDeploy166(void)
 {
 	return;
 };
 	
 // Main function of the task
-int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
+int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
-	PhotoElectricLog sl;                   // log
+	MiniDeployLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Photoelectric task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 MiniDeploy task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -116,48 +116,27 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	
-	// Set up the proxy value
-	proxy->add("LineDirection");
+	// Create a solenoid
+	Solenoid MiniBotOut(1);
+	Solenoid MiniBotIn(2);
 	
-	// Create three DigitalInputs - one for each sensor
-	DigitalInput left(1);
-	DigitalInput center(2);
-	DigitalInput right(3);
+	proxy->add("MiniDeploy");
+	proxy->set("MiniDeploy",0);
 		
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
-		// Use .Get to get the value of the sensor
-		bool l = !left.Get();
-		bool c = !center.Get();
-		bool r = !right.Get();
-		int result=0;
-		/* 0 means dead on
-			1 means to the right
-			-1 means to the left
-			-2 means it's not on the line at all
-		*/
-		// Figure out if 1 is "on the line" or "off the line"
-		if(l&&r) {
-			result=2;
-		} else if(l) {
-			result=1;
-		} else if(r) {
-			result=-1;
-		} else if(c) {
-			result=0;
-		} else {
-			result=-2;
-		} 
-		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
-		// Store that result in proxy
-		proxy->set("LineDirection",result);
+	while (1){
+		
+		
+		if (proxy->get("MiniDeploy",0)>0){
+			MiniBotOut.Set(1);
+		}
 		
         // Logging any values
 		// <<CHANGEME>>
-		// Make this match the declaration above
+		// Make this match the declaraction above
 		sl.PutOne();
 		
-		// Wait for our next lap
+		// Wait for our next loop
 		WaitForNextLoop();		
 	}
 	return (0);

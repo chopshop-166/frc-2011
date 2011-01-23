@@ -1,6 +1,6 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: Retroreflective.h     
+*  File Name  		: TaskTemplate.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
 *  File Description	: Template header file for tasks, with template functions
@@ -19,20 +19,20 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 // You should rename this when you copy it into a new file
 // <<CHANGEME>>
-#define PHOTOELECTRIC_CYCLE_TIME (20) // 20ms
+#define COLORLIGHT_CYCLE_TIME (10) // 10ms
 
 // Rename this, too, or you'll run into collisions
 // <<CHANGEME>>
-class PhotoElectricTask : public Team166Task
+class ColorLightTask : public Team166Task
 {
 	
 public:
 	
 	// task constructor
-	PhotoElectricTask(void);
+	ColorLightTask(void);
 
 	// task destructor
-	virtual ~PhotoElectricTask(void);
+	virtual ~ColorLightTask(void);
 
 	// Main function of the task
 	virtual int Main(int a2, int a3, int a4, int a5,

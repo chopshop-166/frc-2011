@@ -11,7 +11,7 @@
 
 #pragma once
 
-// <<CHANGEME>>
-// Place any #defines for things you want to enable in multiple tasks, simply, here
-// For example,
-// #define DRIVER_JOYSTICK (1)
+#define AUTO_SPEED_FORWARD (-0.4)
+#define AUTO_SPEED_TURN (0.3)
+
+#define DRIVER_AUTOASSIST ("Joy1B5")

@@ -90,7 +90,7 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
  * Normalize all wheel speeds if the magnitude of any wheel is greater than 1.0.
  * Taken from RobotDrive
  */
-void Normalize(double *wheelSpeeds)
+void DriveTask::Normalize(double *wheelSpeeds)
 {
 	double maxMagnitude = fabs(wheelSpeeds[0]);
 	INT32 i;
@@ -144,17 +144,46 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
+	int curr_value=0;
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
-		x=proxy->get("Joy1X");
-		y=proxy->get("Joy1Y");
-		z=proxy->get("Joy1R");
+		if(proxy->get(DRIVER_AUTOASSIST)) {
+			curr_value = (int)proxy->get("LineDirection");
+			x=0;
+			switch(curr_value) {
+				case 2:
+					y = 0;
+					r = 0;
+					break;
+				case 1:
+					y = 0;
+					r = -AUTO_SPEED_TURN;
+					break;
+				case 0:
+					y = AUTO_SPEED_FORWARD;
+					r = 0;
+					break;
+				case -1:
+					y = 0;
+					r = AUTO_SPEED_TURN;
+					break;
+				case -2:
+					break;
+				default:
+					r=y=0;
+					break;
+			}
+		} else {
+			x=proxy->get("Joy1X");
+			y=proxy->get("Joy1Y");
+			r=proxy->get("Joy1R");
+		}
 		
-		wheelSpeeds[0] = x - y + z;
-		wheelSpeeds[1] = -x - y - z;
-		wheelSpeeds[2] = -x - y + z;
-		wheelSpeeds[3] = x - y - z;
+		wheelSpeeds[0] = x - y + r;
+		wheelSpeeds[1] = -x - y - r;
+		wheelSpeeds[2] = -x - y + r;
+		wheelSpeeds[3] = x - y - r;
 		
 		Normalize(wheelSpeeds);
 		
@@ -168,7 +197,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
         // Logging any values
 		// <<CHANGEME>>
 		// Make this match the declaration above
-		sl.PutOne(x,y,z);
+		sl.PutOne(x,y,r);
 		
 		// Wait for our next lap
 		WaitForNextLoop();

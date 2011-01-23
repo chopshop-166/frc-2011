@@ -1,6 +1,6 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: PhotoElectric.cpp     
+*  File Name  		: TaskTemplate.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
 *  File Description	: Template source file for tasks, with template functions
@@ -10,7 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "WPILib.h"
-#include "PhotoElectric.h"
+#include "ColorLights.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -25,16 +25,16 @@ struct abuf166
 
 //  Memory Log
 // <<CHANGEME>>
-class PhotoElectricLog : public MemoryLog
+class ColorLightLog : public MemoryLog
 {
 public:
-	PhotoElectricLog() : MemoryLog(
-			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "template",
+	ColorLightLog() : MemoryLog(
+			sizeof(struct abuf166), COLORLIGHT_CYCLE_TIME, "template",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~PhotoElectricLog() {return;};
+	~ColorLightLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
@@ -44,7 +44,7 @@ public:
 
 // Write one buffer into memory
 // <<CHANGEME>>
-unsigned int PhotoElectricLog::PutOne(void)
+unsigned int ColorLightLog::PutOne(void)
 {
 	struct abuf166 *ob;               // Output buffer
 	
@@ -63,7 +63,7 @@ unsigned int PhotoElectricLog::PutOne(void)
 }
 
 // Format the next buffer for file output
-unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int ColorLightLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf166 *ab = (struct abuf166 *)nptr;
 	
@@ -78,33 +78,34 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 	// Done
 	return (sizeof(struct abuf166));
 }
+//Above me is just logging
 
 
 // task constructor
-PhotoElectricTask::PhotoElectricTask(void)
+ColorLightTask::ColorLightTask(void)
 {
-	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
+	Start((char *)"166ColorLightsTask", COLORLIGHT_CYCLE_TIME);
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
 	return;
 };
 	
 // task destructor
-PhotoElectricTask::~PhotoElectricTask(void)
+ColorLightTask::~ColorLightTask(void)
 {
 	return;
 };
 	
 // Main function of the task
-int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
+int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
-	PhotoElectricLog sl;                   // log
+	ColorLightLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Photoelectric task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -116,49 +117,40 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	
-	// Set up the proxy value
-	proxy->add("LineDirection");
-	
-	// Create three DigitalInputs - one for each sensor
-	DigitalInput left(1);
-	DigitalInput center(2);
-	DigitalInput right(3);
-		
+	//Before don't generally touch^^
+	//To run once write bellow me
+	DigitalOutput red(4); // Use 4-6
+	DigitalOutput white(5); // Use 4-6
+	DigitalOutput blue(6); // Use 4-6
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
-		// Use .Get to get the value of the sensor
-		bool l = !left.Get();
-		bool c = !center.Get();
-		bool r = !right.Get();
-		int result=0;
-		/* 0 means dead on
-			1 means to the right
-			-1 means to the left
-			-2 means it's not on the line at all
-		*/
-		// Figure out if 1 is "on the line" or "off the line"
-		if(l&&r) {
-			result=2;
-		} else if(l) {
-			result=1;
-		} else if(r) {
-			result=-1;
-		} else if(c) {
-			result=0;
-		} else {
-			result=-2;
-		} 
-		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
-		// Store that result in proxy
-		proxy->set("LineDirection",result);
-		
+	while (1) 
+	{
+		if(proxy->get("Joy3B4N")) //red
+		{
+			red.Set(true);
+		}
+		if(proxy->get("Joy3B3N")) //white
+		{
+			white.Set(true);
+		}
+		if(proxy->get("Joy3B5N")) //blue
+		{
+			blue.Set(true);
+		}
+		if(proxy->get("Joy3B2N")) //clear all
+		{
+			red.Set(false);
+			white.Set(false);
+			blue.Set(false);
+		}
         // Logging any values
 		// <<CHANGEME>>
-		// Make this match the declaration above
-		sl.PutOne();
+		// Make this match the declaraction above
+		sl.PutOne();//part of logging
 		
 		// Wait for our next lap
-		WaitForNextLoop();		
+		WaitForNextLoop();//'donate' spare processing power
+						  //When this task is done, stop accessing the CPU
 	}
 	return (0);
 	

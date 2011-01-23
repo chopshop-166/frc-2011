@@ -29,9 +29,11 @@ AutonomousTask::AutonomousTask() {
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
 	
+	AnalogChannel cmd_switch(3);
+	int auto_choice = (int)cmd_switch.GetVoltage();
+	
 	while( lHandle->IsAutonomous() ) {
-		// <<CHANGEME>>
-		// Insert your autonomous logic here
+		proxy->set(DRIVER_AUTOASSIST,true);
 		
 		// This wait is required, it makes sure no task uses too much memory
 		Wait(AUTONOMOUS_WAIT_TIME);

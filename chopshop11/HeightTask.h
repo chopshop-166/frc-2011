@@ -1,12 +1,12 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: Retroreflective.h     
+*  File Name  		: HeightTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
+*  Creation Date	: January 23, 2011
 *  File Description	: Template header file for tasks, with template functions
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #pragma once
@@ -19,20 +19,20 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 // You should rename this when you copy it into a new file
 // <<CHANGEME>>
-#define PHOTOELECTRIC_CYCLE_TIME (20) // 20ms
+#define HEIGHTTASK_CYCLE_TIME (10) // 10ms
 
 // Rename this, too, or you'll run into collisions
 // <<CHANGEME>>
-class PhotoElectricTask : public Team166Task
+class HeightTask166 : public Team166Task
 {
 	
 public:
 	
 	// task constructor
-	PhotoElectricTask(void);
+	HeightTask166(void);
 
 	// task destructor
-	virtual ~PhotoElectricTask(void);
+	virtual ~HeightTask166(void);
 
 	// Main function of the task
 	virtual int Main(int a2, int a3, int a4, int a5,
