@@ -41,4 +41,7 @@ public:
 private:
 	// Any variables that the task has as members go here
 	// <<CHANGEME>>
+	DigitalInput left;
+	DigitalInput center;
+	DigitalInput right;
 };
