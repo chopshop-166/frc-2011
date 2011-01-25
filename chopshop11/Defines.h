@@ -15,3 +15,7 @@
 #define AUTO_SPEED_TURN (0.3)
 
 #define DRIVER_AUTOASSIST ("Joy1B5")
+
+#define LEFTPHOTOSENSE (1)
+#define CENTERPHOTOSENSE (2)
+#define RIGHTPHOTOSENSE (3)

@@ -81,7 +81,7 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-PhotoElectricTask::PhotoElectricTask(void)
+PhotoElectricTask::PhotoElectricTask(void):left(LEFTPHOTOSENSE),center(CENTERPHOTOSENSE),right(RIGHTPHOTOSENSE)
 {
 	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
 	// ^^^ Rename those ^^^
@@ -118,11 +118,6 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Set up the proxy value
 	proxy->add("LineDirection");
-	
-	// Create three DigitalInputs - one for each sensor
-	DigitalInput left(1);
-	DigitalInput center(2);
-	DigitalInput right(3);
 		
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
