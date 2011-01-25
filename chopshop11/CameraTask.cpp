@@ -88,14 +88,17 @@ unsigned int CameraLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 {
-	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	/* allow writing to vxWorks target */
+	Priv_SetWriteFileAllowed(1);   
+	
 	this->MyTaskIsEssential=0;
 	SetDebugFlag ( DEBUG_SCREEN_ONLY  ) ;
 	camera.WriteResolution(AxisCamera::kResolution_320x240);
 	//camera.WriteCompression(20);
 	//camera.WriteBrightness(0);
+
+	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
+	
 	return;
 };
 	
@@ -142,13 +145,11 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		WaitForNextLoop();
 		
 		/* When this works, store a picture to cRIO */
-		//TakeSnapshot("testShot.jpg");
-		
-		DPRINTF(LOG_INFO,"CameraTask::Main loop...");
-		
+		TakeSnapshot("cRIOimage.jpg");
+				
 		/* Look for target */
 		ProcessImage();
-		Wait(10.0);
+		Wait(5.0);
 	}
 	return (0);
 	
@@ -160,36 +161,39 @@ void CameraTask::ProcessImage()  {
 	lHandle->DriverStationDisplay("ProcessIMage:%0.6f",GetTime());
 };
 
+/**
+ * Take a picture and store it to the cRIO in the specified path
+ */
 void CameraTask::TakeSnapshot(char* imageName)  {
-	/* Warning - getting a write error when this is tried 
-	 * ERR_WRITE_FILE_NOT_SUPPORTED  -1074395313   
-	 * */
 	
-	//lHandle->DriverStationDisplay("C:%0.6f",GetTime());
 	lHandle->DriverStationDisplay("storing %s",imageName);
-	DPRINTF(LOG_DEBUG, "taking a SNAPSHOT ");
-
-	/* allow writing to vxWorks target */
-	//Priv_SetWriteFileAllowed(1);   	
+	//DPRINTF(LOG_DEBUG, "taking a SNAPSHOT ");
 	
 	Image* cameraImage = frcCreateImage(IMAQ_IMAGE_HSL);
 	if (!cameraImage) {
 		DPRINTF (LOG_INFO,"frcCreateImage failed - errorcode %i",GetLastVisionError()); 
 	}
-	
-	if ( !camera.GetImage(cameraImage) ) {
-		DPRINTF (LOG_INFO,"\nImage Acquisition from camera failed %i", GetLastVisionError());
-	} else { 
-		DPRINTF (LOG_DEBUG, "calling frcWriteImage for %s", imageName);
-		if (!frcWriteImage(cameraImage, imageName) ) { 
-			int errCode = GetLastVisionError();
-			DPRINTF (LOG_INFO,"frcWriteImage failed - errorcode %i", errCode);
-			char *errString = GetVisionErrorText(errCode);
-			DPRINTF (LOG_INFO,"errString= %s", errString);
-		} else { 
-			DPRINTF (LOG_INFO,"\n>>>>> Saved image to %s", imageName);	
-			// always dispose of image objects when done
-			frcDispose(cameraImage);
-		}
+
+	/* If there is an unacquired image to get, acquire it */
+	if ( camera.IsFreshImage() ) {
+		if ( !camera.GetImage(cameraImage) ) {
+			DPRINTF (LOG_INFO,"\nImage Acquisition from camera failed %i", GetLastVisionError());
+		} else { 	
+			lHandle->DriverStationDisplay("writing %s",imageName);
+            //DPRINTF (LOG_DEBUG, "writing %s", imageName);
+			if (!frcWriteImage(cameraImage, imageName) ) { 
+				int errCode = GetLastVisionError();
+				DPRINTF (LOG_INFO,"frcWriteImage failed - errorcode %i", errCode);
+				char *errString = GetVisionErrorText(errCode);
+				DPRINTF (LOG_INFO,"errString= %s", errString);
+		  	} else { 
+		  		DPRINTF (LOG_INFO,"\n >>>>> Saved image to %s", imageName);	
+		  		// always dispose of image objects when done
+		  		frcDispose(cameraImage);
+		  	}
+		} 
 	}
+	else {
+			DPRINTF (LOG_INFO,"Image is stale");	
+	} // fresh
 };
