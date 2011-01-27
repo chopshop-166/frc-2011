@@ -14,6 +14,7 @@
 #include "WPILib.h"
 #include "Robot.h"
 #include "Vision/AxisCamera.h"
+#include "TrackAPI.h"
 
 //
 // This constant defines how often we want this task to run in the form
@@ -45,4 +46,21 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	AxisCamera &camera;
+
+	Image* ReflectingTape;
+	Image* srcimage;
+	int numParticles;
+	int largestParticleIndex;
+	int widestParticleIndex;
+	ParticleAnalysisReport Biggest;
+	int CameraTask::GetWidestParticle(Image* binaryImage, int* widestParticleIndex);
+	double targetCenterNormalized;
+	int CameraTask::ProcessImage(double* targetCenterNormalized);
+	/*ddduuurrrrr...?
+	 */
+	int imageProcessResult;
+	
+	Range R_Range;
+	Range B_Range;
+	Range G_Range;
 };

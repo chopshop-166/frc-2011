@@ -21,6 +21,7 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(true)dprintf
+#define CAMERA_CENTER_OFFSET 0. // normalized, the offset of the centerline of the camera vs. the robot's centerline at the ideal target center
 
 // Sample in memory buffer
 struct abuf
@@ -86,7 +87,10 @@ unsigned int CameraLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
+CameraTask::CameraTask(void):
+		camera(AxisCamera::GetInstance()), 
+		ReflectingTape(frcCreateImage(IMAQ_IMAGE_U8)), 
+		srcimage(frcCreateImage(IMAQ_IMAGE_RGB))
 {
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
 	// ^^^ Rename those ^^^
@@ -96,6 +100,21 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 	camera.WriteResolution(AxisCamera::kResolution_320x240);
 	//camera.WriteCompression(20);
 	//camera.WriteBrightness(0);
+	R_Range.minValue = 100;
+	R_Range.maxValue = 255;
+	G_Range.minValue = 100;
+	G_Range.maxValue = 255;
+	B_Range.minValue = 100;
+	B_Range.maxValue = 255;
+
+	numParticles=0; 
+	largestParticleIndex=0;
+	widestParticleIndex=0;
+	targetCenterNormalized=0;
+	imageProcessResult=0;
+	
+	
+	
 	return;
 };
 	
@@ -147,19 +166,108 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		DPRINTF(LOG_INFO,"CameraTask::Main loop...");
 		
 		/* Look for target */
-		ProcessImage();
+		imageProcessResult = ProcessImage(&targetCenterNormalized);
+		
+		/*if (imageProcessResult ==0)//nothing was found
+		{
+			
+		}
+		else if (imageProcessResult==1)//only the widest particle was found
+		{
+		
+		}
+		else if (imageProcessResult==2)// only the largest particle was found
+		{
+		
+		}
+		else if (imageProcessResult==3)//both large particle and wide particle were found*/
+		
 		Wait(10.0);
 	}
 	return (0);
 	
 };
 
-void CameraTask::ProcessImage()  {
-	/* TBD  
-	 * */
-	lHandle->DriverStationDisplay("ProcessIMage:%0.6f",GetTime());
-};
+int CameraTask::GetWidestParticle(Image* binaryImage, int* widestParticleIndex)
+{
+	*widestParticleIndex = 0; // points to caller-provided variable
+	
+	int numParticles;
+	int success = frcCountParticles(binaryImage, &numParticles);			
+	//0 is normally false in C++, but functions return 0 when successful normally
+	//non-zeros are successes
+	//0 = fail
+	//when there's a failure, call imaqGetLastError() to get the extended error info
+	if ( !success )	{  printf("Error: %d\n", imaqGetLastError()); return success;}			
+	
+	// if no particles found we can quit here
+	if (numParticles == 0)  {  printf("No widest particle found...\n"); 	} 
+	
+	// find the largest particle
+	double widestParticleWidth = 0;
+	double particleWidth;
+	for (int i = 0; i < numParticles; ++i) {		
+		success = imaqMeasureParticle(binaryImage, i, 0, IMAQ_MT_BOUNDING_RECT_WIDTH, &widestParticleWidth);
+		if ( !success )	{ return success; }		
+		if (particleWidth > widestParticleWidth) 	{
+			// see if is in the right area
+			if ( InArea(binaryImage, i, IMAQ_NO_RECT) ) {
+				widestParticleWidth = particleWidth;
+				*widestParticleIndex = i;  // return index to caller
+			}
+		}
+	}
+	
+	return success;
+}
 
+int CameraTask::ProcessImage(double* targetCenterNormalized)  {
+	int returnValue = 0;
+	if (//(++timer) && 
+			camera.IsFreshImage()) { 
+		//timer = 0;
+			
+		
+		camera.GetImage(srcimage);
+		//&ReflectingTape = srcimage->ThresholdRGB(115, 255, 153, 255, 128, 255);
+		
+		frcColorThreshold(ReflectingTape, srcimage, IMAQ_RGB, &R_Range, &G_Range, &B_Range);
+		//numParticles = ReflectingTape->GetNumberParticles();
+		//frcCountParticles(ReflectingTape, &numParticles);
+		
+		GetLargestParticle(ReflectingTape, &largestParticleIndex);
+			if(largestParticleIndex != 0) {
+				frcParticleAnalysis(ReflectingTape, largestParticleIndex, &Biggest);
+				printf("\tLargest Area: %f\n", Biggest.particleArea);
+				printf("\n\tLargest particle's index: %d\n", largestParticleIndex);
+				returnValue = returnValue+2;
+				//if only the largest particle is found, returnValue = 2
+			} else {
+				printf("No large particle found...\n");
+			}
+		GetWidestParticle(ReflectingTape, &widestParticleIndex);
+			if(widestParticleIndex != 0) {
+				frcParticleAnalysis(ReflectingTape, widestParticleIndex, &Biggest);
+				printf("\n\tLargest Width: %d\n", Biggest.boundingRect.width);
+				printf("\n\tWidest particle's index: %d\n", widestParticleIndex);
+				returnValue = returnValue+1;
+				//if only the largest particle is found, returnValue = 1
+			} else {
+				printf("No wide particle found...\n");
+			}	
+		*targetCenterNormalized = Biggest.center_mass_x_normalized;
+					
+		//DPRINTF(LOG_INFO,"numParticles is %i",&numParticles);
+		
+		lHandle->DriverStationDisplay("ProcessIMage:%0.6f",GetTime());
+	} else {
+		DPRINTF(LOG_INFO,"No fresh image... :-(");
+	}
+	return returnValue;
+	//if both worked, returnValue = 3
+
+	
+};
 void CameraTask::TakeSnapshot(char* imageName)  {
 	/* Warning - getting a write error when this is tried 
 	 * ERR_WRITE_FILE_NOT_SUPPORTED  -1074395313   
