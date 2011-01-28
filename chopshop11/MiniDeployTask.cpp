@@ -83,7 +83,7 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-MiniDeploy166::MiniDeploy166(void)
+MiniDeploy166::MiniDeploy166(void): DeployExtend(1), Deploy(2), Deploy_Limit(4)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	return;
@@ -115,22 +115,22 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	
-	// Create a solenoid
-	Solenoid MiniBotOut(1);
-	Solenoid MiniBotIn(2);
-	
-	proxy->add("MiniDeploy");
-	proxy->set("MiniDeploy",0);
 		
     // General main loop (while in Autonomous or Tele mode)
 	while (1){
 		
-		
-		if (proxy->get("MiniDeploy",0)>0){
-			MiniBotOut.Set(1);
+		if(proxy->get("joy1b7")) {
+			if(proxy->get("MatchTimer") <= 10) {
+				DeployExtend.Set(1);
+			} else {
+				DeployExtend.Set(0);
+			}
 		}
-		
+		if(Deploy_Limit.Get() == 1){
+			Deploy.Set(1);
+		} else {
+			Deploy.Set(0);
+		}
         // Logging any values
 		// <<CHANGEME>>
 		// Make this match the declaraction above
