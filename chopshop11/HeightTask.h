@@ -44,5 +44,6 @@ private:
 	// declare variables
 	float HowHigh;
 	float InchesPerVolt;
+	AnalogChannel Height;
 	
 };
