@@ -20,6 +20,9 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 #define CAMERA_CYCLE_TIME (20) // ms
 
+/** Private NI function needed to write to the VxWorks target */
+IMAQ_FUNC int Priv_SetWriteFileAllowed(UINT32 enable); 
+
 class CameraTask : public Team166Task 
 {
 	

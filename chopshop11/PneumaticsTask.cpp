@@ -1,22 +1,28 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: TaskTemplate.cpp     
+*  File Name  		: PneumaticsTask.cpp    
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Task for Pneumatics
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
+/*------------------------------------------------------------------------------*/
+/* Find & Replace "PneumaticsTask" with the name you would like to give this task     */
+/* Find & Replace "Testing" with the name you would like to give this task      */
+/* Find & Replace "TaskPneumaticsTask" with the name you would like to give this task */
+/*------------------------------------------------------------------------------*/
+
 #include "WPILib.h"
-#include "ColorLights.h"
+#include "PneumaticsTask.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
 
 // Sample in memory buffer
-struct abuf166
+struct abuf
 {
 	struct timespec tp;               // Time of snapshot
 	// Any values that need to be logged go here
@@ -25,16 +31,16 @@ struct abuf166
 
 //  Memory Log
 // <<CHANGEME>>
-class ColorLightLog : public MemoryLog
+class PneumaticsTaskLog : public MemoryLog
 {
 public:
-	ColorLightLog() : MemoryLog(
-			sizeof(struct abuf166), COLORLIGHT_CYCLE_TIME, "template",
+	PneumaticsTaskLog() : MemoryLog(
+			sizeof(struct abuf), PNEUMATICS_CYCLE_TIME, "PneumaticsTask",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~ColorLightLog() {return;};
+	~PneumaticsTaskLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
@@ -44,18 +50,18 @@ public:
 
 // Write one buffer into memory
 // <<CHANGEME>>
-unsigned int ColorLightLog::PutOne(void)
+unsigned int PneumaticsTaskLog::PutOne(void)
 {
-	struct abuf166 *ob;               // Output buffer
+	struct abuf *ob;               // Output buffer
 	
 	// Get output buffer
-	if ((ob = (struct abuf166 *)GetNextBuffer(sizeof(struct abuf166)))) {
+	if ((ob = (struct abuf *)GetNextBuffer(sizeof(struct abuf)))) {
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		// Add any values to be logged here
 		// <<CHANGEME>>
-		return (sizeof(struct abuf166));
+		return (sizeof(struct abuf));
 	}
 	
 	// Did not get a buffer. Return a zero length
@@ -63,9 +69,9 @@ unsigned int ColorLightLog::PutOne(void)
 }
 
 // Format the next buffer for file output
-unsigned int ColorLightLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int PneumaticsTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 {
-	struct abuf166 *ab = (struct abuf166 *)nptr;
+	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
 	fprintf(ofile, "%u,%u,%4.5f\n",
@@ -76,36 +82,35 @@ unsigned int ColorLightLog::DumpBuffer(char *nptr, FILE *ofile)
 	);
 	
 	// Done
-	return (sizeof(struct abuf166));
+	return (sizeof(struct abuf));
 }
-//Above me is just logging
 
 
 // task constructor
-ColorLightTask::ColorLightTask(void):red(4,Relay::kForwardOnly), white(5,Relay::kForwardOnly), blue(6,Relay::kForwardOnly)
+PneumaticsTask::PneumaticsTask(void)
 {
-	Start((char *)"166ColorLightsTask", COLORLIGHT_CYCLE_TIME);
+	Start((char *)"PneumaticsTask", PNEUMATICS_CYCLE_TIME);
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
 	return;
 };
 	
 // task destructor
-ColorLightTask::~ColorLightTask(void)
+PneumaticsTask::~PneumaticsTask(void)
 {
 	return;
 };
 	
 // Main function of the task
-int ColorLightTask::Main(int a2, int a3, int a4, int a5,
+int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
-	ColorLightLog sl;                   // log
+	PneumaticsTaskLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 PneumaticsTask task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -117,38 +122,40 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	
-	//Before don't generally touch^^
-	//To run once write bellow me
+	// assign pressure switch and compressor relay channels	
+	unsigned int pressureSwitchChannel = 7;
+	unsigned int compressorRelayChannel = 2;
+	AnalogChannel ps(7);
+	double pressure, ppressure = 0;
+			
+	//initialize object and start compressor	
+	Compressor c(pressureSwitchChannel,compressorRelayChannel);
+	c.Start();
+		
     // General main loop (while in Autonomous or Tele mode)
-	while (1) 
-	{
-		if(proxy->get("Joy3B4N")) //red
-		{
-			red.Set(Relay::kOn);
-		}
-		if(proxy->get("Joy3B3N")) //white
-		{
-			white.Set(Relay::kOn);
-		}
-		if(proxy->get("Joy3B5N")) //blue
-		{
-			blue.Set(Relay::kOn);
-		}
-		if(proxy->get("Joy3B2N")) //clear all
-		{
-			red.Set(Relay::kOff);
-			white.Set(Relay::kOff);
-			blue.Set(Relay::kOff);
-		}
+	while (1) {
+		
+		// Capture the pressure by adjusted voltage
+		// Subtract 0.5 because sensor ranges from 0.5 to 4.5
+		pressure = (ps.GetVoltage()-0.5);
+		
+		//convert voltage to psi
+		ppressure = (pressure * 62.5);
+		
         // Logging any values
 		// <<CHANGEME>>
 		// Make this match the declaraction above
-		sl.PutOne();//part of logging
+		sl.PutOne();
+		
+		
+		
+		lHandle->DriverStationDisplay("PSI: %d", ppressure);
 		
 		// Wait for our next lap
-		WaitForNextLoop();//'donate' spare processing power
-						  //When this task is done, stop accessing the CPU
+		WaitForNextLoop();		
 	}
+	
+	c.Stop();
 	return (0);
 	
 };
