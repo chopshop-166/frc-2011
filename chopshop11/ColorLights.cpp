@@ -82,7 +82,7 @@ unsigned int ColorLightLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ColorLightTask::ColorLightTask(void)
+ColorLightTask::ColorLightTask(void):red(4,Relay::kForwardOnly), white(5,Relay::kForwardOnly), blue(6,Relay::kForwardOnly)
 {
 	Start((char *)"166ColorLightsTask", COLORLIGHT_CYCLE_TIME);
 	// ^^^ Rename those ^^^
@@ -119,29 +119,26 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 	
 	//Before don't generally touch^^
 	//To run once write bellow me
-	DigitalOutput red(4); // Use 4-6
-	DigitalOutput white(5); // Use 4-6
-	DigitalOutput blue(6); // Use 4-6
     // General main loop (while in Autonomous or Tele mode)
 	while (1) 
 	{
 		if(proxy->get("Joy3B4N")) //red
 		{
-			red.Set(true);
+			red.Set(Relay::kOn);
 		}
 		if(proxy->get("Joy3B3N")) //white
 		{
-			white.Set(true);
+			white.Set(Relay::kOn);
 		}
 		if(proxy->get("Joy3B5N")) //blue
 		{
-			blue.Set(true);
+			blue.Set(Relay::kOn);
 		}
 		if(proxy->get("Joy3B2N")) //clear all
 		{
-			red.Set(false);
-			white.Set(false);
-			blue.Set(false);
+			red.Set(Relay::kOff);
+			white.Set(Relay::kOff);
+			blue.Set(Relay::kOff);
 		}
         // Logging any values
 		// <<CHANGEME>>
