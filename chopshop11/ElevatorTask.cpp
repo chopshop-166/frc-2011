@@ -143,6 +143,8 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			float target = target_heights[target_type];
 			float current = proxy->get("ElevatorHeight");
 			elevator.Set((target < current)? speed : ((target > current)? -speed : 0));
+		} else {
+			elevator.Set(proxy->get("Joy3Y"));
 		}
 		
         // Logging any values
