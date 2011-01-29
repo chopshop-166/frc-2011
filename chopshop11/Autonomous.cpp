@@ -38,6 +38,9 @@ AutonomousTask::AutonomousTask() {
 	AnalogChannel height_switch(6);
 	int height_choice;
 	height_choice = (int)height_switch.GetVoltage();
+	if(height_choice & 4) {
+		height_choice = 0;
+	}
 	proxy->add("Autonomous Height");
 	proxy->set("Autonomous Height", height_choice);
 	
