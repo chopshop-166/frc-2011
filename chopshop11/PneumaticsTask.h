@@ -41,4 +41,6 @@ public:
 private:
 	// Any variables that the task has as members go here
 	// <<CHANGEME>>
+	AnalogChannel PSITransducer;
+	Compressor AirCompresser;
 };

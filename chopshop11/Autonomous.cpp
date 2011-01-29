@@ -29,13 +29,13 @@ AutonomousTask::AutonomousTask() {
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
 	
-	AnalogChannel lane_switch(3);
+	AnalogChannel lane_switch(5);
 	int lane_choice;
 	lane_choice = (int)lane_switch.GetVoltage();
 	proxy->add("Autonomous Lane");
 	proxy->set("Autonomous Lane", lane_choice);
 	
-	AnalogChannel height_switch(4);
+	AnalogChannel height_switch(6);
 	int height_choice;
 	height_choice = (int)height_switch.GetVoltage();
 	proxy->add("Autonomous Height");

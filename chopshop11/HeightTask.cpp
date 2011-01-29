@@ -83,7 +83,7 @@ unsigned int HeightTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-HeightTask166::HeightTask166(void): Height(2)
+HeightTask166::HeightTask166(void): Height(8)
 {
 	Start((char *)"166HeightTask", HEIGHTTASK_CYCLE_TIME);
 	return;
