@@ -130,7 +130,7 @@ int HeightTask166::Main(int a2, int a3, int a4, int a5,
 		HowHigh = InchesPerVolt*Height.GetVoltage();
 		// tell proxy how high we are
 		proxy->set("ElevatorHeight",HowHigh);
-		
+		SmartDashboard::Log(HowHigh, "Height");
 		sl.PutOne();
 		
 		// Wait for our next lap

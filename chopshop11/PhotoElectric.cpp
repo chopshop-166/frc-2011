@@ -146,6 +146,7 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
 		// Store that result in proxy
 		proxy->set("LineDirection",result);
+		SmartDashboard::Log(result, "Line Result");
 		
         // Logging any values
 		// <<CHANGEME>>

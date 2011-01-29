@@ -49,7 +49,7 @@ Robot::Robot(void)
 		RobotHandle = this;
 	}
 	mlHead = 0;
-
+	SmartDashboard::init();
 	// update DS
 	DriverStationDisplay("Starting Robot");
 	

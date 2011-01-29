@@ -19,7 +19,7 @@
 #include "SonarTask.h"
 
 // To locally enable debug printing: set true, to disable false
-#define DPRINTF if(true)dprintf
+#define DPRINTF if(false)dprintf
 
 // Sample in memory buffer
 struct abuf
@@ -180,8 +180,9 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 		proxy->set("FrontDistance", vf);
 		proxy->set("LeftDistance", vl);
 		proxy->set("RightDistance", vr);
-
-		printf("Volts: %f\t %f\n", volts, vf);
+		SmartDashboard::Log(vf, "Front Distance");
+		SmartDashboard::Log(vl, "Left Distance");
+		SmartDashboard::Log(vr, "Right Distance");
 		
 		// Increment the counter for distance slot in the array
 		i++;
