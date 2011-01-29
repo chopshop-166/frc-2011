@@ -39,6 +39,7 @@ import sys, os
 import ftplib
 import subprocess
 import glob
+import shutil
 
 
 # Edit these:
@@ -49,7 +50,7 @@ username = "anonymous"                # FTP username (often times anonymous)
 password = "guest"                    # FTP password (usually can be anything)
 remoteDir = "/"                       # Directory where the image(s) is/are
 remoteFile = "CRIOimage.jpg"          # Name of file you wish to download
-keepCount = 100                       # Max number of files to be saved when recording images (edit as needed)
+keepCount = 10                       # Max number of files to be saved when recording images (edit as needed)
 #########################
  
 # Don't edit these:
@@ -64,7 +65,7 @@ class ManagedGUI(object):
         self.master = master
         self.queue = queue
         self.imageFilename = imageFilename
-        self.titleText = "RobotI"
+        self.titleText = "RobotI" + " " + remoteFile
         self.time = 0
         self.toggle = 0
         self.record = False
@@ -112,7 +113,7 @@ class ManagedGUI(object):
                   # Set the image TIME
                   self.master.title(self.titleText+"  "+str(time.ctime()))
 
-                  self.imageFile = os.path.join(self.cwd, '\\output\\', self.imageFilename.get(0))
+                  self.imageFile = os.path.join(self.cwd, self.imageFilename.get(0))
 
                   #continue
 
@@ -126,17 +127,14 @@ class ManagedGUI(object):
                   self.canvas.create_image(0,0,image=self.image,anchor='nw')
 
                   if self.record:
+                    newFile = os.path.splitext(self.imageFile)
+                    self.recordFile = (newFile[0] + '-' + str(int(time.time())) + ".jpg")
+                    shutil.copy(self.imageFile, self.recordFile)
+                    print "Recorded Image File:%s" %(self.recordFile)
                     f = glob.glob('*.jpg')
-                    print f
                     if len(f) > keepCount:
                         f = sorted(f)
                         os.remove(os.path.join(self.cwd, f[0]))
-                    newFile = os.path.splitext(self.imageFile)
-                    self.recordFile = (newFile[0] + '-' + str(int(time.time())) + ".jpg")
-                    os.rename(self.imageFile, self.recordFile)
-                    print "Recorded Image File:%s" %(self.recordFile)
-                            
-        
 
                 elif msg == 'main':
                   if (self.time + 10) > time.time():
@@ -259,7 +257,7 @@ class ThreadedGUI(object):
                     self.ftp.retrbinary('RETR '+remoteFile, self.gFile.write)
                     self.ftp.delete(remoteFile)
                     self.gFile.close()
-
+                        
                     # Send file name to be processed
                     self.imageData.put(remoteFile)
                     self.queue.put("imageFile")
