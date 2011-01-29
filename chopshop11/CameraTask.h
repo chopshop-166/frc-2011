@@ -13,6 +13,7 @@
 
 #include "WPILib.h"
 #include "Robot.h"
+#include "Proxy.h"
 #include "Vision/AxisCamera.h"
 
 //
@@ -22,6 +23,9 @@
 
 /** Private NI function needed to write to the VxWorks target */
 IMAQ_FUNC int Priv_SetWriteFileAllowed(UINT32 enable); 
+
+// Store an image on the cRIO
+void SaveImage(char* imageName, Image* image);
 
 class CameraTask : public Team166Task 
 {
@@ -41,7 +45,7 @@ public:
 	// Take a picture and store to cRIO
 	void TakeSnapshot(char* imageName);
 	// Search for Target
-	void ProcessImage();
+	void FindTargets();
 	
 private:
 	// Any variables that the task has as members go here

@@ -18,6 +18,7 @@
 #include "WPILib.h"
 #include "Robot.h"
 #include "CameraTask.h"
+#include "TargetCircle.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(true)dprintf
@@ -90,14 +91,18 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 {
 	/* allow writing to vxWorks target */
 	Priv_SetWriteFileAllowed(1);   
-	
+		
 	this->MyTaskIsEssential=0;
+	
 	SetDebugFlag ( DEBUG_SCREEN_ONLY  ) ;
 	camera.WriteResolution(AxisCamera::kResolution_320x240);
 	//camera.WriteCompression(20);
 	//camera.WriteBrightness(0);
 
+	int fps = camera.GetMaxFPS();
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
+
+	DPRINTF(LOG_INFO,"CameraTask FPS=%i task cycle time=%i",fps,CAMERA_CYCLE_TIME);
 	
 	return;
 };
@@ -132,15 +137,7 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 	DPRINTF(LOG_INFO,"CameraTask got proxy");
 	
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
-		// <<CHANGEME>>
-		// Insert your own logic here
-		
-        // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaration above
-		//sl.PutOne();
-		
+	while (1) {				
 		// Wait for our next lap
 		WaitForNextLoop();
 		
@@ -148,17 +145,63 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		TakeSnapshot("cRIOimage.jpg");
 				
 		/* Look for target */
-		ProcessImage();
-		Wait(5.0);
+		FindTargets();
+
+	    // Logging any values
+		// Make this match the declaration above
+		//sl.PutOne();
+		
+		Wait(10.0);
 	}
 	return (0);
 	
 };
 
-void CameraTask::ProcessImage()  {
+void CameraTask::FindTargets()  {
 	/* TBD  
 	 * */
 	lHandle->DriverStationDisplay("ProcessIMage:%0.6f",GetTime());
+
+	// get the camera image
+		HSLImage *image = camera.GetImage();
+
+		// find FRC targets in the image
+		vector<TargetCircle> targets = TargetCircle::FindCircularTargets(image);
+		//delete image;
+		if (targets.size() == 0 || targets[0].m_score < MINIMUM_SCORE)
+		{
+			// no targets found. Make sure the first one in the list is 0,0
+			// since the dashboard program annotates the first target in green
+			// and the others in magenta. With no qualified targets, they'll all
+			// be magenta.
+			TargetCircle nullTarget;
+			nullTarget.m_majorRadius = 0.0;
+			nullTarget.m_minorRadius = 0.0;
+			nullTarget.m_score = 0.0;
+			if (targets.size() == 0)
+				targets.push_back(nullTarget);
+			else
+				targets.insert(targets.begin(), nullTarget);
+			if (targets.size() == 0)
+				DPRINTF(LOG_DEBUG, "No target found\n\n");
+			else
+				DPRINTF(LOG_DEBUG, "No valid targets found, best score: %f ", 
+						targets[0].m_score);
+		}
+		else {
+			// We have some targets.
+			SaveImage("targetImage.jpg", (Image*)image);
+			// set the new PID heading setpoint to the first target in the list
+			double hAngle = targets[0].GetHorizontalAngle();
+			double vAngle = targets[0].GetVerticalAngle();
+			double size = targets[0].GetSize();
+			
+			// send dashbaord data for target tracking
+			DPRINTF(LOG_DEBUG, "Target found %f ", targets[0].m_score);
+			DPRINTF(LOG_DEBUG, "H: %f  V: %f  SIZE: %f ", hAngle, vAngle, size);
+//			targets[0].Print();
+		}
+		delete image;
 };
 
 /**
@@ -179,21 +222,25 @@ void CameraTask::TakeSnapshot(char* imageName)  {
 		if ( !camera.GetImage(cameraImage) ) {
 			DPRINTF (LOG_INFO,"\nImage Acquisition from camera failed %i", GetLastVisionError());
 		} else { 	
-			lHandle->DriverStationDisplay("writing %s",imageName);
-            //DPRINTF (LOG_DEBUG, "writing %s", imageName);
-			if (!frcWriteImage(cameraImage, imageName) ) { 
-				int errCode = GetLastVisionError();
-				DPRINTF (LOG_INFO,"frcWriteImage failed - errorcode %i", errCode);
-				char *errString = GetVisionErrorText(errCode);
-				DPRINTF (LOG_INFO,"errString= %s", errString);
-		  	} else { 
-		  		DPRINTF (LOG_INFO,"\n >>>>> Saved image to %s", imageName);	
-		  		// always dispose of image objects when done
-		  		frcDispose(cameraImage);
-		  	}
+			SaveImage(imageName, cameraImage);
+		  	// always dispose of image objects when done
+		  	frcDispose(cameraImage);
 		} 
 	}
 	else {
 			DPRINTF (LOG_INFO,"Image is stale");	
 	} // fresh
+};
+
+/**
+ * Store an Image to the cRIO in the specified path
+ */
+void SaveImage(char* imageName, Image* image)  {	
+	DPRINTF (LOG_DEBUG, "writing %s", imageName);
+	if (!frcWriteImage(image, imageName) ) { 
+		int errCode = GetLastVisionError();
+		DPRINTF (LOG_INFO,"frcWriteImage failed - errorcode %i", errCode);
+		char *errString = GetVisionErrorText(errCode);
+		DPRINTF (LOG_INFO,"errString= %s", errString);
+	} 
 };
