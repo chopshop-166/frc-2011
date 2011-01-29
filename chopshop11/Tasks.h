@@ -18,5 +18,6 @@ CameraTask CameraObject;
 //DriveTask DriveObject;
 PhotoElectricTask PhotoElectricObject;
 ColorLightTask ColorLightObject;
+SonarTask SonarTaskObject;
 
 #endif

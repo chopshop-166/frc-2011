@@ -136,14 +136,19 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 	double leftarray[AverageSize];
 	double rightarray[AverageSize];
 	int i = 0;
-		
+	float volts=0;
+	float voltsleft=0;
+	float voltsright=0;
+	
+	double vf = 0;
+	double vl = 0;
+	double vr = 0;
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
 		// Get the adjusted voltage of each sensor
-		double volts = ac.GetVoltage();
-		double voltsleft = acl.GetVoltage();
-		double voltsright = acr.GetVoltage();
-		volts = volts - 2.5;
+		volts = ac.GetVoltage();
+		voltsleft = acl.GetVoltage();
+		voltsright = acr.GetVoltage();
 		if(volts<0){
 			volts = 0;
 		}else if(volts>3){
@@ -158,9 +163,9 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 		// Get the Average of each sensor
 		// Multiply each by the magic number 81. (yes, with a . at the end)
 		// Store each value into the proxy
-		double vf = 0;
-		double vl = 0;
-		double vr = 0;
+		vf = 0;
+		vl = 0;
+		vr = 0;
 		for(unsigned j = 0;j<AverageSize;j++) {
 			vf+= frontarray[j];
 			vl+= leftarray[j];
@@ -175,6 +180,9 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 		proxy->set("FrontDistance", vf);
 		proxy->set("LeftDistance", vl);
 		proxy->set("RightDistance", vr);
+		SmartDashboard::Log(vf, "Front Distance");
+		SmartDashboard::Log(vl, "Left Distance");
+		SmartDashboard::Log(vr, "Right Distance");
 		
 		// Increment the counter for distance slot in the array
 		i++;
