@@ -131,7 +131,8 @@ class ManagedGUI(object):
                     self.recordFile = (newFile[0] + '-' + str(int(time.time())) + ".jpg")
                     shutil.copy(self.imageFile, self.recordFile)
                     print "Recorded Image File:%s" %(self.recordFile)
-                    f = glob.glob('*.jpg')
+                    searchString = newFile[0] + '*.jpg'
+                    f = glob.glob(searchString)
                     if len(f) > keepCount:
                         f = sorted(f)
                         os.remove(os.path.join(self.cwd, f[0]))
