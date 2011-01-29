@@ -87,7 +87,7 @@ unsigned int PneumaticsTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-PneumaticsTask::PneumaticsTask(void)
+PneumaticsTask::PneumaticsTask(void): PSITransducer(PRESSURETRANSDUCER), AirCompresser(PRESSURESWITCH,COMPRESSORRELAY)
 {
 	Start((char *)"PneumaticsTask", PNEUMATICS_CYCLE_TIME);
 	// ^^^ Rename those ^^^
@@ -121,23 +121,17 @@ int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	
-	// assign pressure switch and compressor relay channels	
-	unsigned int pressureSwitchChannel = 7;
-	unsigned int compressorRelayChannel = 2;
-	AnalogChannel ps(7);
 	double pressure, ppressure = 0;
 			
-	//initialize object and start compressor	
-	Compressor c(pressureSwitchChannel,compressorRelayChannel);
-	c.Start();
+	//initialize object and start compressor
+	AirCompresser.Start();
 		
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
 		
 		// Capture the pressure by adjusted voltage
 		// Subtract 0.5 because sensor ranges from 0.5 to 4.5
-		pressure = (ps.GetVoltage()-0.5);
+		pressure = (PSITransducer.GetVoltage()-0.5);
 		
 		//convert voltage to psi
 		ppressure = (pressure * 62.5);
@@ -147,15 +141,13 @@ int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
 		// Make this match the declaraction above
 		sl.PutOne();
 		
-		
-		
 		lHandle->DriverStationDisplay("PSI: %d", ppressure);
 		
 		// Wait for our next lap
 		WaitForNextLoop();		
 	}
 	
-	c.Stop();
+	AirCompresser.Stop();
 	return (0);
 	
 };
