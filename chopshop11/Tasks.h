@@ -15,7 +15,7 @@ CameraTask CameraObject;
 
 #else
 // tasks that cannot run on suitcase
-DriveTask DriveObject;
+//DriveTask DriveObject;
 PhotoElectricTask PhotoElectricObject;
 ColorLightTask ColorLightObject;
 

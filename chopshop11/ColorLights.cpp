@@ -125,14 +125,20 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 		if(proxy->get("Joy3B4N")) //red
 		{
 			red.Set(Relay::kOn);
+			white.Set(Relay::kOff);
+			blue.Set(Relay::kOff);
 		}
 		if(proxy->get("Joy3B3N")) //white
 		{
 			white.Set(Relay::kOn);
+			red.Set(Relay::kOff);
+			blue.Set(Relay::kOff);
 		}
 		if(proxy->get("Joy3B5N")) //blue
 		{
 			blue.Set(Relay::kOn);
+			red.Set(Relay::kOff);
+			white.Set(Relay::kOff);
 		}
 		if(proxy->get("Joy3B2N")) //clear all
 		{
