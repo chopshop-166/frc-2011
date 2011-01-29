@@ -144,41 +144,12 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	int curr_value=0;
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
-		if(proxy->get(DRIVER_AUTOASSIST)) {
-			curr_value = (int)proxy->get("LineDirection");
-			x=0;
-			switch(curr_value) {
-				case 2:
-					y = 0;
-					r = 0;
-					break;
-				case 1:
-					y = 0;
-					r = -AUTO_SPEED_TURN;
-					break;
-				case 0:
-					y = AUTO_SPEED_FORWARD;
-					r = 0;
-					break;
-				case -1:
-					y = 0;
-					r = AUTO_SPEED_TURN;
-					break;
-				case -2:
-					break;
-				default:
-					r=y=0;
-					break;
-			}
-		} else {
-			x=proxy->get("Joy1X");
-			y=proxy->get("Joy1Y");
-			r=proxy->get("Joy1R");
-		}
+		x=proxy->get("Joy1X");
+		y=proxy->get("Joy1Y");
+		r=proxy->get("Joy1R");
 		
 		wheelSpeeds[0] = x - y + r;
 		wheelSpeeds[1] = -x - y - r;

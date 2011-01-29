@@ -227,6 +227,15 @@ bool Proxy::del(string name)
 	}
 }
 
+//
+bool Proxy::exists(string name)
+{
+	for(unsigned i=0;i<name.size();i++) {
+		name[i] = toupper(name[i]);
+	}
+	return(data.find(name) != data.end());
+}
+
 /**
  * @brief Sets a cached joystick value.
  * @param joy_id Which joystick to set the cached value for.
