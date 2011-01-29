@@ -41,4 +41,7 @@ public:
 private:
 	// Any variables that the task has as members go here
 	// <<CHANGEME>>
+	Relay red;
+	Relay white;
+	Relay blue;
 };

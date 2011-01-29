@@ -83,7 +83,7 @@ unsigned int HeightTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-HeightTask166::HeightTask166(void)
+HeightTask166::HeightTask166(void): Height(2)
 {
 	Start((char *)"166HeightTask", HEIGHTTASK_CYCLE_TIME);
 	return;
@@ -116,17 +116,12 @@ int HeightTask166::Main(int a2, int a3, int a4, int a5,
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	
-	// Set the analog channel of the potentiometer
-	AnalogChannel Height(2);
-	
 	// add a proxy variable
 	proxy->add("ElevatorHeight");
-	// set it to zero
-	proxy->set("ElevatorHeight",0);
 	
 	// Set variable values
 	HowHigh = 0;
-	InchesPerVolt = -10;  // Change this when we get the potentiometer!!!!!!!!!
+	InchesPerVolt = 0.02;  // This value is given in Spec sheet for LX-PA-50
 		
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {

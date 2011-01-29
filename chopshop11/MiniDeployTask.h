@@ -35,4 +35,7 @@ public:
 	
 private:
 	// Variable for Minibot deployment
+	Solenoid DeployExtend;
+	Solenoid Deploy;
+	DigitalInput Deploy_Limit;
 };
