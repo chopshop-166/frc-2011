@@ -49,7 +49,7 @@ Robot::Robot(void)
 		RobotHandle = this;
 	}
 	mlHead = 0;
-	SmartDashboard::init();
+
 	// update DS
 	DriverStationDisplay("Starting Robot");
 	
@@ -73,6 +73,7 @@ Robot::Robot(void)
 void Robot::Autonomous(void)
 {
 	GetWatchdog().SetEnabled(false);
+	Proxy::getInstance()->ToggleSettingJoysticks(false);
 	AutonomousTask();
 }
 
@@ -85,10 +86,10 @@ void Robot::Disabled(void)
 	printf("%s\n", FRAMEWORK_VERSION);
 	
 	DriverStationDisplay("Dumping Memory Log...");
-    printf("Dumping log files...\n");
-    DumpLoggers(maxLogId);
-    printf("Logfiles dumped!\n");
-    maxLogId++;
+	printf("Dumping log files...\n");
+	DumpLoggers(maxLogId);
+	printf("Logfiles dumped!\n");
+	maxLogId++;
 }
 
 /** 
@@ -98,6 +99,7 @@ void Robot::OperatorControl(void)
 {
 	Timer debugTimer;
 	debugTimer.Start();
+	Proxy::getInstance()->ToggleSettingJoysticks(true);
 	
 	printf("Operator control\n");
 	GetWatchdog().SetEnabled(true);
