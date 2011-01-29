@@ -29,9 +29,17 @@ AutonomousTask::AutonomousTask() {
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
 	
-	AnalogChannel cmd_switch(3);
-	int auto_choice;
-	auto_choice = (int)cmd_switch.GetVoltage();
+	AnalogChannel lane_switch(3);
+	int lane_choice;
+	lane_choice = (int)lane_switch.GetVoltage();
+	proxy->add("Autonomous Lane");
+	proxy->set("Autonomous Lane", lane_choice);
+	
+	AnalogChannel height_switch(4);
+	int height_choice;
+	height_choice = (int)height_switch.GetVoltage();
+	proxy->add("Autonomous Height");
+	proxy->set("Autonomous Height", height_choice);
 	
 	while( lHandle->IsAutonomous() ) {
 		proxy->set(DRIVER_AUTOASSIST,true);
