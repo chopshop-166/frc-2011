@@ -10,7 +10,7 @@
 /*----------------------------------------------------------------------------*/
 
 #include "WPILib.h"
-#include "DriveTask.h"
+#include "ColorLights.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -18,34 +18,33 @@
 // Sample in memory buffer
 struct abuf166
 {
-	struct timespec tp;             // Time of snapshot
-	double x,y,z;					// Joystick axis
+	struct timespec tp;               // Time of snapshot
 	// Any values that need to be logged go here
 	// <<CHANGEME>>
 };
 
 //  Memory Log
 // <<CHANGEME>>
-class DriveLog : public MemoryLog
+class ColorLightLog : public MemoryLog
 {
 public:
-	DriveLog() : MemoryLog(
-			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "template",
-			"Seconds,Nanoseconds,Elapsed Time,X,Y,Z\n" // Put the names of the values in here, comma-seperated
+	ColorLightLog() : MemoryLog(
+			sizeof(struct abuf166), COLORLIGHT_CYCLE_TIME, "template",
+			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~DriveLog() {return;};
+	~ColorLightLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
 	// <<CHANGEME>>
-	unsigned int PutOne(double,double,double);     // Log the values needed-add in arguments
+	unsigned int PutOne(void);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
 // <<CHANGEME>>
-unsigned int DriveLog::PutOne(double x, double y, double z)
+unsigned int ColorLightLog::PutOne(void)
 {
 	struct abuf166 *ob;               // Output buffer
 	
@@ -54,9 +53,6 @@ unsigned int DriveLog::PutOne(double x, double y, double z)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
-		ob->x = x;
-		ob->y = y;
-		ob->z = z;
 		// Add any values to be logged here
 		// <<CHANGEME>>
 		return (sizeof(struct abuf166));
@@ -67,17 +63,14 @@ unsigned int DriveLog::PutOne(double x, double y, double z)
 }
 
 // Format the next buffer for file output
-unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int ColorLightLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf166 *ab = (struct abuf166 *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f,%1.6f,%1.6f,%1.6f\n",
+	fprintf(ofile, "%u,%u,%4.5f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
-			ab->x,
-			ab->y,
-			ab->z
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
 			// Add values here
 			// <<CHANGEME>>
 	);
@@ -85,55 +78,34 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 	// Done
 	return (sizeof(struct abuf166));
 }
+//Above me is just logging
 
-/**
- * Normalize all wheel speeds if the magnitude of any wheel is greater than 1.0.
- * Taken from RobotDrive
- */
-void DriveTask::Normalize(double *wheelSpeeds)
-{
-	double maxMagnitude = fabs(wheelSpeeds[0]);
-	INT32 i;
-	for (i=1; i<4; i++)
-	{
-		double temp = fabs(wheelSpeeds[i]);
-		if (maxMagnitude < temp) maxMagnitude = temp;
-	}
-	if (maxMagnitude > 1.0)
-	{
-		for (i=0; i<4; i++)
-		{
-			wheelSpeeds[i] = wheelSpeeds[i] / maxMagnitude;
-		}
-	}
-}
 
 // task constructor
-DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(10), fr(5), bl(7), br(9)
+ColorLightTask::ColorLightTask(void):red(4,Relay::kForwardOnly), white(5,Relay::kForwardOnly), blue(6,Relay::kForwardOnly)
 {
-	Start((char *)"166DriveTask", DRIVE_TASK_CYCLE_TIME);
+	Start((char *)"166ColorLightsTask", COLORLIGHT_CYCLE_TIME);
 	// ^^^ Rename those ^^^
-	wheelSpeeds[0] = wheelSpeeds[1] = wheelSpeeds[2] = wheelSpeeds[3] = 0;
 	// <<CHANGEME>>
 	return;
 };
 	
 // task destructor
-DriveTask::~DriveTask(void)
+ColorLightTask::~ColorLightTask(void)
 {
 	return;
 };
 	
 // Main function of the task
-int DriveTask::Main(int a2, int a3, int a4, int a5,
+int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
-	DriveLog sl;                   // log
+	ColorLightLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Drive task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -145,33 +117,44 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	
+	//Before don't generally touch^^
+	//To run once write bellow me
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
-		x=proxy->get("Joy1X");
-		y=proxy->get("Joy1Y");
-		r=proxy->get("Joy1R");
-		
-		wheelSpeeds[0] = x - y + r;
-		wheelSpeeds[1] = -x - y - r;
-		wheelSpeeds[2] = -x - y + r;
-		wheelSpeeds[3] = x - y - r;
-		
-		Normalize(wheelSpeeds);
-		
-		fl.Set(wheelSpeeds[0]* m_maxOutput, syncGroup);
-		fr.Set(-wheelSpeeds[1]* m_maxOutput, syncGroup);
-		bl.Set(wheelSpeeds[2]* m_maxOutput, syncGroup);
-		br.Set(-wheelSpeeds[3]* m_maxOutput, syncGroup);
-		
-		CANJaguar::UpdateSyncGroup(syncGroup);
-		
+	while (1) 
+	{
+		if(proxy->get("Joy3B4N")) //red
+		{
+			red.Set(Relay::kOn);
+			white.Set(Relay::kOff);
+			blue.Set(Relay::kOff);
+		}
+		if(proxy->get("Joy3B3N")) //white
+		{
+			white.Set(Relay::kOn);
+			red.Set(Relay::kOff);
+			blue.Set(Relay::kOff);
+		}
+		if(proxy->get("Joy3B5N")) //blue
+		{
+			blue.Set(Relay::kOn);
+			red.Set(Relay::kOff);
+			white.Set(Relay::kOff);
+		}
+		if(proxy->get("Joy3B2N")) //clear all
+		{
+			red.Set(Relay::kOff);
+			white.Set(Relay::kOff);
+			blue.Set(Relay::kOff);
+		}
         // Logging any values
 		// <<CHANGEME>>
-		// Make this match the declaration above
-		sl.PutOne(x,y,r);
+		// Make this match the declaraction above
+		sl.PutOne();//part of logging
 		
 		// Wait for our next lap
-		WaitForNextLoop();
+		WaitForNextLoop();//'donate' spare processing power
+						  //When this task is done, stop accessing the CPU
 	}
 	return (0);
+	
 };

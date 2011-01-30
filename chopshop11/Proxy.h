@@ -42,6 +42,7 @@ class Proxy : public Team166Task{
 		float get(string, bool=false);
 		float set(string, float);
 		bool del(string);
+		bool exists(string);
 		
 		bool RegisterCounter(string);
 		bool UnregisterCounter(string);
@@ -52,6 +53,8 @@ class Proxy : public Team166Task{
 		
 		bool AreSettingJoysticks();
 		void ToggleSettingJoysticks(bool);
+		void UseUserJoystick(int,bool);
+		bool IsSettingJoystick(int);
 		
 		static Proxy *getInstance(void);
 		
@@ -80,6 +83,7 @@ class Proxy : public Team166Task{
 		Joystick stick2;
 		Joystick stick3;
 		Joystick stick4;
-				
-		bool areSettingJoysticks;
+		
+		bool wasEnabled;
+		bool manualJoystick[4];
 };
