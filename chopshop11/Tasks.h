@@ -7,6 +7,7 @@
 #define SUITCASE_BOT 0
 
 // tasks that run everywhere
+CameraTask CameraObject;
 
 
 #if SUITCASE_BOT
@@ -24,5 +25,4 @@ PhotoElectricTask PhotoElectricObject;
 PneumaticsTask PneumaticsTaskObject;
 SonarTask SonarTaskObject;
 TimerTask TimerTaskObject;
-CameraTask CameraObject;
 #endif
