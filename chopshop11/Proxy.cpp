@@ -190,7 +190,11 @@ float Proxy::get(string name, bool reset)
 	for(unsigned i=0;i<name.size();i++) {
 		name[i] = toupper(name[i]);
 	}
-	wpi_assert(data.find(name) != data.end());
+	if(data.find(name) == data.end()) {
+		Robot::getInstance()->DriverStationDisplay("Proxy ERR: %s", name.c_str());
+		printf("Proxy::get cannot find variable: `%s`", name.c_str());
+		return 0;
+	}
 	semTake(data[name].second, WAIT_FOREVER);
 	float ret = data[name].first;
 	data[name].first = (reset)? 0 : data[name].first;
@@ -204,7 +208,11 @@ float Proxy::set(string name, float val)
 	for(unsigned i=0;i<name.size();i++) {
 		name[i] = toupper(name[i]);
 	}
-	wpi_assert(data.find(name) != data.end());
+	if(data.find(name) == data.end()) {
+		Robot::getInstance()->DriverStationDisplay("Proxy ERR: %s", name.c_str());
+		printf("Proxy::set cannot find variable: `%s`", name.c_str());
+		return 0;
+	}
 	semTake(data[name].second, WAIT_FOREVER);
 	data[name].first = val;
 	semGive(data[name].second);
