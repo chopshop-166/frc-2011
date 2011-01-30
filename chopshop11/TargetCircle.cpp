@@ -1,8 +1,12 @@
 #include "nivision.h"
 #include "Vision/MonoImage.h"
 #include "TargetCircle.h"
+#include "BaeUtilities.h"
 #include <algorithm>
 #include <math.h>
+
+// To locally enable debug printing: set true, to disable false
+#define DPRINTF if(false)dprintf
 
 // These parameters set ellipse finding in the NI imaq (Image Aquisition) library.
 // Refer to the CVI Function Reference PDF document installed with LabVIEW for
@@ -97,6 +101,7 @@ vector<TargetCircle> TargetCircle::FindCircularTargets(HSLImage *image)
 																	&shapeOptions,
 																	NULL);
 	delete luminancePlane;
+	DPRINTF(LOG_INFO,"found %i possible ellipses", results->size() );
 	if (results->size() == 0)
 	{
 		return sortedTargets;
@@ -127,6 +132,7 @@ vector<TargetCircle> TargetCircle::FindCircularTargets(HSLImage *image)
 	// sort the combined targets so the highest scoring one is first
 	sort(sortedTargets.begin(), sortedTargets.end(), compareTargets);
 
+	DPRINTF(LOG_INFO,"returning ellipses" );
 	return sortedTargets;
 }
 

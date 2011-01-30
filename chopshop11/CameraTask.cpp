@@ -21,7 +21,7 @@
 #include "TargetCircle.h"
 
 // To locally enable debug printing: set true, to disable false
-#define DPRINTF if(true)dprintf
+#define DPRINTF if(false)dprintf
 
 // Sample in memory buffer
 struct abuf
@@ -160,14 +160,37 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 void CameraTask::FindTargets()  {
 	/* TBD  
 	 * */
-	lHandle->DriverStationDisplay("ProcessIMage:%0.6f",GetTime());
+	lHandle->DriverStationDisplay("ProcessImage:%0.6f",GetTime());
 
 	// get the camera image
-		HSLImage *image = camera.GetImage();
+	//Image * image = frcCreateImage(IMAQ_IMAGE_HSL);
+	HSLImage * image = camera.GetImage();
 
-		// find FRC targets in the image
-		vector<TargetCircle> targets = TargetCircle::FindCircularTargets(image);
+	// find FRC targets in the image
+	vector<TargetCircle> targets = TargetCircle::FindCircularTargets(image);
+		
+		/* try
+		 * copy (or convert) HSL to RGB
+IMAQ_FUNC int   IMAQ_STDCALL imaqCast(
+Image* dest, const Image* source, ImageType type, const float* lookup, int shift);
+		 */
+		if (targets.size()) {
+			DPRINTF(LOG_DEBUG, "targetImage SCORE = %f", targets[0].m_score);
+			/* do this in the target code
+			Image *tmpImage;
+			//if (frcCopyImage(tmpImage, (Image*)image) ) { 
+			if (imaqCast(NULL, image, IMAQ_IMAGE_HSL,NULL, -1) ) { 
+					int errCode = GetLastVisionError();
+					DPRINTF (LOG_INFO,"frcCopyImage failed - errorcode %i", errCode);
+					char *errString = GetVisionErrorText(errCode);
+					DPRINTF (LOG_INFO,"errString= %s", errString);
+			}
+			else {
+				SaveImage("targetImage.jpg", tmpImage);
+			} */
+		}	
 		//delete image;
+		delete image;
 		if (targets.size() == 0 || targets[0].m_score < MINIMUM_SCORE)
 		{
 			// no targets found. Make sure the first one in the list is 0,0
@@ -190,7 +213,6 @@ void CameraTask::FindTargets()  {
 		}
 		else {
 			// We have some targets.
-			SaveImage("targetImage.jpg", (Image*)image);
 			// set the new PID heading setpoint to the first target in the list
 			double hAngle = targets[0].GetHorizontalAngle();
 			double vAngle = targets[0].GetVerticalAngle();
@@ -198,10 +220,9 @@ void CameraTask::FindTargets()  {
 			
 			// send dashbaord data for target tracking
 			DPRINTF(LOG_DEBUG, "Target found %f ", targets[0].m_score);
-			DPRINTF(LOG_DEBUG, "H: %f  V: %f  SIZE: %f ", hAngle, vAngle, size);
+			DPRINTF(LOG_DEBUG, "H: %3.0f  V: %3.0f  SIZE: %3.3f ", hAngle, vAngle, size);
 //			targets[0].Print();
 		}
-		delete image;
 };
 
 /**
