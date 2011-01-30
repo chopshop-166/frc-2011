@@ -1,6 +1,6 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: PhotoElectric.cpp     
+*  File Name  		: TaskTemplate.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
 *  File Description	: Template source file for tasks, with template functions
@@ -9,14 +9,20 @@
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
+/*------------------------------------------------------------------------------*/
+/* Find & Replace "Template" with the name you would like to give this task     */
+/* Find & Replace "Testing" with the name you would like to give this task      */
+/* Find & Replace "TaskTemplate" with the name you would like to give this task */
+/*------------------------------------------------------------------------------*/
+
 #include "WPILib.h"
-#include "PhotoElectric.h"
+#include "AutoAssist.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
 
 // Sample in memory buffer
-struct abuf166
+struct abuf
 {
 	struct timespec tp;               // Time of snapshot
 	// Any values that need to be logged go here
@@ -25,16 +31,16 @@ struct abuf166
 
 //  Memory Log
 // <<CHANGEME>>
-class PhotoElectricLog : public MemoryLog
+class AutoAssistLog : public MemoryLog
 {
 public:
-	PhotoElectricLog() : MemoryLog(
-			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "template",
+	AutoAssistLog() : MemoryLog(
+			sizeof(struct abuf), AUTOASSIST_CYCLE_TIME, "template",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~PhotoElectricLog() {return;};
+	~AutoAssistLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
@@ -44,18 +50,18 @@ public:
 
 // Write one buffer into memory
 // <<CHANGEME>>
-unsigned int PhotoElectricLog::PutOne(void)
+unsigned int AutoAssistLog::PutOne(void)
 {
-	struct abuf166 *ob;               // Output buffer
+	struct abuf *ob;               // Output buffer
 	
 	// Get output buffer
-	if ((ob = (struct abuf166 *)GetNextBuffer(sizeof(struct abuf166)))) {
+	if ((ob = (struct abuf *)GetNextBuffer(sizeof(struct abuf)))) {
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		// Add any values to be logged here
 		// <<CHANGEME>>
-		return (sizeof(struct abuf166));
+		return (sizeof(struct abuf));
 	}
 	
 	// Did not get a buffer. Return a zero length
@@ -63,9 +69,9 @@ unsigned int PhotoElectricLog::PutOne(void)
 }
 
 // Format the next buffer for file output
-unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int AutoAssistLog::DumpBuffer(char *nptr, FILE *ofile)
 {
-	struct abuf166 *ab = (struct abuf166 *)nptr;
+	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
 	fprintf(ofile, "%u,%u,%4.5f\n",
@@ -76,35 +82,35 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 	);
 	
 	// Done
-	return (sizeof(struct abuf166));
+	return (sizeof(struct abuf));
 }
 
 
 // task constructor
-PhotoElectricTask::PhotoElectricTask(void):left(LEFTPHOTOSENSE),center(CENTERPHOTOSENSE),right(RIGHTPHOTOSENSE)
+AutonomousAssistTask::AutonomousAssistTask(void)
 {
-	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
+	Start((char *)"166TemplateTask", AUTOASSIST_CYCLE_TIME);
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
 	return;
 };
 	
 // task destructor
-PhotoElectricTask::~PhotoElectricTask(void)
+AutonomousAssistTask::~AutonomousAssistTask(void)
 {
 	return;
 };
 	
 // Main function of the task
-int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
+int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
-	PhotoElectricLog sl;                   // log
+	AutoAssistLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Photoelectric task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -116,41 +122,46 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	
-	// Set up the proxy value
-	proxy->add("LineDirection");
-		
+	float r,y;
+	int curr_value;
+	
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
-		// Use .Get to get the value of the sensor
-		bool l = !left.Get();
-		bool c = !center.Get();
-		bool r = !right.Get();
-		int result=0;
-		/* 0 means dead on
-			1 means to the right
-			-1 means to the left
-			-2 means it's not on the line at all
-		*/
-		// Figure out if 1 is "on the line" or "off the line"
-		if(l&&r) {
-			result=2;
-		} else if(l) {
-			result=1;
-		} else if(r) {
-			result=-1;
-		} else if(c) {
-			result=0;
+		if(proxy->get(DRIVER_AUTOASSIST)) {
+			proxy->UseUserJoystick(1,false);
+			proxy->set(DRIVER_AUTOASSIST, Joystick(1).GetRawButton(6));
+			if(proxy->exists("LineDirection")) {
+				curr_value = (int)proxy->get("LineDirection");
+				switch(curr_value) {
+					case 2:
+						y = 0;
+						r = 0;
+						break;
+					case 1:
+						y = 0;
+						r = -AUTO_SPEED_TURN;
+						break;
+					case 0:
+						y = AUTO_SPEED_FORWARD;
+						r = 0;
+						break;
+					case -1:
+						y = 0;
+						r = AUTO_SPEED_TURN;
+						break;
+					case -2:
+						break;
+					default:
+						r=y=0;
+						break;
+				}
+				proxy->set("joy1x",0);
+				proxy->set("joy1y",y);
+				proxy->set("joy1R",r);
+			}
 		} else {
-			result=-2;
-		} 
-		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
-		// Store that result in proxy
-		proxy->set("LineDirection",result);
-		SmartDashboard::Log(result, "Line Result");
-		
-        // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaration above
+			proxy->UseUserJoystick(1,true);
+		}
 		sl.PutOne();
 		
 		// Wait for our next lap

@@ -1,9 +1,9 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: SonarTask.h     
+*  File Name  		: ColorLights.h   
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
-*  File Description	: Template header file for tasks, with template functions
+*  File Description	: Header file for the color lights task
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
@@ -19,20 +19,20 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 // You should rename this when you copy it into a new file
 // <<CHANGEME>>
-#define SONAR_CYCLE_TIME (50) // 50ms
+#define COLORLIGHT_CYCLE_TIME (10) // 10ms
 
 // Rename this, too, or you'll run into collisions
 // <<CHANGEME>>
-class SonarTask : public Team166Task
+class ColorLightTask : public Team166Task
 {
 	
 public:
 	
 	// task constructor
-	SonarTask(void);
+	ColorLightTask(void);
 
 	// task destructor
-	virtual ~SonarTask(void);
+	virtual ~ColorLightTask(void);
 
 	// Main function of the task
 	virtual int Main(int a2, int a3, int a4, int a5,
@@ -41,6 +41,7 @@ public:
 private:
 	// Any variables that the task has as members go here
 	// <<CHANGEME>>
-	AnalogChannel ac, acl, acr;
-	const unsigned int AverageSize;
+	Relay red;
+	Relay white;
+	Relay blue;
 };

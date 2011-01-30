@@ -29,12 +29,12 @@ Proxy *Proxy::ProxyHandle = 0;
  * @brief Starts the Proxy166 task.
  */
 Proxy::Proxy(void):
-	stick1(1), stick2(2), stick3(3), stick4(4),
-	areSettingJoysticks(true)
+	stick1(1), stick2(2), stick3(3), stick4(4)
 {
 	//
 	// Add the built in storage areas
 	//
+	manualJoystick[0]=manualJoystick[1]=manualJoystick[2]=manualJoystick[3]=false;
 	static bool runonce = 0;
 	if (runonce == 0) {
 		ProxyHandle = this;
@@ -56,6 +56,7 @@ Proxy::Proxy(void):
 			add(joywid + "R");
 			add(joywid + "T");
 			add(joywid + "BT");
+			add(joywid + "BTN");
 			//Add Buttons, and newpress
 			for (int buttonid=1;buttonid<NUMBER_OF_JOY_BUTTONS+1;buttonid++) {
 				char tmp[32];
@@ -68,6 +69,7 @@ Proxy::Proxy(void):
 		//Make sure they're only added once
 		runonce = 1;
 	}
+	add("matchtimer");
 	// Start the actual task
 	Start((char *)"166ProxyTask", PROXY_CYCLE_TIME);
 }
@@ -92,26 +94,41 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 	WaitForGoAhead();
 	
 	lHandle = Robot::getInstance();
-	
-	Timer debugTimer;
-	debugTimer.Start();
+	Timer matchTimer;
 	
 	while(MyTaskInitialized) {
 		setNewpress();
-		if(lHandle->IsOperatorControl() && true == AreSettingJoysticks()) {
-			SetJoystick(1, stick1);
-			SetJoystick(2, stick2);
-			SetJoystick(3, stick3);
-			SetJoystick(4, stick4);
-			
-			if(debugTimer.HasPeriodPassed(1.0)) {
-				// Debug info
+		if(lHandle->IsOperatorControl() && true) {
+			if(manualJoystick[0]) {
+				SetJoystick(1, stick1);
+			}
+			if(manualJoystick[1]) {
+				SetJoystick(2, stick2);
+			}
+			if(manualJoystick[2]) {
+				SetJoystick(3, stick3);
+			}
+			if(manualJoystick[3]) {
+				SetJoystick(4, stick4);
+			}
+		}
+		if(!lHandle->IsEnabled()) {
+			matchTimer.Reset();
+			// It became disabled
+			matchTimer.Stop();
+			set("matchtimer",0);
+		} else {
+			// It became enabled
+			matchTimer.Start();
+			if(lHandle->IsAutonomous()) {
+				set("matchtimer",max( 15 - matchTimer.Get(),0));
+			} else {
+				set("matchtimer",max(120 - matchTimer.Get(),0));
 			}
 		}
 		// The task ends if it's not initialized
 		WaitForNextLoop();
 	}
-	
 	return 0;
 }
 
@@ -140,6 +157,11 @@ void Proxy::setNewpress()
 				newpress_values[joy_id-1][btn_id-1] = 2;
 			}
 		}
+		char tmp[32];
+		sprintf(tmp, "Joy%dBTN", joy_id);
+		string bn = tmp;
+		sprintf(tmp, "Joy%dB1N", joy_id);
+		set(bn,get((string)tmp));
 	}
 }
 
@@ -165,7 +187,14 @@ float Proxy::get(string name, bool reset)
 	for(unsigned i=0;i<name.size();i++) {
 		name[i] = toupper(name[i]);
 	}
-	wpi_assert(data.find(name) != data.end());
+	if(data.find(name) == data.end()) {
+		Robot::getInstance()->DriverStationDisplay("Proxy ERR: %s", name.c_str());
+		printf("Proxy::get cannot find variable: `%s`\n", name.c_str());
+		TASK_DESC errtask;
+		taskInfoGet(taskIdSelf(),&errtask);
+		printf("\tFrom task: %s\n",errtask.td_name);
+		return 0;
+	}
 	semTake(data[name].second, WAIT_FOREVER);
 	float ret = data[name].first;
 	data[name].first = (reset)? 0 : data[name].first;
@@ -179,7 +208,14 @@ float Proxy::set(string name, float val)
 	for(unsigned i=0;i<name.size();i++) {
 		name[i] = toupper(name[i]);
 	}
-	wpi_assert(data.find(name) != data.end());
+	if(data.find(name) == data.end()) {
+		Robot::getInstance()->DriverStationDisplay("Proxy ERR: %s", name.c_str());
+		printf("Proxy::set cannot find variable: `%s`\n", name.c_str());
+		TASK_DESC errtask;
+		taskInfoGet(taskIdSelf(),&errtask);
+		printf("\tFrom task: %s\n",errtask.td_name);
+		return 0;
+	}
 	semTake(data[name].second, WAIT_FOREVER);
 	data[name].first = val;
 	semGive(data[name].second);
@@ -200,6 +236,15 @@ bool Proxy::del(string name)
 	} else {
 		return false;
 	}
+}
+
+// Tell if a value exists in the proxy
+bool Proxy::exists(string name)
+{
+	for(unsigned i=0;i<name.size();i++) {
+		name[i] = toupper(name[i]);
+	}
+	return(data.find(name) != data.end());
 }
 
 /**
@@ -296,9 +341,14 @@ Proxy* Proxy::getInstance(void)
 	return ProxyHandle;
 }
 
+void Proxy::UseUserJoystick(int stick, bool manual) {
+	wpi_assert(stick >= 1 && stick <= 4);
+	manualJoystick[stick-1] = manual;
+}
+
 bool Proxy::AreSettingJoysticks() {
-	return areSettingJoysticks;
+	return (manualJoystick[0]|manualJoystick[1]|manualJoystick[2]|manualJoystick[3]);
 }
 void Proxy::ToggleSettingJoysticks(bool in) {
-	in = areSettingJoysticks;
+	manualJoystick[0]=manualJoystick[1]=manualJoystick[2]=manualJoystick[3]=in;
 }

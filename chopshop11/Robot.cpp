@@ -43,7 +43,6 @@ Robot::Robot(void)
 
 	DPRINTF(LOG_DEBUG, "Constructor\n");
 	
-	RobotMode = T166_CONSTRUCTOR;
 	dsHandle = DriverStation::GetInstance();
 	dsHandleLCD = DriverStationLCD::GetInstance();
 	if(RobotHandle == NULL) {
@@ -74,6 +73,7 @@ Robot::Robot(void)
 void Robot::Autonomous(void)
 {
 	GetWatchdog().SetEnabled(false);
+	Proxy::getInstance()->ToggleSettingJoysticks(false);
 	AutonomousTask();
 }
 
@@ -84,6 +84,12 @@ void Robot::Disabled(void)
 {
 	DriverStationDisplay(FRAMEWORK_VERSION);
 	printf("%s\n", FRAMEWORK_VERSION);
+	
+	DriverStationDisplay("Dumping Memory Log...");
+	printf("Dumping log files...\n");
+	DumpLoggers(maxLogId);
+	printf("Logfiles dumped!\n");
+	maxLogId++;
 }
 
 /** 
@@ -91,35 +97,17 @@ void Robot::Disabled(void)
  */
 void Robot::OperatorControl(void)
 {
-	int has_been_disabled = 0;
-	
 	Timer debugTimer;
 	debugTimer.Start();
+	Proxy::getInstance()->ToggleSettingJoysticks(true);
 	
 	printf("Operator control\n");
-	RobotMode = T166_OPERATOR;
 	GetWatchdog().SetEnabled(true);
 	DriverStationDisplay("Teleoperated Enabled.");
 	while (IsOperatorControl())
 	{
 		if(debugTimer.HasPeriodPassed(ROBOT_WAIT_TIME))
 			Team166Task::PrintStats();
-		
-		// Are we being disabled?
-		if (IsDisabled()) {
-			if (!has_been_disabled) {
-				has_been_disabled = true;
-				DriverStationDisplay("Dumping Memory Log...");
-			    printf("Dumping log files...\n");
-			    DumpLoggers(maxLogId);
-			    printf("Logfiles dumped!\n");
-			    maxLogId++;
-			}
-			Wait (ROBOT_WAIT_TIME);
-			continue;
-		} else {
-			has_been_disabled = false;
-		}
 		
 		// Each task needs to update for us to feed the watch dog.
 		if (Team166Task::FeedWatchDog()) {

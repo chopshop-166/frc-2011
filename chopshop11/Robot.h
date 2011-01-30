@@ -25,11 +25,6 @@
 // Robot166 wait time
 #define ROBOT_WAIT_TIME (0.5)
 
-//
-// Robot modes
-//
-typedef enum {T166_UNKNOWN=0, T166_CONSTRUCTOR, T166_AUTONOMOUS, T166_OPERATOR, T166_DISABLED} t_RobotMode;
-
 /**
  * This is a demo program showing the use of the RobotBase class.
  * The SimpleRobot class is the base of a robot application that will automatically call your
@@ -38,8 +33,6 @@ typedef enum {T166_UNKNOWN=0, T166_CONSTRUCTOR, T166_AUTONOMOUS, T166_OPERATOR, 
  */ 
 class Robot : public SimpleRobot
 {
-public:
-    t_RobotMode RobotMode;						// Robot mode
 private:
     DriverStation *dsHandle;					// Driver Station handle
     DriverStationLCD *dsHandleLCD;				// Driver Station display handle

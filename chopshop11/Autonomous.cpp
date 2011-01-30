@@ -29,9 +29,23 @@ AutonomousTask::AutonomousTask() {
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
 	
+	AnalogChannel lane_switch(5);
+	int lane_choice;
+	lane_choice = (int)lane_switch.GetVoltage();
+	proxy->add("Autonomous Lane");
+	proxy->set("Autonomous Lane", lane_choice);
+	
+	AnalogChannel height_switch(6);
+	int height_choice;
+	height_choice = (int)height_switch.GetVoltage();
+	if(height_choice & 4) {
+		height_choice = 0;
+	}
+	proxy->add("Autonomous Height");
+	proxy->set("Autonomous Height", height_choice);
+	
 	while( lHandle->IsAutonomous() ) {
-		// <<CHANGEME>>
-		// Insert your autonomous logic here
+		proxy->set(DRIVER_AUTOASSIST,true);
 		
 		// This wait is required, it makes sure no task uses too much memory
 		Wait(AUTONOMOUS_WAIT_TIME);
