@@ -112,21 +112,18 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 				SetJoystick(4, stick4);
 			}
 		}
-		if(wasEnabled != lHandle->IsEnabled()) {
+		if(!lHandle->IsEnabled()) {
 			matchTimer.Reset();
-			if(wasEnabled=lHandle->IsEnabled()) {
-				// It became enabled
-				matchTimer.Start();
-			} else {
-				// It became disabled
-				matchTimer.Stop();
-			}
+			// It became disabled
+			matchTimer.Stop();
 			set("matchtimer",0);
-		} else if(wasEnabled) {
+		} else {
+			// It became enabled
+			matchTimer.Start();
 			if(lHandle->IsAutonomous()) {
-				set("matchtimer",min( 15 - matchTimer.Get(),0));
+				set("matchtimer",max( 15 - matchTimer.Get(),0));
 			} else {
-				set("matchtimer",min(120 - matchTimer.Get(),0));
+				set("matchtimer",max(120 - matchTimer.Get(),0));
 			}
 		}
 		// The task ends if it's not initialized
@@ -193,6 +190,9 @@ float Proxy::get(string name, bool reset)
 	if(data.find(name) == data.end()) {
 		Robot::getInstance()->DriverStationDisplay("Proxy ERR: %s", name.c_str());
 		printf("Proxy::get cannot find variable: `%s`\n", name.c_str());
+		TASK_DESC errtask;
+		taskInfoGet(taskIdSelf(),&errtask);
+		printf("\tFrom task: %s\n",errtask.td_name);
 		return 0;
 	}
 	semTake(data[name].second, WAIT_FOREVER);
@@ -211,6 +211,9 @@ float Proxy::set(string name, float val)
 	if(data.find(name) == data.end()) {
 		Robot::getInstance()->DriverStationDisplay("Proxy ERR: %s", name.c_str());
 		printf("Proxy::set cannot find variable: `%s`\n", name.c_str());
+		TASK_DESC errtask;
+		taskInfoGet(taskIdSelf(),&errtask);
+		printf("\tFrom task: %s\n",errtask.td_name);
 		return 0;
 	}
 	semTake(data[name].second, WAIT_FOREVER);
