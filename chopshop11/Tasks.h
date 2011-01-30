@@ -19,5 +19,6 @@ CameraTask CameraObject;
 PhotoElectricTask PhotoElectricObject;
 ColorLightTask ColorLightObject;
 SonarTask SonarTaskObject;
+AutonomousAssistTask AutoAssistObject;
 
 #endif

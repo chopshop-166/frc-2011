@@ -35,7 +35,7 @@ class TimerLog : public MemoryLog
 {
 public:
 	TimerLog() : MemoryLog(
-			sizeof(struct abuf), TEMPLATE_CYCLE_TIME, "template",
+			sizeof(struct abuf), TIMER_CYCLE_TIME, "template",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
@@ -89,7 +89,7 @@ unsigned int TimerLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 TimerTask::TimerTask(void)
 {
-	Start((char *)"TimerTask", TEMPLATE_CYCLE_TIME);
+	Start((char *)"TimerTask", TIMER_CYCLE_TIME);
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
 	return;

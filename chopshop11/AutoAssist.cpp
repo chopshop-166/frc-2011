@@ -35,7 +35,7 @@ class AutoAssistLog : public MemoryLog
 {
 public:
 	AutoAssistLog() : MemoryLog(
-			sizeof(struct abuf), TEMPLATE_CYCLE_TIME, "template",
+			sizeof(struct abuf), AUTOASSIST_CYCLE_TIME, "template",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
@@ -89,7 +89,7 @@ unsigned int AutoAssistLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 AutonomousAssistTask::AutonomousAssistTask(void)
 {
-	Start((char *)"166TemplateTask", TEMPLATE_CYCLE_TIME);
+	Start((char *)"166TemplateTask", AUTOASSIST_CYCLE_TIME);
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
 	return;
@@ -128,7 +128,8 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {
 		if(proxy->get(DRIVER_AUTOASSIST)) {
-			proxy->OverrideJoystick(1,false);
+			proxy->UseUserJoystick(1,false);
+			proxy->set(DRIVER_AUTOASSIST, Joystick(1).GetRawButton(6));
 			if(proxy->exists("LineDirection")) {
 				curr_value = (int)proxy->get("LineDirection");
 				switch(curr_value) {
@@ -159,7 +160,7 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				proxy->set("joy1R",r);
 			}
 		} else {
-			proxy->OverrideJoystick(1,true);
+			proxy->UseUserJoystick(1,true);
 		}
 		sl.PutOne();
 		

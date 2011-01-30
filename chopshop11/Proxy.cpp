@@ -227,7 +227,7 @@ bool Proxy::del(string name)
 	}
 }
 
-//
+// Tell if a value exists in the proxy
 bool Proxy::exists(string name)
 {
 	for(unsigned i=0;i<name.size();i++) {
@@ -330,7 +330,7 @@ Proxy* Proxy::getInstance(void)
 	return ProxyHandle;
 }
 
-void Proxy::OverrideJoystick(int stick, bool manual) {
+void Proxy::UseUserJoystick(int stick, bool manual) {
 	wpi_assert(stick >= 1 && stick <= 4);
 	manualJoystick[stick-1] = manual;
 }
