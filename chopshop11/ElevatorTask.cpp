@@ -110,7 +110,10 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	ElevatorLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Elevator task\n");
+	
+	// Register the proxy
+	proxy = Proxy::getInstance();
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -118,9 +121,6 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	// Register our logger
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
-	
-	// Register the proxy
-	proxy = Proxy::getInstance();
 	
 	enum {hNone=-1, hFloor=0, hLow=1, hMid=2, hHigh=3} target_type = hNone;
 	// Fix these heights once we can test

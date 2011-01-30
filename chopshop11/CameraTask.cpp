@@ -122,6 +122,10 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 	DPRINTF(LOG_INFO,"In the 166 Camera task\n");
 	
 	WaitForGoAhead(); // THIS IS VERY IMPORTANT
+	
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	DPRINTF(LOG_INFO,"CameraTask got proxy");
 
 	// Register our logger
 	lHandle = Robot::getInstance();	
@@ -130,10 +134,6 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 	
 	lHandle->DriverStationDisplay("Camera Task...");
 	DPRINTF(LOG_INFO,"CameraTask informed DS");
-	
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	DPRINTF(LOG_INFO,"CameraTask got proxy");
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (1) {				
