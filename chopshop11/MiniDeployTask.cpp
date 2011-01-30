@@ -119,7 +119,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
     // General main loop (while in Autonomous or Tele mode)
 	while (1){
 		
-		if(proxy->get("joy1b7")) {
+		if(proxy->get("joy1b6")) {
 			if(proxy->get("MatchTimer") <= 10) {
 				DeployExtend.Set(1);
 			} else {
