@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: ColorLights.cpp     
+*  Project   		: Chopshop11
+*  File Name  		: ColorLights.cpp
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Source file for the color lights task
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/

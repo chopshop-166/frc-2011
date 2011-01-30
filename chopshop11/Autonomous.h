@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: Autonomous.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Header for robot code to execute in autonomous mode
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/

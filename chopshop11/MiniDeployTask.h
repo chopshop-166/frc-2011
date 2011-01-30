@@ -1,9 +1,8 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: MiniDeployTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 21, 2011
-*  File Description	: Header file for MiniDeploy task
+*  File Description	: Task to handle minibot deployment logic
 *******************************************************************************/
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */

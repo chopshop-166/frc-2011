@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: Team166Task.h     
+*  Project   		: Chopshop11
+*  File Name  		: Team166Task.h
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Header for main robot task and global paramters
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/

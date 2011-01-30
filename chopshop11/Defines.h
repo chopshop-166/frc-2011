@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: Defines.h    
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Robot code header which contains defines for global usage
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/

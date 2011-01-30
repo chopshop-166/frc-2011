@@ -1,9 +1,8 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: TaskTemplate.h     
+*  Project   		: Chopshop11
+*  File Name  		: AutoAssist.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Template header file for tasks, with template functions
+*  File Description	: Autonomous Assist to aid the drivers
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */

@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: Autonomous.cpp     
+*  Project   		: Chopshop11
+*  File Name  		: Autonomous.cpp
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Robot code to execute in autonomous mode
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/

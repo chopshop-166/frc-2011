@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: MemoryLog166.h     
+*  Project   		: Chopshop11
+*  File Name  		: MemoryLog.h
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Header for general memory logger on chopshop robot
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/

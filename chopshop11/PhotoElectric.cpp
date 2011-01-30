@@ -2,8 +2,7 @@
 *  Project   		: Framework
 *  File Name  		: PhotoElectric.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Task to get photoelectric sensor values
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
@@ -24,12 +23,11 @@ struct abuf166
 };
 
 //  Memory Log
-// <<CHANGEME>>
 class PhotoElectricLog : public MemoryLog
 {
 public:
 	PhotoElectricLog() : MemoryLog(
-			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "template",
+			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "photoelectric",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
@@ -43,7 +41,6 @@ public:
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
 unsigned int PhotoElectricLog::PutOne(void)
 {
 	struct abuf166 *ob;               // Output buffer
@@ -120,16 +117,18 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	proxy->add("LineDirection");
 		
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		// Use .Get to get the value of the sensor
 		bool l = !left.Get();
 		bool c = !center.Get();
 		bool r = !right.Get();
 		int result=0;
-		/* 0 means dead on
-			1 means to the right
-			-1 means to the left
-			-2 means it's not on the line at all
+		/* 
+		 * 2 means it hit a T or fork
+		 * 1 means to the right
+		 * 0 means dead on
+		 * -1 means to the left
+		 * -2 means it's not on the line at all
 		*/
 		// Figure out if 1 is "on the line" or "off the line"
 		if(l&&r) {

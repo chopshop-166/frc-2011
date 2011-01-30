@@ -1,9 +1,8 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: TaskTemplate.h     
+*  Project   		: Chopshop11
+*  File Name  		: TimerTask.h
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Template header file for tasks, with template functions
+*  File Description	: Task to send the remaining match time to the dashboard
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
