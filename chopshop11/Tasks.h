@@ -11,18 +11,18 @@
 
 #if SUITCASE_BOT
 //suitcase only tasks here
-CameraTask CameraObject;
+
 
 #else
 // tasks that cannot run on suitcase
-//DriveTask DriveObject;
 AutonomousAssistTask AutoAssistObject;
 ColorLightTask ColorLightObject;
+//DriveTask DriveObject;
 HeightTask166 HeightTaskObject;
 MiniDeploy166 MiniDeployObject;
 PhotoElectricTask PhotoElectricObject;
 PneumaticsTask PneumaticsTaskObject;
 SonarTask SonarTaskObject;
 TimerTask TimerTaskObject;
-
+CameraTask CameraObject;
 #endif

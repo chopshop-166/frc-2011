@@ -89,7 +89,7 @@ unsigned int TimerLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 TimerTask::TimerTask(void)
 {
-	Start((char *)"TimerTask", TIMER_CYCLE_TIME);
+	Start((char *)"166TimerTask", TIMER_CYCLE_TIME);
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
 	return;
