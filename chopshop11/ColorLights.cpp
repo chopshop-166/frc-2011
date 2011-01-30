@@ -1,9 +1,9 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: TaskTemplate.cpp     
+*  File Name  		: ColorLights.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Source file for the color lights task
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
@@ -105,7 +105,7 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 	ColorLightLog sl;                   // log
 	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_DEBUG,"In the Color Lights Task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -118,7 +118,7 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 	proxy = Proxy::getInstance();
 	
 	//Before don't generally touch^^
-	//To run once write bellow me
+	//To run once write below me
     // General main loop (while in Autonomous or Tele mode)
 	while (1) 
 	{
@@ -128,19 +128,19 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 			white.Set(Relay::kOff);
 			blue.Set(Relay::kOff);
 		}
-		if(proxy->get("Joy3B3N")) //white
+		else if(proxy->get("Joy3B3N")) //white
 		{
 			white.Set(Relay::kOn);
 			red.Set(Relay::kOff);
 			blue.Set(Relay::kOff);
 		}
-		if(proxy->get("Joy3B5N")) //blue
+		else if(proxy->get("Joy3B5N")) //blue
 		{
 			blue.Set(Relay::kOn);
 			red.Set(Relay::kOff);
 			white.Set(Relay::kOff);
 		}
-		if(proxy->get("Joy3B2N")) //clear all
+		else if(proxy->get("Joy3B2N")) //clear all
 		{
 			red.Set(Relay::kOff);
 			white.Set(Relay::kOff);
