@@ -16,9 +16,13 @@ CameraTask CameraObject;
 #else
 // tasks that cannot run on suitcase
 //DriveTask DriveObject;
-PhotoElectricTask PhotoElectricObject;
-ColorLightTask ColorLightObject;
-SonarTask SonarTaskObject;
 AutonomousAssistTask AutoAssistObject;
+ColorLightTask ColorLightObject;
+HeightTask166 HeightTaskObject;
+MiniDeploy166 MiniDeployObject;
+PhotoElectricTask PhotoElectricObject;
+PneumaticsTask PneumaticsTaskObject;
+SonarTask SonarTaskObject;
+TimerTask TimerTaskObject;
 
 #endif
