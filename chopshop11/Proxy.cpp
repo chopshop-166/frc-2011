@@ -192,7 +192,7 @@ float Proxy::get(string name, bool reset)
 	}
 	if(data.find(name) == data.end()) {
 		Robot::getInstance()->DriverStationDisplay("Proxy ERR: %s", name.c_str());
-		printf("Proxy::get cannot find variable: `%s`", name.c_str());
+		printf("Proxy::get cannot find variable: `%s`\n", name.c_str());
 		return 0;
 	}
 	semTake(data[name].second, WAIT_FOREVER);
@@ -210,7 +210,7 @@ float Proxy::set(string name, float val)
 	}
 	if(data.find(name) == data.end()) {
 		Robot::getInstance()->DriverStationDisplay("Proxy ERR: %s", name.c_str());
-		printf("Proxy::set cannot find variable: `%s`", name.c_str());
+		printf("Proxy::set cannot find variable: `%s`\n", name.c_str());
 		return 0;
 	}
 	semTake(data[name].second, WAIT_FOREVER);
