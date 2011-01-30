@@ -1,6 +1,6 @@
 /*******************************************************************************
 *  Project   		: Framework
-*  File Name  		: TaskTemplate.h     
+*  File Name  		: SonarTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 18, 2010
 *  File Description	: Template header file for tasks, with template functions
