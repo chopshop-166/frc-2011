@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: CameraTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: This task initializes the camera and calls the 2011
 *           targeting code. It offers a static fuction that any task can call 
 *                   CameraTask::TakeSnapshot(char* imageName))
@@ -109,7 +108,10 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
 
 	DPRINTF(LOG_INFO,"CameraTask FPS=%i task cycle time=%i",fps,CAMERA_CYCLE_TIME);
-	
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	DPRINTF(LOG_INFO,"CameraTask got proxy");
+	lHandle = Robot::getInstance();	
 	return;
 };
 	
@@ -123,27 +125,21 @@ CameraTask::~CameraTask(void)
 int CameraTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
+	// Register our logger
 	CameraLog sl;                   // log
+	lHandle->RegisterLogger(&sl);
+	DPRINTF(LOG_INFO,"CameraTask registered logger");
 	
 	// Let the world know we're in
 	DPRINTF(LOG_INFO,"In the 166 Camera task\n");
 	
 	WaitForGoAhead(); // THIS IS VERY IMPORTANT
-
-	// Register our logger
-	lHandle = Robot::getInstance();	
-	lHandle->RegisterLogger(&sl);
-	DPRINTF(LOG_INFO,"CameraTask registered logger");
 	
 	lHandle->DriverStationDisplay("Camera Task...");
 	DPRINTF(LOG_INFO,"CameraTask informed DS");
 	
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	DPRINTF(LOG_INFO,"CameraTask got proxy");
-	
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {				
+	while (true) {				
 		// Wait for our next lap
 		WaitForNextLoop();
 		

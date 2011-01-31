@@ -1,12 +1,11 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: ColorLights.h   
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Header file for the color lights task
+*  File Description	: Task to run the LEDs to tell the feeders the needed colors
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #pragma once
@@ -17,12 +16,8 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-// You should rename this when you copy it into a new file
-// <<CHANGEME>>
-#define COLORLIGHT_CYCLE_TIME (10) // 10ms
+#define COLORLIGHT_CYCLE_TIME (100) // 100ms
 
-// Rename this, too, or you'll run into collisions
-// <<CHANGEME>>
 class ColorLightTask : public Team166Task
 {
 	
@@ -39,8 +34,9 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	// Any variables that the task has as members go here
-	// <<CHANGEME>>
+	Proxy *proxy;				// Handle to proxy
+	Robot *lHandle;            // Local handle
+	
 	Relay red;
 	Relay white;
 	Relay blue;

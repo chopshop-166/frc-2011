@@ -1,9 +1,8 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: MiniDeployTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 21, 2011
-*  File Description	: Header file for MiniDeploy task
+*  File Description	: Task to handle minibot deployment logic
 *******************************************************************************/
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
@@ -16,7 +15,7 @@
 
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-#define MINIDEPLOY_CYCLE_TIME (10) // 10ms
+#define MINIDEPLOY_CYCLE_TIME (20) // 10ms
 
 class MiniDeploy166 : public Team166Task
 {
@@ -34,7 +33,8 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	// Variable for Minibot deployment
+	Proxy *proxy;				// Handle to proxy
+	Robot *lHandle;            // Local handle
 	Solenoid DeployExtend;
 	Solenoid Deploy;
 	DigitalInput Deploy_Limit;

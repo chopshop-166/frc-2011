@@ -1,12 +1,11 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: HeightTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 23, 2011
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Task that gets the elevator height
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #include "WPILib.h"
@@ -21,18 +20,16 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
-	// Any values that need to be logged go here
-	// <<CHANGEME>>
+	float height;
 };
 
 //  Memory Log
-// <<CHANGEME>>
 class HeightTaskLog : public MemoryLog
 {
 public:
 	HeightTaskLog() : MemoryLog(
 			sizeof(struct abuf), HEIGHTTASK_CYCLE_TIME, "Height Task",
-			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
+			"Seconds,Nanoseconds,Elapsed Time, Height of Lift\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
@@ -40,13 +37,11 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+	unsigned int PutOne(float);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
-unsigned int HeightTaskLog::PutOne(void)
+unsigned int HeightTaskLog::PutOne(float LiftHeight)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -55,8 +50,7 @@ unsigned int HeightTaskLog::PutOne(void)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
-		// Add any values to be logged here
-		// <<CHANGEME>>
+		ob->height = LiftHeight;
 		return (sizeof(struct abuf));
 	}
 	
@@ -72,20 +66,24 @@ unsigned int HeightTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 	// Output the data into the file
 	fprintf(ofile, "%u,%u,%4.5f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
-			// Add values here
-			// <<CHANGEME>>
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+			ab->height
 	);
 	
 	// Done
 	return (sizeof(struct abuf));
 }
 
-
 // task constructor
 HeightTask166::HeightTask166(void): Height(8)
 {
 	Start((char *)"166HeightTask", HEIGHTTASK_CYCLE_TIME);
+	
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	// Register our logger
+	lHandle = Robot::getInstance();
+	
 	return;
 };
 	
@@ -99,9 +97,8 @@ HeightTask166::~HeightTask166(void)
 int HeightTask166::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;             // Local handle
 	HeightTaskLog sl;           // log
+	lHandle->RegisterLogger(&sl);
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Height task\n");
@@ -109,29 +106,21 @@ int HeightTask166::Main(int a2, int a3, int a4, int a5,
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
 	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
-	
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	
 	// add a proxy variable
 	proxy->add("ElevatorHeight");
 	
 	// Set variable values
 	HowHigh = 0;
-	InchesPerVolt = 0.02;  // This value is given in Spec sheet for LX-PA-50
 		
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		
 		// set howhigh to the height of the elevator
 		HowHigh = InchesPerVolt*Height.GetVoltage();
 		// tell proxy how high we are
 		proxy->set("ElevatorHeight",HowHigh);
 		SmartDashboard::Log(HowHigh, "Height");
-		sl.PutOne();
+		sl.PutOne(HowHigh);
 		
 		// Wait for our next lap
 		WaitForNextLoop();		

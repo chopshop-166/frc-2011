@@ -2,18 +2,11 @@
 *  Project   		: Framework
 *  File Name  		: SonarTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Task to get front and side sonar distances
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
-
-/*------------------------------------------------------------------------------*/
-/* Find & Replace "Template" with the name you would like to give this task     */
-/* Find & Replace "Testing" with the name you would like to give this task      */
-/* Find & Replace "TaskTemplate" with the name you would like to give this task */
-/*------------------------------------------------------------------------------*/
 
 #include "WPILib.h"
 #include "SonarTask.h"
@@ -26,18 +19,15 @@ struct abuf
 {
 	struct timespec tp;               // Time of snapshot
 	double f,l,r;					// Sonar values
-	// Any values that need to be logged go here
-	// <<CHANGEME>>
 };
 
 //  Memory Log
-// <<CHANGEME>>
 class SonarLog : public MemoryLog
 {
 public:
 	SonarLog() : MemoryLog(
-			sizeof(struct abuf), SONAR_CYCLE_TIME, "template",
-			"Seconds,Nanoseconds,Elapsed Time,Front,Left,Right\n" // Put the names of the values in here, comma-seperated
+			sizeof(struct abuf), SONAR_CYCLE_TIME, "Sonar",
+			"Seconds,Nanoseconds,Elapsed Time,Front,Left,Right\n"
 			) {
 		return;
 	};
@@ -45,12 +35,10 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
 	unsigned int PutOne(double,double,double);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
 unsigned int SonarLog::PutOne(double f,double l,double r)
 {
 	struct abuf *ob;               // Output buffer
@@ -63,8 +51,6 @@ unsigned int SonarLog::PutOne(double f,double l,double r)
 		ob->f = f;
 		ob->l = l;
 		ob->r = r;
-		// Add any values to be logged here
-		// <<CHANGEME>>
 		return (sizeof(struct abuf));
 	}
 	
@@ -84,8 +70,6 @@ unsigned int SonarLog::DumpBuffer(char *nptr, FILE *ofile)
 			ab->f,
 			ab->l,
 			ab->r
-			// Add values here
-			// <<CHANGEME>>
 	);
 	
 	// Done
@@ -97,8 +81,10 @@ unsigned int SonarLog::DumpBuffer(char *nptr, FILE *ofile)
 SonarTask::SonarTask(void): ac(1), acl(2), acr(3), AverageSize(10)
 {
 	Start((char *)"166SonarTask", SONAR_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	// Register main robot task
+	lHandle = Robot::getInstance();
 	return;
 };
 	
@@ -112,22 +98,16 @@ SonarTask::~SonarTask(void)
 int SonarTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
+	// Register our logger
 	SonarLog sl;                   // log
-	
+	lHandle->RegisterLogger(&sl);
+
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
 	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
-	
-	// Register the proxy
-	proxy = Proxy::getInstance();
 	proxy->add("FrontDistance");
 	proxy->add("LeftDistance");
 	proxy->add("RightDistance");
@@ -144,7 +124,7 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 	double vl = 0;
 	double vr = 0;
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		// Get the adjusted voltage of each sensor
 		volts = ac.GetVoltage();
 		voltsleft = acl.GetVoltage();
@@ -186,13 +166,7 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 		
 		// Increment the counter for distance slot in the array
 		i++;
-		
-		// <<CHANGEME>>
-		// Insert your own logic here
-		
         // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaraction above
 		sl.PutOne(vf,vl,vr);
 		
 		// Wait for our next lap

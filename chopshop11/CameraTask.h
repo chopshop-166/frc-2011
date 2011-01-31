@@ -1,8 +1,8 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: CameraTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
+*  File Description	: Task to run the camera and tracking
 *  File Description	: Definition of CameraTask class and associated data
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
@@ -52,7 +52,6 @@ public:
 	bool FindTargets();
 	
 private:
-	// Any variables that the task has as members go here
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	AxisCamera &camera;

@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: Runtime166.h  
+*  Project   		: Chopshop11
+*  File Name  		: Runtime166.h
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Header for class that generates runtime statistics
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/

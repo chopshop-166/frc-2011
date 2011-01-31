@@ -1,12 +1,11 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: PhotoElectric.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Task to get photoelectric sensor values
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #include "WPILib.h"
@@ -24,12 +23,11 @@ struct abuf166
 };
 
 //  Memory Log
-// <<CHANGEME>>
 class PhotoElectricLog : public MemoryLog
 {
 public:
 	PhotoElectricLog() : MemoryLog(
-			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "template",
+			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "photoelectric",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
@@ -43,7 +41,6 @@ public:
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
 unsigned int PhotoElectricLog::PutOne(void)
 {
 	struct abuf166 *ob;               // Output buffer
@@ -84,8 +81,9 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 PhotoElectricTask::PhotoElectricTask(void):left(LEFTPHOTOSENSE),center(CENTERPHOTOSENSE),right(RIGHTPHOTOSENSE)
 {
 	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	lHandle = Robot::getInstance();
 	return;
 };
 	
@@ -99,37 +97,32 @@ PhotoElectricTask::~PhotoElectricTask(void)
 int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
+	// Register our logger
 	PhotoElectricLog sl;                   // log
+	lHandle->RegisterLogger(&sl);
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Photoelectric task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
-	WaitForGoAhead();
-	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
-	
-	// Register the proxy
-	proxy = Proxy::getInstance();
+	WaitForGoAhead();	
 	
 	// Set up the proxy value
 	proxy->add("LineDirection");
 		
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		// Use .Get to get the value of the sensor
 		bool l = !left.Get();
 		bool c = !center.Get();
 		bool r = !right.Get();
 		int result=0;
-		/* 0 means dead on
-			1 means to the right
-			-1 means to the left
-			-2 means it's not on the line at all
+		/* 
+		 * 2 means it hit a T or fork
+		 * 1 means to the right
+		 * 0 means dead on
+		 * -1 means to the left
+		 * -2 means it's not on the line at all
 		*/
 		// Figure out if 1 is "on the line" or "off the line"
 		if(l&&r) {
