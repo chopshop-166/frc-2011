@@ -5,7 +5,7 @@
 *  File Description	: Task to run the elevator
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #pragma once
@@ -16,12 +16,9 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-// You should rename this when you copy it into a new file
-// <<CHANGEME>>
 #define ELEVATOR_CYCLE_TIME (25) // 10ms
 
-// Rename this, too, or you'll run into collisions
-// <<CHANGEME>>
+
 class ElevatorTask : public Team166Task
 {
 	
@@ -38,7 +35,9 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	// Any variables that the task has as members go here
+	Proxy *proxy;				// Handle to proxy
+	Robot *lHandle;            // Local handle
+	
 	CANJaguar elevator;
 	float speed;
 };

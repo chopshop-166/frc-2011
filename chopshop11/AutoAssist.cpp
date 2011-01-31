@@ -34,7 +34,7 @@ class AutoAssistLog : public MemoryLog
 {
 public:
 	AutoAssistLog() : MemoryLog(
-			sizeof(struct abuf), AUTOASSIST_CYCLE_TIME, "template",
+			sizeof(struct abuf), AUTOASSIST_CYCLE_TIME, "AutoAssist",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
@@ -89,8 +89,10 @@ unsigned int AutoAssistLog::DumpBuffer(char *nptr, FILE *ofile)
 AutonomousAssistTask::AutonomousAssistTask(void)
 {
 	Start((char *)"166TemplateTask", AUTOASSIST_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	// Register main robot task
+	lHandle = Robot::getInstance();
 	return;
 };
 	
@@ -104,28 +106,21 @@ AutonomousAssistTask::~AutonomousAssistTask(void)
 int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
+	// Register our logger
 	AutoAssistLog sl;                   // log
+	lHandle->RegisterLogger(&sl);
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 AutoAssist task\n");
 	
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
-	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
-	
+
 	float r,y;
 	int curr_value;
 	
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		if(proxy->get(DRIVER_AUTOASSIST)) {
 			proxy->UseUserJoystick(1,false);
 			proxy->set(DRIVER_AUTOASSIST, Joystick(1).GetRawButton(6));

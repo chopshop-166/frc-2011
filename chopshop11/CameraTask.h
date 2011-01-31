@@ -47,7 +47,6 @@ public:
 	void FindTargets();
 	
 private:
-	// Any variables that the task has as members go here
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	AxisCamera &camera;

@@ -1,19 +1,13 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: PneumaticsTask.cpp    
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Task for Pneumatics
+*  File Description	: Task for running compressor and measuring pressure
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
-/*------------------------------------------------------------------------------*/
-/* Find & Replace "PneumaticsTask" with the name you would like to give this task     */
-/* Find & Replace "Testing" with the name you would like to give this task      */
-/* Find & Replace "TaskPneumaticsTask" with the name you would like to give this task */
-/*------------------------------------------------------------------------------*/
 
 #include "WPILib.h"
 #include "PneumaticsTask.h"
@@ -90,8 +84,10 @@ unsigned int PneumaticsTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 PneumaticsTask::PneumaticsTask(void): PSITransducer(PRESSURETRANSDUCER), AirCompresser(PRESSURESWITCH,COMPRESSORRELAY)
 {
 	Start((char *)"PneumaticsTask", PNEUMATICS_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	// Register main robot task
+	lHandle = Robot::getInstance();
 	return;
 };
 	
@@ -105,30 +101,23 @@ PneumaticsTask::~PneumaticsTask(void)
 int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
+	// Register our logger
 	PneumaticsTaskLog sl;                   // log
+	lHandle->RegisterLogger(&sl);
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 PneumaticsTask task\n");
 	
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
 	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
-
 	double pressure, ppressure = 0;
 			
 	//initialize object and start compressor
 	AirCompresser.Start();
 		
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		
 		// Capture the pressure by adjusted voltage
 		// Subtract 0.5 because sensor ranges from 0.5 to 4.5

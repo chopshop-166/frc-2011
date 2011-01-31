@@ -1,9 +1,8 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: MiniDeployTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 21, 2011
-*  File Description	: Source file for MiniDeploy task
+*  File Description	: Task to handle minibot deployment logic
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
@@ -86,6 +85,10 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 MiniDeploy166::MiniDeploy166(void): DeployExtend(1), Deploy(2), Deploy_Limit(4)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	// Register main robot task
+	lHandle = Robot::getInstance();
 	return;
 };
 	
@@ -99,25 +102,17 @@ MiniDeploy166::~MiniDeploy166(void)
 int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
+	// Register our logger
 	MiniDeployLog sl;                   // log
-	
+		lHandle->RegisterLogger(&sl);
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 MiniDeploy task\n");
-	
-	// Register the proxy
-	proxy = Proxy::getInstance();
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
 	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
-		
     // General main loop (while in Autonomous or Tele mode)
-	while (1){
+	while (true){
 		
 		if(proxy->get("joy1b6")) {
 			if(proxy->get("MatchTimer") <= 10) {
@@ -132,8 +127,6 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			Deploy.Set(0);
 		}
         // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaraction above
 		sl.PutOne();
 		
 		// Wait for our next loop

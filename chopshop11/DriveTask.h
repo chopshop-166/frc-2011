@@ -1,11 +1,11 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: ColorLights.h     
+*  Project   		: Chopshop11
+*  File Name  		: DriveTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  File Description	: Task to run the LEDs to tell the feeders the needed colors
+*  File Description	: Takes X, Y, Z inputs from joystick generates outputs for mecanum wheels
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #pragma once
@@ -16,12 +16,8 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-// You should rename this when you copy it into a new file
-// <<CHANGEME>>
 #define DRIVE_TASK_CYCLE_TIME (20) // 20ms
 
-// Rename this, too, or you'll run into collisions
-// <<CHANGEME>>
 class DriveTask : public Team166Task
 {
 	
@@ -29,7 +25,7 @@ public:
 	
 	// task constructor
 	DriveTask(void);
-
+	
 	// task destructor
 	virtual ~DriveTask(void);
 
@@ -38,6 +34,9 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
+	Proxy *proxy;				// Handle to proxy
+	Robot *lHandle;            // Local handle
+	
 	void Normalize(double*);
 	float m_maxOutput;
 	int syncGroup;

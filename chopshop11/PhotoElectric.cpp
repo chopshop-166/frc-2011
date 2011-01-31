@@ -1,11 +1,11 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: PhotoElectric.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  File Description	: Task to get photoelectric sensor values
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #include "WPILib.h"
@@ -81,8 +81,9 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 PhotoElectricTask::PhotoElectricTask(void):left(LEFTPHOTOSENSE),center(CENTERPHOTOSENSE),right(RIGHTPHOTOSENSE)
 {
 	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	lHandle = Robot::getInstance();
 	return;
 };
 	
@@ -96,22 +97,15 @@ PhotoElectricTask::~PhotoElectricTask(void)
 int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
+	// Register our logger
 	PhotoElectricLog sl;                   // log
+	lHandle->RegisterLogger(&sl);
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Photoelectric task\n");
 	
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
-	WaitForGoAhead();
-	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
+	WaitForGoAhead();	
 	
 	// Set up the proxy value
 	proxy->add("LineDirection");

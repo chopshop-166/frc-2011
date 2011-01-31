@@ -1,19 +1,12 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: TaskTemplate.cpp     
+*  Project   		: Chopshop11
+*  File Name  		: ElevatorTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Task to run the elevator
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
-
-/*------------------------------------------------------------------------------*/
-/* Find & Replace "Template" with the name you would like to give this task     */
-/* Find & Replace "Testing" with the name you would like to give this task      */
-/* Find & Replace "TaskTemplate" with the name you would like to give this task */
-/*------------------------------------------------------------------------------*/
 
 #include "WPILib.h"
 #include "ElevatorTask.h"
@@ -25,18 +18,18 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
-	// Any values that need to be logged go here
-	// <<CHANGEME>>
+	int target_type;
+	
 };
 
 //  Memory Log
-// <<CHANGEME>>
+
 class ElevatorLog : public MemoryLog
 {
 public:
 	ElevatorLog() : MemoryLog(
-			sizeof(struct abuf), ELEVATOR_CYCLE_TIME, "template",
-			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
+			sizeof(struct abuf), ELEVATOR_CYCLE_TIME, "Elevator",
+			"Seconds,Nanoseconds,Elapsed Time,Target Height\n"
 			) {
 		return;
 	};
@@ -44,23 +37,22 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+	
+	unsigned int PutOne(int);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
-unsigned int ElevatorLog::PutOne(void)
+
+unsigned int ElevatorLog::PutOne(int height)
 {
 	struct abuf *ob;               // Output buffer
 	
 	// Get output buffer
 	if ((ob = (struct abuf *)GetNextBuffer(sizeof(struct abuf)))) {
 		
-		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
-		// Add any values to be logged here
-		// <<CHANGEME>>
+		ob->target_type = height;
+		
 		return (sizeof(struct abuf));
 	}
 	
@@ -74,11 +66,10 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f\n",
+	fprintf(ofile, "%u,%u,%4.5f, %d\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
-			// Add values here
-			// <<CHANGEME>>
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+			ab->target_type
 	);
 	
 	// Done
@@ -89,9 +80,14 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25)
 {
-	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);
-	// ^^^ Rename those ^^^
-	// <<CHANGEME>>
+	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);	
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	
+	// Register main robot
+	lHandle = Robot::getInstance();
+
+	
 	return;
 };
 	
@@ -105,29 +101,23 @@ ElevatorTask::~ElevatorTask(void)
 int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
+	//Create then register logger
 	ElevatorLog sl;                   // log
+	lHandle->RegisterLogger(&sl);
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Elevator task\n");
-	
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	
+
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
 	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
-	
 	enum {hNone=-1, hFloor=0, hLow=1, hMid=2, hHigh=3} target_type = hNone;
+	
 	// Fix these heights once we can test
 	float target_heights[4] = {0,10,15,20};
 	
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		if(proxy->get("Joy1B6")) {
 			target_type = hHigh;
 		} else if(proxy->get("Joy1B7")) {
@@ -148,7 +138,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
         // Logging any values
-		sl.PutOne();
+		sl.PutOne(target_type);
 		
 		// Wait for our next lap
 		WaitForNextLoop();		

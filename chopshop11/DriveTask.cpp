@@ -1,12 +1,11 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: TaskTemplate.cpp     
+*  File Name  		: DriveTask.cpp  
+*  Project   		: Chopshop11   
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Takes X, Y, Z inputs from joystick generates outputs for mecanum wheels
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
 #include "WPILib.h"
@@ -20,17 +19,14 @@ struct abuf166
 {
 	struct timespec tp;             // Time of snapshot
 	double x,y,z;					// Joystick axis
-	// Any values that need to be logged go here
-	// <<CHANGEME>>
 };
 
 //  Memory Log
-// <<CHANGEME>>
 class DriveLog : public MemoryLog
 {
 public:
 	DriveLog() : MemoryLog(
-			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "template",
+			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "DriveTask",
 			"Seconds,Nanoseconds,Elapsed Time,X,Y,Z\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
@@ -39,12 +35,12 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
+	
 	unsigned int PutOne(double,double,double);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
+
 unsigned int DriveLog::PutOne(double x, double y, double z)
 {
 	struct abuf166 *ob;               // Output buffer
@@ -58,7 +54,7 @@ unsigned int DriveLog::PutOne(double x, double y, double z)
 		ob->y = y;
 		ob->z = z;
 		// Add any values to be logged here
-		// <<CHANGEME>>
+		
 		return (sizeof(struct abuf166));
 	}
 	
@@ -78,8 +74,6 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 			ab->x,
 			ab->y,
 			ab->z
-			// Add values here
-			// <<CHANGEME>>
 	);
 	
 	// Done
@@ -112,9 +106,11 @@ void DriveTask::Normalize(double *wheelSpeeds)
 DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(10), fr(5), bl(7), br(9)
 {
 	Start((char *)"166DriveTask", DRIVE_TASK_CYCLE_TIME);
-	// ^^^ Rename those ^^^
 	wheelSpeeds[0] = wheelSpeeds[1] = wheelSpeeds[2] = wheelSpeeds[3] = 0;
-	// <<CHANGEME>>
+	
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	lHandle = Robot::getInstance();
 	return;
 };
 	
@@ -128,25 +124,18 @@ DriveTask::~DriveTask(void)
 int DriveTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
+	// Register our logger
 	DriveLog sl;                   // log
-	
+	lHandle->RegisterLogger(&sl);
+
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Drive task\n");
-	
-	// Register the proxy
-	proxy = Proxy::getInstance();
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
 	
-	// Register our logger
-	lHandle = Robot::getInstance();
-	lHandle->RegisterLogger(&sl);
-	
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		x=proxy->get("Joy1X");
 		y=proxy->get("Joy1Y");
 		r=proxy->get("Joy1R");
@@ -164,10 +153,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		br.Set(-wheelSpeeds[3]* m_maxOutput, syncGroup);
 		
 		CANJaguar::UpdateSyncGroup(syncGroup);
-		
-        // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaration above
+
 		sl.PutOne(x,y,r);
 		
 		// Wait for our next lap

@@ -16,12 +16,8 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-// You should rename this when you copy it into a new file
-// <<CHANGEME>>
 #define AUTOASSIST_CYCLE_TIME (20) // 10ms
 
-// Rename this, too, or you'll run into collisions
-// <<CHANGEME>>
 class AutonomousAssistTask : public Team166Task
 {
 	
@@ -38,6 +34,6 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	// Any variables that the task has as members go here
-	// <<CHANGEME>>
+	Proxy *proxy;				// Handle to proxy
+	Robot *lHandle;            // Local handle
 };
