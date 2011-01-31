@@ -18,8 +18,10 @@
 struct abuf166
 {
 	struct timespec tp;               // Time of snapshot
-	// Any values that need to be logged go here
-	// <<CHANGEME>>
+	int left_result;
+	int center_result;
+	int right_result;
+	int result_result;
 };
 
 //  Memory Log
@@ -28,7 +30,7 @@ class PhotoElectricLog : public MemoryLog
 public:
 	PhotoElectricLog() : MemoryLog(
 			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "photoelectric",
-			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
+			"Seconds,Nanoseconds,Elapsed Time,Left Result,Right Result,Center Result,Result\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
@@ -36,12 +38,11 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+	unsigned int PutOne(int ,int ,int ,int);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-unsigned int PhotoElectricLog::PutOne(void)
+unsigned int PhotoElectricLog::PutOne(int left,int right,int center,int result)
 {
 	struct abuf166 *ob;               // Output buffer
 	
@@ -50,8 +51,10 @@ unsigned int PhotoElectricLog::PutOne(void)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
-		// Add any values to be logged here
-		// <<CHANGEME>>
+		ob->left_result= left;
+		ob->right_result= right;
+		ob->center_result= center;
+		ob->result_result=result;
 		return (sizeof(struct abuf166));
 	}
 	
@@ -67,9 +70,11 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 	// Output the data into the file
 	fprintf(ofile, "%u,%u,%4.5f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
-			// Add values here
-			// <<CHANGEME>>
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)), 
+			ab->left_result,
+			ab->right_result,
+			ab->center_result,
+			ab->result_result
 	);
 	
 	// Done
@@ -109,13 +114,15 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Set up the proxy value
 	proxy->add("LineDirection");
-		
+		bool left_result;
+		bool center_result;
+		bool right_result;
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		// Use .Get to get the value of the sensor
-		bool l = !left.Get();
-		bool c = !center.Get();
-		bool r = !right.Get();
+		left_result = !left.Get();
+	    center_result = !center.Get();
+	    right_result = !right.Get();
 		int result=0;
 		/* 
 		 * 2 means it hit a T or fork
@@ -125,13 +132,13 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		 * -2 means it's not on the line at all
 		*/
 		// Figure out if 1 is "on the line" or "off the line"
-		if(l&&r) {
+		if(left_result&&right_result) {
 			result=2;
-		} else if(l) {
+		} else if(left_result) {
 			result=1;
-		} else if(r) {
+		} else if(right_result) {
 			result=-1;
-		} else if(c) {
+		} else if(center_result) {
 			result=0;
 		} else {
 			result=-2;
@@ -144,7 +151,8 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
         // Logging any values
 		// <<CHANGEME>>
 		// Make this match the declaration above
-		sl.PutOne();
+		sl.PutOne(left_result, center_result, right_result, result);
+		
 		
 		// Wait for our next lap
 		WaitForNextLoop();		
