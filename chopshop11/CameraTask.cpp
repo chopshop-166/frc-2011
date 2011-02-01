@@ -2,17 +2,16 @@
 *  Project   		: Chopshop11
 *  File Name  		: CameraTask.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: This task initializes the camera and calls the 2011
+*           targeting code. It offers a static fuction that any task can call 
+*                   CameraTask::TakeSnapshot(char* imageName))
+*			to save a picture to the cRIO.
+*           Logged target data: size, location, and score (a
+*                     quality metric)
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
-
-/*------------------------------------------------------------------------------*/
-/* Find & Replace "Template" with the name you would like to give this task     */
-/* Find & Replace "Testing" with the name you would like to give this task      */
-/* Find & Replace "TaskTemplate" with the name you would like to give this task */
-/*------------------------------------------------------------------------------*/
 
 #include "WPILib.h"
 #include "Robot.h"
@@ -27,7 +26,9 @@ struct abuf
 {
 	struct timespec tp;               // Time of snapshot
 	// Any values that need to be logged go here
-	// <<CHANGEME>>
+	double targetHAngle;
+	double targetVAngle;
+	double targetSize;	
 };
 
 //  Memory Log
@@ -36,7 +37,7 @@ class CameraLog : public MemoryLog
 public:
 	CameraLog() : MemoryLog(
 			sizeof(struct abuf), CAMERA_CYCLE_TIME, "camera",
-			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
+			"Seconds,Nanoseconds,Elapsed Time,H-Angle, V-Angle, Size,\n" 
 			) {
 		return;
 	};
@@ -44,12 +45,12 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+
+	unsigned int PutOne(double,double,double);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-unsigned int CameraLog::PutOne(void)
+unsigned int CameraLog::PutOne(double hAngle,double vAngle,double size)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -59,7 +60,10 @@ unsigned int CameraLog::PutOne(void)
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		// Add any values to be logged here
-		// <<CHANGEME>>
+
+		ob-> targetHAngle = hAngle;
+		ob-> targetVAngle = vAngle;
+		ob-> targetSize = size;	
 		return (sizeof(struct abuf));
 	}
 	
@@ -73,11 +77,11 @@ unsigned int CameraLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f\n",
+	fprintf(ofile, "%u,%u,%4.5f, %3.3f, %3.3f, %4.4f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
-			// Add values here
-			// <<CHANGEME>>
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+			// Values to log
+			ab-> targetHAngle, ab-> targetVAngle, ab-> targetSize		
 	);
 	
 	// Done
@@ -88,6 +92,8 @@ unsigned int CameraLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 {
+	myHandle = this;
+	
 	/* allow writing to vxWorks target */
 	Priv_SetWriteFileAllowed(1);   
 		
@@ -137,23 +143,26 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		// Wait for our next lap
 		WaitForNextLoop();
 		
-		/* When this works, store a picture to cRIO */
+		/* Store a picture to cRIO */
 		TakeSnapshot("cRIOimage.jpg");
 				
 		/* Look for target */
-		FindTargets();
+		bool found = FindTargets();
 
-	    // Logging any values
-		// Make this match the declaration above
-		//sl.PutOne();
+	    // Logging values if a valid target found
+		if (found) {
+			sl.PutOne(targetHAngle,targetVAngle,targetSize);
+		}
 		
+		// JUST FOR DEBUGGING - give us time to look at the screen
+		// REMOVE THIS WAIT to go operational!
 		Wait(10.0);
 	}
 	return (0);
 	
 };
 
-void CameraTask::FindTargets()  {
+bool CameraTask::FindTargets()  {
 	/* TBD  
 	 * */
 	lHandle->DriverStationDisplay("ProcessImage:%0.6f",GetTime());
@@ -187,46 +196,40 @@ Image* dest, const Image* source, ImageType type, const float* lookup, int shift
 		}	
 		//delete image;
 		delete image;
-		if (targets.size() == 0 || targets[0].m_score < MINIMUM_SCORE)
-		{
-			// no targets found. Make sure the first one in the list is 0,0
-			// since the dashboard program annotates the first target in green
-			// and the others in magenta. With no qualified targets, they'll all
-			// be magenta.
-			TargetCircle nullTarget;
-			nullTarget.m_majorRadius = 0.0;
-			nullTarget.m_minorRadius = 0.0;
-			nullTarget.m_score = 0.0;
-			if (targets.size() == 0)
-				targets.push_back(nullTarget);
-			else
-				targets.insert(targets.begin(), nullTarget);
-			if (targets.size() == 0)
-				DPRINTF(LOG_DEBUG, "No target found\n\n");
-			else
-				DPRINTF(LOG_DEBUG, "No valid targets found, best score: %f ", 
+		if (targets.size() == 0) {
+			// no targets found.
+			DPRINTF(LOG_DEBUG, "No target found\n\n");
+			return false;			
+		}
+		else if (targets[0].m_score < MINIMUM_SCORE) {
+			// no good enough targets found
+			DPRINTF(LOG_DEBUG, "No valid targets found, best score: %f ", 
 						targets[0].m_score);
+			return false;			
 		}
 		else {
 			// We have some targets.
 			// set the new PID heading setpoint to the first target in the list
-			double hAngle = targets[0].GetHorizontalAngle();
-			double vAngle = targets[0].GetVerticalAngle();
-			double size = targets[0].GetSize();
-			
-			// send dashbaord data for target tracking
+			targetHAngle = targets[0].GetHorizontalAngle();
+			targetVAngle = targets[0].GetVerticalAngle();
+			targetSize = targets[0].GetSize();
+
+			// send dashboard data for target tracking
 			DPRINTF(LOG_DEBUG, "Target found %f ", targets[0].m_score);
-			DPRINTF(LOG_DEBUG, "H: %3.0f  V: %3.0f  SIZE: %3.3f ", hAngle, vAngle, size);
+			DPRINTF(LOG_DEBUG, "H: %3.0f  V: %3.0f  SIZE: %3.3f ", 
+					targetHAngle, targetVAngle, targetSize);
 //			targets[0].Print();
 		}
+		return true;
 };
 
 /**
  * Take a picture and store it to the cRIO in the specified path
+ * Any task should be able to call this to take and save a snapshot
  */
 void CameraTask::TakeSnapshot(char* imageName)  {
 	
-	lHandle->DriverStationDisplay("storing %s",imageName);
+	myHandle->lHandle->DriverStationDisplay("storing %s",imageName);
 	//DPRINTF(LOG_DEBUG, "taking a SNAPSHOT ");
 	
 	Image* cameraImage = frcCreateImage(IMAQ_IMAGE_HSL);
@@ -235,8 +238,8 @@ void CameraTask::TakeSnapshot(char* imageName)  {
 	}
 
 	/* If there is an unacquired image to get, acquire it */
-	if ( camera.IsFreshImage() ) {
-		if ( !camera.GetImage(cameraImage) ) {
+	if ( myHandle->camera.IsFreshImage() ) {
+		if ( !myHandle->camera.GetImage(cameraImage) ) {
 			DPRINTF (LOG_INFO,"\nImage Acquisition from camera failed %i", GetLastVisionError());
 		} else { 	
 			SaveImage(imageName, cameraImage);
@@ -261,3 +264,4 @@ void SaveImage(char* imageName, Image* image)  {
 		DPRINTF (LOG_INFO,"errString= %s", errString);
 	} 
 };
+
