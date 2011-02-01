@@ -18,7 +18,8 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 
 #define SONAR_CYCLE_TIME (50) // 50ms
-
+#define AVERAGESIZE (10)	//Store 10 values
+#define SONARINPERVOLT (81.0)	//Number of inches per 1 volt of change
 class SonarTask : public Team166Task
 {
 	
@@ -38,6 +39,5 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	
-	AnalogChannel ac, acl, acr;
-	const unsigned int AverageSize;
+	AnalogChannel SonarCenter, SonarLeft, SonarRight;
 };

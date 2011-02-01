@@ -78,7 +78,7 @@ unsigned int SonarLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-SonarTask::SonarTask(void): ac(1), acl(2), acr(3), AverageSize(10)
+SonarTask::SonarTask(void): SonarCenter(1), SonarLeft(2), SonarRight(3)
 {
 	Start((char *)"166SonarTask", SONAR_CYCLE_TIME);
 	// Register the proxy
@@ -112,62 +112,64 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 	proxy->add("LeftDistance");
 	proxy->add("RightDistance");
 	
-	double frontarray[AverageSize];
-	double leftarray[AverageSize];
-	double rightarray[AverageSize];
+	float frontarray[AVERAGESIZE];
+	float leftarray[AVERAGESIZE];
+	float rightarray[AVERAGESIZE];
 	int i = 0;
-	float volts=0;
+	//Volts from sensors
+	float voltscenter=0;
 	float voltsleft=0;
 	float voltsright=0;
 	
-	double vf = 0;
-	double vl = 0;
-	double vr = 0;
+	//Distance in inches
+	float DistanceCenter = 0;
+	float DistanceLeft = 0;
+	float DistanceRight = 0;
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		// Get the adjusted voltage of each sensor
-		volts = ac.GetVoltage();
-		voltsleft = acl.GetVoltage();
-		voltsright = acr.GetVoltage();
-		if(volts<0){
-			volts = 0;
-		}else if(volts>3){
-			volts = 3;
+		voltscenter = SonarCenter.GetVoltage();
+		voltsleft = SonarLeft.GetVoltage();
+		voltsright = SonarRight.GetVoltage();
+		if(voltscenter<0){
+			voltscenter = 0;
+		}else if(voltscenter>3){
+			voltscenter = 3;
 		}
 		
 		// Store each sensor's value into the rolling array
-		frontarray[(i%AverageSize)] = volts;
-		leftarray[(i%AverageSize)] = voltsleft;
-		rightarray[(i%AverageSize)] = voltsright;
+		frontarray[(i%AVERAGESIZE)] = voltscenter;
+		leftarray[(i%AVERAGESIZE)] = voltsleft;
+		rightarray[(i%AVERAGESIZE)] = voltsright;
 		
 		// Get the Average of each sensor
 		// Multiply each by the magic number 81. (yes, with a . at the end)
 		// Store each value into the proxy
-		vf = 0;
-		vl = 0;
-		vr = 0;
-		for(unsigned j = 0;j<AverageSize;j++) {
-			vf+= frontarray[j];
-			vl+= leftarray[j];
-			vr+= rightarray[j];
+		DistanceCenter = 0;
+		DistanceLeft = 0;
+		DistanceRight = 0;
+		for(unsigned j = 0;j<AVERAGESIZE;j++) {
+			DistanceCenter+= frontarray[j];
+			DistanceLeft+= leftarray[j];
+			DistanceRight+= rightarray[j];
 		}
-		vf/=AverageSize;
-		vl/=AverageSize;
-		vr/=AverageSize;
-		vf*=81.;
-		vl*=81.;
-		vr*=81.;
-		proxy->set("FrontDistance", vf);
-		proxy->set("LeftDistance", vl);
-		proxy->set("RightDistance", vr);
-		SmartDashboard::Log(vf, "Front Distance");
-		SmartDashboard::Log(vl, "Left Distance");
-		SmartDashboard::Log(vr, "Right Distance");
+		DistanceCenter/=AVERAGESIZE;
+		DistanceLeft/=AVERAGESIZE;
+		DistanceRight/=AVERAGESIZE;
+		DistanceCenter*=SONARINPERVOLT;
+		DistanceLeft*=SONARINPERVOLT;
+		DistanceRight*=SONARINPERVOLT;
+		proxy->set("FrontDistance", DistanceCenter);
+		proxy->set("LeftDistance", DistanceLeft);
+		proxy->set("RightDistance", DistanceRight);
+		SmartDashboard::Log(DistanceCenter, "Front Distance");
+		SmartDashboard::Log(DistanceLeft, "Left Distance");
+		SmartDashboard::Log(DistanceRight, "Right Distance");
 		
 		// Increment the counter for distance slot in the array
 		i++;
         // Logging any values
-		sl.PutOne(vf,vl,vr);
+		sl.PutOne(DistanceCenter,DistanceLeft,DistanceRight);
 		
 		// Wait for our next lap
 		WaitForNextLoop();		

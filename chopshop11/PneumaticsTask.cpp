@@ -19,18 +19,16 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
-	// Any values that need to be logged go here
-	// <<CHANGEME>>
+	float pressure;
 };
 
 //  Memory Log
-// <<CHANGEME>>
 class PneumaticsTaskLog : public MemoryLog
 {
 public:
 	PneumaticsTaskLog() : MemoryLog(
 			sizeof(struct abuf), PNEUMATICS_CYCLE_TIME, "PneumaticsTask",
-			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
+			"Seconds,Nanoseconds,Elapsed Time, Pressure\n"
 			) {
 		return;
 	};
@@ -38,13 +36,13 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+	
+	unsigned int PutOne(float);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
 // <<CHANGEME>>
-unsigned int PneumaticsTaskLog::PutOne(void)
+unsigned int PneumaticsTaskLog::PutOne(float pressure_in)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -53,8 +51,7 @@ unsigned int PneumaticsTaskLog::PutOne(void)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
-		// Add any values to be logged here
-		// <<CHANGEME>>
+		ob->pressure = pressure_in;
 		return (sizeof(struct abuf));
 	}
 	
@@ -70,9 +67,8 @@ unsigned int PneumaticsTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 	// Output the data into the file
 	fprintf(ofile, "%u,%u,%4.5f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
-			// Add values here
-			// <<CHANGEME>>
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+			ab->pressure
 	);
 	
 	// Done
@@ -129,7 +125,7 @@ int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
         // Logging any values
 		// <<CHANGEME>>
 		// Make this match the declaraction above
-		sl.PutOne();
+		sl.PutOne(ppressure);
 		
 		SmartDashboard::Log(ppressure, "PSI");
 		
