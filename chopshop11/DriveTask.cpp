@@ -107,10 +107,8 @@ DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(10), fr(5), bl(7
 {
 	Start((char *)"166DriveTask", DRIVE_TASK_CYCLE_TIME);
 	wheelSpeeds[0] = wheelSpeeds[1] = wheelSpeeds[2] = wheelSpeeds[3] = 0;
-	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	lHandle = Robot::getInstance();
 	return;
 };
 	
@@ -134,6 +132,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
 	
+	lHandle = Robot::getInstance();
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		x=proxy->get("Joy1X");

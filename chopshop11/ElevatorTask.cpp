@@ -84,10 +84,6 @@ ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25)
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	
-	// Register main robot
-	lHandle = Robot::getInstance();
-
-	
 	return;
 };
 	
@@ -103,13 +99,17 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 {
 	//Create then register logger
 	ElevatorLog sl;                   // log
-	lHandle->RegisterLogger(&sl);
+	
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Elevator task\n");
 
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
+	
+	// Register main robot
+	lHandle = Robot::getInstance();
+	lHandle->RegisterLogger(&sl);
 	
 	enum {hNone=-1, hFloor=0, hLow=1, hMid=2, hHigh=3} target_type = hNone;
 	

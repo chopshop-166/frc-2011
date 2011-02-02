@@ -83,8 +83,7 @@ SonarTask::SonarTask(void): SonarCenter(1), SonarLeft(2), SonarRight(3)
 	Start((char *)"166SonarTask", SONAR_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	// Register main robot task
-	lHandle = Robot::getInstance();
+	
 	return;
 };
 	
@@ -100,13 +99,17 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 {
 	// Register our logger
 	SonarLog sl;                   // log
-	lHandle->RegisterLogger(&sl);
+	
 
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
+	
+	// Register main robot task
+	lHandle = Robot::getInstance();
+	lHandle->RegisterLogger(&sl);
 	
 	proxy->add("FrontDistance");
 	proxy->add("LeftDistance");

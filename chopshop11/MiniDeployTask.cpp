@@ -87,8 +87,7 @@ MiniDeploy166::MiniDeploy166(void): DeployExtend(1), Deploy(2), Deploy_Limit(4)
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	// Register main robot task
-	lHandle = Robot::getInstance();
+
 	return;
 };
 	
@@ -104,12 +103,15 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 {
 	// Register our logger
 	MiniDeployLog sl;                   // log
-		lHandle->RegisterLogger(&sl);
+		
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 MiniDeploy task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
+	// Register main robot task
+	lHandle = Robot::getInstance();
+	lHandle->RegisterLogger(&sl);
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true){

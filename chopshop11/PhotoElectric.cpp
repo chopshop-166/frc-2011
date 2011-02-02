@@ -88,7 +88,7 @@ PhotoElectricTask::PhotoElectricTask(void):left(LEFTPHOTOSENSE),center(CENTERPHO
 	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	lHandle = Robot::getInstance();
+	
 	return;
 };
 	
@@ -104,13 +104,16 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 {
 	// Register our logger
 	PhotoElectricLog sl;                   // log
-	lHandle->RegisterLogger(&sl);
+	
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Photoelectric task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();	
+	
+	lHandle = Robot::getInstance();
+	lHandle->RegisterLogger(&sl);
 	
 	// Set up the proxy value
 	proxy->add("LineDirection");

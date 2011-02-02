@@ -21,8 +21,7 @@ ColorLightTask::ColorLightTask(void):red(4,Relay::kForwardOnly), white(5,Relay::
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	// Register main robot task
-	lHandle = Robot::getInstance();
+	
 	
 	return;
 };
@@ -44,6 +43,8 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
 	
+	// Register main robot task
+	lHandle = Robot::getInstance();
     // General main loop (while in Autonomous or Tele mode)
 	while (true) 
 	{

@@ -108,10 +108,7 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
 
 	DPRINTF(LOG_INFO,"CameraTask FPS=%i task cycle time=%i",fps,CAMERA_CYCLE_TIME);
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	DPRINTF(LOG_INFO,"CameraTask got proxy");
-	lHandle = Robot::getInstance();	
+
 	return;
 };
 	
@@ -127,15 +124,22 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 {
 	// Register our logger
 	CameraLog sl;                   // log
-	lHandle->RegisterLogger(&sl);
-	DPRINTF(LOG_INFO,"CameraTask registered logger");
+	
+	// Register the proxy
+	proxy = Proxy::getInstance();
+	DPRINTF(LOG_INFO,"CameraTask got proxy");
+	
 	
 	// Let the world know we're in
 	DPRINTF(LOG_INFO,"In the 166 Camera task\n");
 	
 	WaitForGoAhead(); // THIS IS VERY IMPORTANT
 	
+	lHandle = Robot::getInstance();
+	lHandle->RegisterLogger(&sl);
+	DPRINTF(LOG_INFO,"CameraTask registered logger");
 	lHandle->DriverStationDisplay("Camera Task...");
+	
 	DPRINTF(LOG_INFO,"CameraTask informed DS");
 	
     // General main loop (while in Autonomous or Tele mode)

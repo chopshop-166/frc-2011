@@ -81,8 +81,7 @@ HeightTask166::HeightTask166(void): Height(8)
 	
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	// Register our logger
-	lHandle = Robot::getInstance();
+	
 	
 	return;
 };
@@ -98,13 +97,16 @@ int HeightTask166::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	HeightTaskLog sl;           // log
-	lHandle->RegisterLogger(&sl);
+	
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Height task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
+	// Register our logger
+	lHandle = Robot::getInstance();
+	lHandle->RegisterLogger(&sl);
 	
 	// add a proxy variable
 	proxy->add("ElevatorHeight");
