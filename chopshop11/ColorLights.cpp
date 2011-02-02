@@ -15,7 +15,7 @@
 #define DPRINTF if(false)dprintf
 
 // task constructor
-ColorLightTask::ColorLightTask(void):red(4,Relay::kForwardOnly), white(5,Relay::kForwardOnly), blue(6,Relay::kForwardOnly)
+ColorLightTask::ColorLightTask(void):Team166Task(0),red(4,Relay::kForwardOnly), white(5,Relay::kForwardOnly), blue(6,Relay::kForwardOnly)
 {
 	Start((char *)"166ColorLightsTask", COLORLIGHT_CYCLE_TIME);
 	

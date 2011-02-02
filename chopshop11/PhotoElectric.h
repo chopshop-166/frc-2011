@@ -17,6 +17,7 @@
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
 #define PHOTOELECTRIC_CYCLE_TIME (20) // 20ms
+enum LineStateType { No_Line = -2, Left = -1, Center = 0, Right = 1, Fork = 2, T = 3 };
 
 class PhotoElectricTask : public Team166Task
 {
@@ -36,6 +37,7 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	
+	LineStateType LineState;
 	DigitalInput left;
 	DigitalInput center;
 	DigitalInput right;

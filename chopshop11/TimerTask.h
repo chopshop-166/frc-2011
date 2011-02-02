@@ -16,7 +16,7 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-#define TIMER_CYCLE_TIME (50) // 10ms
+#define TIMER_CYCLE_TIME (100) // 10ms
 
 class TimerTask : public Team166Task
 {

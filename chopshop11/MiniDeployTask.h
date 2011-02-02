@@ -35,7 +35,7 @@ public:
 private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
-	Solenoid DeployExtend;
-	Solenoid Deploy;
+	Solenoid DeployerExtender;	// Extend the minibot deployment mechanism
+	Solenoid MiniCloser;		//Close the minibot on the pole
 	DigitalInput Deploy_Limit;
 };

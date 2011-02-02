@@ -41,7 +41,6 @@ public:
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
 unsigned int PneumaticsTaskLog::PutOne(float pressure_in)
 {
 	struct abuf *ob;               // Output buffer
@@ -110,7 +109,7 @@ int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	
-	double pressure, ppressure = 0;
+	double PressureVolts=0, PSI = 0;
 			
 	//initialize object and start compressor
 	AirCompresser.Start();
@@ -120,17 +119,15 @@ int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
 		
 		// Capture the pressure by adjusted voltage
 		// Subtract 0.5 because sensor ranges from 0.5 to 4.5
-		pressure = (PSITransducer.GetVoltage()-0.5);
+		PressureVolts = (PSITransducer.GetVoltage()-0.5);
 		
 		//convert voltage to psi
-		ppressure = (pressure * 62.5);
+		PSI = (PressureVolts * PSI_PER_VOLT);
 		
         // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaraction above
-		sl.PutOne(ppressure);
+		sl.PutOne(PSI);
 		
-		SmartDashboard::Log(ppressure, "PSI");
+		SmartDashboard::Log(PSI, "PSI");
 		
 		// Wait for our next lap
 		WaitForNextLoop();		

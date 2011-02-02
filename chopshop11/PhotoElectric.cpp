@@ -21,7 +21,7 @@ struct abuf166
 	int left_result;
 	int center_result;
 	int right_result;
-	int result_result;
+	LineStateType result_result;
 };
 
 //  Memory Log
@@ -38,11 +38,11 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	unsigned int PutOne(int ,int ,int ,int);     // Log the values needed-add in arguments
+	unsigned int PutOne(int ,int ,int ,LineStateType);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-unsigned int PhotoElectricLog::PutOne(int left,int right,int center,int result)
+unsigned int PhotoElectricLog::PutOne(int left,int right,int center,LineStateType result)
 {
 	struct abuf166 *ob;               // Output buffer
 	
@@ -88,7 +88,7 @@ PhotoElectricTask::PhotoElectricTask(void):left(LEFTPHOTOSENSE),center(CENTERPHO
 	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	
+	LineState = No_Line;
 	return;
 };
 	
@@ -126,8 +126,8 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		left_result = !left.Get();
 	    center_result = !center.Get();
 	    right_result = !right.Get();
-		int result=0;
 		/* 
+		 * 
 		 * 2 means it hit a T or fork
 		 * 1 means to the right
 		 * 0 means dead on
@@ -135,26 +135,28 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		 * -2 means it's not on the line at all
 		*/
 		// Figure out if 1 is "on the line" or "off the line"
-		if(left_result&&right_result) {
-			result=2;
+		if(left_result&&center_result&&right_result) {
+			LineState=T;
+		} else if(left_result&&right_result) {
+			LineState=Fork;
 		} else if(left_result) {
-			result=1;
+			LineState=Left;
 		} else if(right_result) {
-			result=-1;
+			LineState=Right;
 		} else if(center_result) {
-			result=0;
+			LineState=Center;
 		} else {
-			result=-2;
+			LineState=No_Line;
 		} 
 		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
 		// Store that result in proxy
-		proxy->set("LineDirection",result);
-		SmartDashboard::Log(result, "Line Result");
+		proxy->set("LineDirection",(float) LineState);
+		SmartDashboard::Log((int) LineState, "Line Result");
 		
         // Logging any values
 		// <<CHANGEME>>
 		// Make this match the declaration above
-		sl.PutOne(left_result, center_result, right_result, result);
+		sl.PutOne(left_result, center_result, right_result, LineState);
 		
 		
 		// Wait for our next lap

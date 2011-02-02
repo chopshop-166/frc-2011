@@ -15,7 +15,7 @@
 #define DPRINTF if(false)dprintf
 
 // task constructor
-TimerTask::TimerTask(void)
+TimerTask::TimerTask(void):Team166Task(0)
 {
 	Start((char *)"166TimerTask", TIMER_CYCLE_TIME);
 	// Register the proxy
