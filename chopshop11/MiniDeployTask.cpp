@@ -20,18 +20,15 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
-	// Any values that need to be logged go here
-	// <<CHANGEME>>
 };
 
 //  Memory Log
-// <<CHANGEME>>
 class MiniDeployLog : public MemoryLog
 {
 public:
 	MiniDeployLog() : MemoryLog(
 			sizeof(struct abuf), MINIDEPLOY_CYCLE_TIME, "MiniDeploy",
-			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
+			"Seconds,Nanoseconds,Elapsed Time\n"
 			) {
 		return;
 	};
@@ -39,12 +36,10 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
 	unsigned int PutOne(void);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
 unsigned int MiniDeployLog::PutOne(void)
 {
 	struct abuf *ob;               // Output buffer
@@ -54,8 +49,6 @@ unsigned int MiniDeployLog::PutOne(void)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
-		// Add any values to be logged here
-		// <<CHANGEME>>
 		return (sizeof(struct abuf));
 	}
 	
@@ -72,8 +65,6 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 	fprintf(ofile, "%u,%u,%4.5f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
-			// Add values here
-			// <<CHANGEME>>
 	);
 	
 	// Done

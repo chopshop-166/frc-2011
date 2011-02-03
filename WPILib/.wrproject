@@ -1375,7 +1375,7 @@
                 <stringAttribute value="SIMSPARCSOLARISgnu"/>
             </listAttribute>
             <listAttribute key="BLD::Tgt|Targets"/>
-            <intAttribute key="BuildSupportEnabled" value="1"/>
+            <intAttribute key="BuildSupportEnabled" value="0"/>
             <listAttribute key="BuildSupportForBuildSpecs">
                 <stringAttribute value="PPC603gnu"/>
             </listAttribute>

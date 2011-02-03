@@ -84,12 +84,6 @@ void Robot::Disabled(void)
 {
 	DriverStationDisplay(FRAMEWORK_VERSION);
 	printf("%s\n", FRAMEWORK_VERSION);
-	
-	DriverStationDisplay("Dumping Memory Log...");
-	printf("Dumping log files...\n");
-	DumpLoggers(maxLogId);
-	printf("Logfiles dumped!\n");
-	maxLogId++;
 }
 
 /** 
@@ -112,6 +106,14 @@ void Robot::OperatorControl(void)
 		// Each task needs to update for us to feed the watch dog.
 		if (Team166Task::FeedWatchDog()) {
 		    GetWatchdog().Feed();
+		}
+		if(IsDisabled()) {
+			DriverStationDisplay("Dumping Memory Log...");
+			printf("Dumping log files...\n");
+			DumpLoggers(maxLogId);
+			printf("Logfiles dumped!\n");
+			maxLogId++;
+			break;
 		}
 		
 		Wait (ROBOT_WAIT_TIME);

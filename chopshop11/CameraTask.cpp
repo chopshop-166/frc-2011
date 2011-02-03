@@ -88,6 +88,7 @@ unsigned int CameraLog::DumpBuffer(char *nptr, FILE *ofile)
 	return (sizeof(struct abuf));
 }
 
+CameraTask *CameraTask::myHandle = NULL;
 
 // task constructor
 CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())

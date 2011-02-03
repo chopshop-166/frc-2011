@@ -152,8 +152,6 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		SmartDashboard::Log(result, "Line Result");
 		
         // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaration above
 		sl.PutOne(left_result, center_result, right_result, result);
 		
 		

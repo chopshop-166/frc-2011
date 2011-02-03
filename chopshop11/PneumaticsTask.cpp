@@ -41,7 +41,6 @@ public:
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
 unsigned int PneumaticsTaskLog::PutOne(float pressure_in)
 {
 	struct abuf *ob;               // Output buffer
@@ -126,8 +125,6 @@ int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
 		ppressure = (pressure * 62.5);
 		
         // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaraction above
 		sl.PutOne(ppressure);
 		
 		SmartDashboard::Log(ppressure, "PSI");

@@ -20,8 +20,9 @@
 <pathentry kind="con" path="com.windriver.ide.core.build.model.WR_USERDEFINED_CONTAINER"/>
 </storageModule>
 <storageModule moduleId="scannerConfiguration"/>
+
 <storageModule moduleId="userdefinedContainer">
-<indexAllFiles value="false"/>
+<indexAllFiles value="true"/>
 <initialized value="true"/>
 </storageModule>
 </cconfiguration>
