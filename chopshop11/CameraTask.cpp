@@ -178,12 +178,7 @@ bool CameraTask::FindTargets()  {
 
 	// find FRC targets in the image
 	vector<TargetCircle> targets = TargetCircle::FindCircularTargets(image);
-		
-		/* try
-		 * copy (or convert) HSL to RGB
-IMAQ_FUNC int   IMAQ_STDCALL imaqCast(
-Image* dest, const Image* source, ImageType type, const float* lookup, int shift);
-		 */
+	
 		if (targets.size()) {
 			DPRINTF(LOG_DEBUG, "targetImage SCORE = %f", targets[0].m_score);
 			/* do this in the target code

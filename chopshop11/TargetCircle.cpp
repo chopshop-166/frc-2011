@@ -2,6 +2,7 @@
 #include "Vision/MonoImage.h"
 #include "TargetCircle.h"
 #include "BaeUtilities.h"
+#include "CameraTask.h"
 #include <algorithm>
 #include <math.h>
 
@@ -100,6 +101,40 @@ vector<TargetCircle> TargetCircle::FindCircularTargets(HSLImage *image)
 																	&curveOptions,
 																	&shapeOptions,
 																	NULL);
+												
+	
+	/* try
+	// cannot convert MonoImage* to Image*
+	imaqCast(luminancePlane,luminancePlane,IMAQ_IMAGE_U8,NULL,-1);
+	 */				
+
+	/* try 
+	 * IMAQ_FUNC int IMAQ_STDCALL imaqArrayToImage(
+	 * Image* image, const void* array, int numCols, int numRows);
+	 */	
+	/* create an image object */
+	Image* tmpImage = frcCreateImage(IMAQ_IMAGE_U8);
+	if (!tmpImage) {
+			int errCode = GetLastVisionError();
+			DPRINTF (LOG_INFO,"frcCreateImage failed - errorcode %i", errCode);
+	}
+
+	if (!imaqArrayToImage( tmpImage, luminancePlane, 
+					luminancePlane->GetWidth(), 
+					luminancePlane->GetHeight() ) ) {
+		int errCode = GetLastVisionError();
+		DPRINTF (LOG_INFO,"imaqArrayToImage failed - errorcode %i", errCode);
+		//ERROR_NOT_IMAGE
+		char *errString = GetVisionErrorText(errCode);
+		DPRINTF (LOG_INFO,"errString= %s", errString);		
+	}
+	
+	// save a file with the the luminance plane
+	// cannot convert MonoImage* to Image*
+	//SaveImage("luminance.jpg", luminancePlane);
+	DPRINTF(LOG_INFO,"saving luminance.jpg");
+	SaveImage("luminance.jpg", tmpImage);
+	
 	delete luminancePlane;
 	DPRINTF(LOG_INFO,"found %i possible ellipses", results->size() );
 	if (results->size() == 0)
