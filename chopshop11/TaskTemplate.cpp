@@ -90,6 +90,8 @@ unsigned int TemplateLog::DumpBuffer(char *nptr, FILE *ofile)
 Template166::Template166(void)
 {
 	Start((char *)"166TemplateTask", TEMPLATE_CYCLE_TIME);
+	// Register the proxy
+	proxy = Proxy::getInstance();
 	// ^^^ Rename those ^^^
 	// <<CHANGEME>>
 	return;
@@ -105,17 +107,13 @@ Template166::~Template166(void)
 int Template166::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
 	TemplateLog sl;                   // log
 	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
 	
-	// Register the proxy
-	proxy = Proxy::getInstance();
-	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
+	// lHandle = Robot::getInstance() MUST go after this, otherwise code breaks
 	WaitForGoAhead();
 	
 	// Register our logger
@@ -123,7 +121,7 @@ int Template166::Main(int a2, int a3, int a4, int a5,
 	lHandle->RegisterLogger(&sl);
 		
     // General main loop (while in Autonomous or Tele mode)
-	while (1) {
+	while (true) {
 		// <<CHANGEME>>
 		// Insert your own logic here
 		

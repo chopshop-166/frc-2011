@@ -73,7 +73,7 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-MiniDeploy166::MiniDeploy166(void): DeployExtend(1), Deploy(2), Deploy_Limit(4)
+MiniDeploy166::MiniDeploy166(void): DeployerExtender(1), MiniCloser(2), Deploy_Limit(4)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
@@ -109,15 +109,15 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		
 		if(proxy->get("joy1b6")) {
 			if(proxy->get("MatchTimer") <= 10) {
-				DeployExtend.Set(1);
+				DeployerExtender.Set(1);
 			} else {
-				DeployExtend.Set(0);
+				DeployerExtender.Set(0);
 			}
 		}
 		if(Deploy_Limit.Get() == 1){
-			Deploy.Set(1);
+			MiniCloser.Set(1);
 		} else {
-			Deploy.Set(0);
+			MiniCloser.Set(0);
 		}
         // Logging any values
 		sl.PutOne();

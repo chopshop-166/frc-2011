@@ -102,7 +102,7 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 	
 
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Sonar task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
@@ -118,6 +118,11 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 	float frontarray[AVERAGESIZE];
 	float leftarray[AVERAGESIZE];
 	float rightarray[AVERAGESIZE];
+	for (int i=0; i<AVERAGESIZE;i++) {
+		frontarray[i]= 0;
+		leftarray[i]=0;
+		rightarray[i]=0;
+	}
 	int i = 0;
 	//Volts from sensors
 	float voltscenter=0;
@@ -139,7 +144,16 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 		}else if(voltscenter>3){
 			voltscenter = 3;
 		}
-		
+		if(voltsleft<0){
+			voltsleft = 0;
+		}else if(voltsleft>3){
+			voltsleft = 3;
+		}
+		if(voltsright<0){
+			voltsright = 0;
+		}else if(voltsright>3){
+			voltsright = 3;
+		}
 		// Store each sensor's value into the rolling array
 		frontarray[(i%AVERAGESIZE)] = voltscenter;
 		leftarray[(i%AVERAGESIZE)] = voltsleft;

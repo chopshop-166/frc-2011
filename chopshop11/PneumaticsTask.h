@@ -16,8 +16,8 @@
 //
 // This constant defines how often we want this task to run in the form
 // of milliseconds. Max allowed time is 999 miliseconds.
-#define PNEUMATICS_CYCLE_TIME (10) // 10ms
-
+#define PNEUMATICS_CYCLE_TIME (100) // 100ms
+#define PSI_PER_VOLT (62.5)
 class PneumaticsTask : public Team166Task
 {
 	
