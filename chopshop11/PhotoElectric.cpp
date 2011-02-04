@@ -88,7 +88,7 @@ PhotoElectricTask::PhotoElectricTask(void):left(LEFTPHOTOSENSE),center(CENTERPHO
 	Start((char *)"166PhotoElectricTask", PHOTOELECTRIC_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	LineState = No_Line;
+	LineState = lNo_Line;
 	return;
 };
 	
@@ -127,7 +127,8 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 	    center_result = !center.Get();
 	    right_result = !right.Get();
 		/* 
-		 * 2 means it hit a T or fork
+		 * 3 means it hit a T
+		 * 2 means it hit a fork
 		 * 1 means to the right
 		 * 0 means dead on
 		 * -1 means to the left
@@ -135,17 +136,17 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		*/
 		// Figure out if 1 is "on the line" or "off the line"
 		if(left_result&&center_result&&right_result) {
-			LineState=T;
+			LineState = lT;
 		} else if(left_result&&right_result) {
-			LineState=Fork;
+			LineState = lFork;
 		} else if(left_result) {
-			LineState=Left;
+			LineState = lLeft;
 		} else if(right_result) {
-			LineState=Right;
+			LineState = lRight;
 		} else if(center_result) {
-			LineState=Center;
+			LineState = lCenter;
 		} else {
-			LineState=No_Line;
+			LineState = lNo_Line;
 		} 
 		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
 		// Store that result in proxy
