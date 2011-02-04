@@ -103,10 +103,20 @@ void DriveTask::Normalize(double *wheelSpeeds)
 }
 
 // task constructor
+#if 0
+DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(10, CANJaguar::kSpeed), fr(5, CANJaguar::kSpeed), bl(7, CANJaguar::kSpeed), br(9, CANJaguar::kSpeed)
+#else 
 DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(10), fr(5), bl(7), br(9)
+#endif
 {
 	Start((char *)"166DriveTask", DRIVE_TASK_CYCLE_TIME);
 	wheelSpeeds[0] = wheelSpeeds[1] = wheelSpeeds[2] = wheelSpeeds[3] = 0;
+#if 0
+	fl.ConfigEncoderCodesPerRev(1024);
+	fr.ConfigEncoderCodesPerRev(1024);
+	bl.ConfigEncoderCodesPerRev(1024);
+	br.ConfigEncoderCodesPerRev(1024);
+#endif
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	return;
