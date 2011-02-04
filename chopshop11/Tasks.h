@@ -12,7 +12,6 @@ CameraTask CameraObject;
 
 #if SUITCASE_BOT
 //suitcase only tasks here
-CameraTask CameraObject;
 
 
 #else
