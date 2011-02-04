@@ -15,6 +15,7 @@
 #include "Robot.h"
 #include "Proxy.h"
 #include "Vision/AxisCamera.h"
+#include "TrackAPI.h"
 
 //
 // This constant defines how often we want this task to run in the form
@@ -61,4 +62,16 @@ private:
 	double targetHAngle;
 	double targetVAngle;
 	double targetSize;
+	int widestParticleIndex;
+	ParticleAnalysisReport Biggest;
+	int CameraTask::GetWidestParticle(Image* binaryImage, int* widestParticleIndex);
+	double targetCenterNormalized;
+	int CameraTask::ProcessImage(double* targetCenterNormalized);
+	/*ddduuurrrrr...?
+	 */
+	int imageProcessResult;
+	
+	Range R_Range;
+	Range B_Range;
+	Range G_Range;
 };

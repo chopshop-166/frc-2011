@@ -20,6 +20,7 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
+#define CAMERA_CENTER_OFFSET 0. // normalized, the offset of the centerline of the camera vs. the robot's centerline at the ideal target center
 
 // Sample in memory buffer
 struct abuf
@@ -91,7 +92,10 @@ unsigned int CameraLog::DumpBuffer(char *nptr, FILE *ofile)
 CameraTask *CameraTask::myHandle = NULL;
 
 // task constructor
-CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
+CameraTask::CameraTask(void):
+		camera(AxisCamera::GetInstance()), 
+		ReflectingTape(frcCreateImage(IMAQ_IMAGE_U8)), 
+		srcimage(frcCreateImage(IMAQ_IMAGE_RGB))
 {
 	myHandle = this;
 	
@@ -104,6 +108,18 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 	camera.WriteResolution(AxisCamera::kResolution_320x240);
 	//camera.WriteCompression(20);
 	//camera.WriteBrightness(0);
+	R_Range.minValue = 100;
+	R_Range.maxValue = 255;
+	G_Range.minValue = 100;
+	G_Range.maxValue = 255;
+	B_Range.minValue = 100;
+	B_Range.maxValue = 255;
+
+	numParticles=0; 
+	largestParticleIndex=0;
+	widestParticleIndex=0;
+	targetCenterNormalized=0;
+	imageProcessResult=0;
 
 	int fps = camera.GetMaxFPS();
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
@@ -139,7 +155,9 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	DPRINTF(LOG_INFO,"CameraTask registered logger");
+	
 	lHandle->DriverStationDisplay("Camera Task...");
+	DPRINTF(LOG_INFO,"CameraTask informed DS");
 	
 	DPRINTF(LOG_INFO,"CameraTask informed DS");
 	
@@ -153,11 +171,23 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 				
 		/* Look for target */
 		bool found = FindTargets();
+		
+		/*if (imageProcessResult ==0)//nothing was found
+		{
+			
+		}
+		else if (imageProcessResult==1)//only the widest particle was found
+		{
+		
+		}
+		else if (imageProcessResult==2)// only the largest particle was found
+		{
 
 	    // Logging values if a valid target found
 		if (found) {
 			sl.PutOne(targetHAngle,targetVAngle,targetSize);
 		}
+		else if (imageProcessResult==3)//both large particle and wide particle were found*/
 		
 		// JUST FOR DEBUGGING - give us time to look at the screen
 		// REMOVE THIS WAIT to go operational!
@@ -168,13 +198,17 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 };
 
 bool CameraTask::FindTargets()  {
-	/* TBD  
-	 * */
+{
+	*widestParticleIndex = 0; // points to caller-provided variable
 	lHandle->DriverStationDisplay("ProcessImage:%0.6f",GetTime());
 
 	// get the camera image
 	//Image * image = frcCreateImage(IMAQ_IMAGE_HSL);
 	HSLImage * image = camera.GetImage();
+	//non-zeros are successes
+	//0 = fail
+	//when there's a failure, call imaqGetLastError() to get the extended error info
+	if ( !success )	{  printf("Error: %d\n", imaqGetLastError()); return success;}			
 
 	// find FRC targets in the image
 	vector<TargetCircle> targets = TargetCircle::FindCircularTargets(image);
@@ -189,6 +223,9 @@ bool CameraTask::FindTargets()  {
 					DPRINTF (LOG_INFO,"frcCopyImage failed - errorcode %i", errCode);
 					char *errString = GetVisionErrorText(errCode);
 					DPRINTF (LOG_INFO,"errString= %s", errString);
+				*widestParticleIndex = i;  // return index to caller
+			}
+		}
 			}
 			else {
 				SaveImage("targetImage.jpg", tmpImage);
@@ -200,12 +237,34 @@ bool CameraTask::FindTargets()  {
 			// no targets found.
 			DPRINTF(LOG_DEBUG, "No target found\n\n");
 			return false;			
+			
+		
+		camera.GetImage(srcimage);
+		//&ReflectingTape = srcimage->ThresholdRGB(115, 255, 153, 255, 128, 255);
+		
+		frcColorThreshold(ReflectingTape, srcimage, IMAQ_RGB, &R_Range, &G_Range, &B_Range);
+		//numParticles = ReflectingTape->GetNumberParticles();
+		//frcCountParticles(ReflectingTape, &numParticles);
+		
+		GetLargestParticle(ReflectingTape, &largestParticleIndex);
+			if(largestParticleIndex != 0) {
+				frcParticleAnalysis(ReflectingTape, largestParticleIndex, &Biggest);
+				printf("\tLargest Area: %f\n", Biggest.particleArea);
+				printf("\n\tLargest particle's index: %d\n", largestParticleIndex);
+				returnValue = returnValue+2;
+				//if only the largest particle is found, returnValue = 2
+			} else {
+				printf("No large particle found...\n");
 		}
 		else if (targets[0].m_score < MINIMUM_SCORE) {
 			// no good enough targets found
 			DPRINTF(LOG_DEBUG, "No valid targets found, best score: %f ", 
 						targets[0].m_score);
 			return false;			
+				returnValue = returnValue+1;
+				//if only the largest particle is found, returnValue = 1
+			} else {
+				printf("No wide particle found...\n");
 		}
 		else {
 			// We have some targets.
@@ -221,13 +280,17 @@ bool CameraTask::FindTargets()  {
 //			targets[0].Print();
 		}
 		return true;
-};
+	//if both worked, returnValue = 3
 
 /**
  * Take a picture and store it to the cRIO in the specified path
  * Any task should be able to call this to take and save a snapshot
  */
+};
 void CameraTask::TakeSnapshot(char* imageName)  {
+	/* Warning - getting a write error when this is tried 
+	 * ERR_WRITE_FILE_NOT_SUPPORTED  -1074395313   
+	 * */
 	
 	myHandle->lHandle->DriverStationDisplay("storing %s",imageName);
 	//DPRINTF(LOG_DEBUG, "taking a SNAPSHOT ");
