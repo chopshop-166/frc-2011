@@ -17,6 +17,8 @@
 #include "Robot.h"
 #include "CameraTask.h"
 #include "TargetCircle.h"
+#include "TargetLight.h"
+#include "nivision.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -152,7 +154,8 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		TakeSnapshot("cRIOimage.jpg");
 				
 		/* Look for target */
-		bool found = FindTargets();
+		//bool found = FindCircleTargets();
+		bool found = FindLightTargets();
 
 	    // Logging values if a valid target found
 		if (found) {
@@ -167,9 +170,61 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 	
 };
 
-bool CameraTask::FindTargets()  {
-	/* TBD  
-	 * */
+/** 
+ * Call the targeting code that looks for bright objects.
+ * @return bool success code
+ */
+bool CameraTask::FindLightTargets()  {
+	int success;
+	lHandle->DriverStationDisplay("FindLightTargets:%0.6f",GetTime());
+
+#if 0
+	// get the camera image
+	HSLImage * image = camera.GetImage();	
+	Image *imaqImage = image->GetImaqImage();
+
+	// write the hsl image to cRIO
+	SaveImage("imaqImage.jpg", imaqImage);
+#endif
+#if 1
+	// get the camera image
+	Image *cameraImage = frcCreateImage(IMAQ_IMAGE_RGB);
+	success = camera.GetImage(cameraImage);
+	if (!success) {
+		int errCode = GetLastVisionError();
+		DPRINTF (LOG_INFO,"GetImage failed - errorcode %i", errCode);
+		char *errString = GetVisionErrorText(errCode);
+		DPRINTF (LOG_INFO,"errString= %s", errString);
+		return false;
+	}
+	// write the hsl image to cRIO
+	SaveImage("imaqImage.jpg", cameraImage);
+#endif	
+	
+	// do processing
+	double normalizedTargetReturn;
+	Image* processedImage = frcCreateImage(IMAQ_IMAGE_U8);
+	
+	success = ProcessTheImage(cameraImage, &normalizedTargetReturn, processedImage, IMAQ_IMAGE_U8);
+	DPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
+
+	// write the binary image to cRIO
+	SaveImage("binImage.jpg", processedImage);
+		
+	//delete images;
+	frcDispose(cameraImage);
+	frcDispose(processedImage);
+	
+	DPRINTF(LOG_DEBUG, "success value = %i\n", success);
+	return true;
+
+};
+
+/** 
+ * Call the targeting code that looks for elliptical objects.
+ * @return bool success code
+ */
+bool CameraTask::FindCircleTargets()  {
 	lHandle->DriverStationDisplay("ProcessImage:%0.6f",GetTime());
 
 	// get the camera image

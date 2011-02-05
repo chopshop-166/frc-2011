@@ -50,7 +50,8 @@ public:
 	static void TakeSnapshot(char* imageName);
 	
 	// Search for Target
-	bool FindTargets();
+	bool FindCircleTargets();
+	bool FindLightTargets();
 	
 private:
 	Proxy *proxy;				// Handle to proxy
