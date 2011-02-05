@@ -52,6 +52,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 
 int GetWidestParticle(Image* binaryImage, int* widestParticleIndex);
 int IsolateLightTarget(Image* ReflectingTape, Image* srcimage);
+int CleanUpBinary(Image* ReflectingTape, bool AttemptCleanUp);
 /*DO NOT CALL THESE FUNCTIONS
  This function is called in ProcessTheImage.
  */

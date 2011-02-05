@@ -25,6 +25,7 @@
 #include "TrackAPI.h"
 
 #define CAMERA_OFFSET 0.0
+#define DO_BINARY_IMAGE_CLEAN_UP false
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -32,7 +33,7 @@
 
 
 
-//Converts the camera image into a binary image with targets highlighted
+//Converts the camera image by RGB threshold into a binary image with targets highlighted
 int IsolateLightTargetRGB(Image* ReflectingTape, Image* srcimage)
 	{
 	//Create binary image with threshold technique
@@ -50,7 +51,7 @@ int IsolateLightTargetRGB(Image* ReflectingTape, Image* srcimage)
 		return 1;
 	}
 
-//Converts the camera image into a binary image with targets highlighted
+//Converts the camera image by HSL threshold into a binary image with targets highlighted
 int IsolateLightTargetHSL(Image* ReflectingTape, Image* srcimage)
 	{
 	//Create binary image with threshold technique
@@ -68,11 +69,14 @@ int IsolateLightTargetHSL(Image* ReflectingTape, Image* srcimage)
 		return 1;
 	}
 
-int CleanUpBinary(Image* ReflectingTape)
+//Edit the binary image that has targets highlighted for readability
+int CleanUpBinary(Image* ReflectingTape, bool AttemptCleanUp)
 {
-	//Edit the binary image that has targets highlighted for readability
+	if (AttemptCleanUp)
+	{
 		// Keeps large particles only
-		//if(!imaqSizeFilter(ReflectingTape, ReflectingTape, 1, 0, IMAQ_KEEP_LARGE, NULL)) {return 0;} else {return 1;}
+		if(!imaqSizeFilter(ReflectingTape, ReflectingTape, 1, 0, IMAQ_KEEP_LARGE, NULL)) {return 0;}
+	}
 	return 1;
 }
 
@@ -86,7 +90,7 @@ int GetWidestParticle(Image* binaryImage, int* widestParticleIndex)
 		if ( !success )	{  printf("Error: %d\n", imaqGetLastError()); return success;}			
 		
 		// if no particles found we quit here
-		if (numParticles == 0)  {  printf("No widest particle found...\n"); 	} 
+		if (numParticles == 0)  {  printf("No widest particle found...\n"); } 
 		
 		// find the widest particle
 		double widestParticleWidth = 0;
@@ -114,7 +118,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 		int widestParticleIndex = 0;
 		ParticleAnalysisReport Biggest;
 		
-	//Making the image usable
+	//Isolate the targets in the image
 		//Transform the camera image into a binary image (Reflecting Tape) with only the targets as "on"
 		//WantedType determines which method of thresholding is called
 		if(WantedType = IMAQ_IMAGE_RGB)
@@ -140,8 +144,10 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 			}
 		}
 		else {return 0; DPRINTF(LOG_INFO, "ProcessTheImage() does not support analysis of the wanted type.");}
-		//Make the binary image more readable for analysis
-		if(!CleanUpBinary(ReflectingTape))
+	
+	//Make the binary image more readable for analysis
+		//NOTE: As of now, CleanUpBinaryImage() does not do anything. 
+		if(!CleanUpBinary(ReflectingTape, DO_BINARY_IMAGE_CLEAN_UP))
 		{
 			int errCode = GetLastVisionError();
 			DPRINTF(LOG_INFO, "Binary Image enhancement failed - errorcode %i", errCode);
@@ -154,14 +160,23 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 	//Using usable image to return 
 		//Determine the wanted target: the central circle/the central circle and its strip-friend
 		//If it worked, analyze the particle
-		if(!GetWidestParticle(ReflectingTape, &widestParticleIndex)) {
+		if(!GetWidestParticle(ReflectingTape, &widestParticleIndex)) 
+		{
 			int errCode = GetLastVisionError();
 			DPRINTF(LOG_INFO, "Widest particle identification failed - errorcode %i", errCode);
 			char *errString = GetVisionErrorText(errCode);
 			DPRINTF(LOG_INFO, "errString= %s", errString);
 			return 0;
 		} 
-		else{frcParticleAnalysis(ReflectingTape, widestParticleIndex, &Biggest);}  
+		if(!frcParticleAnalysis(ReflectingTape, widestParticleIndex, &Biggest))
+		{
+			int errCode = GetLastVisionError();
+			DPRINTF(LOG_INFO, "Widest particle analysis failed - errorcode %i", errCode);
+			char *errString = GetVisionErrorText(errCode);
+			DPRINTF(LOG_INFO, "errString= %s", errString);
+			return 0;
+		}
+		
 		//Return the normalized center - points out which way to turn, accounting for camera's offset (if any)
 		*targetCenterNormalized = Biggest.center_mass_x_normalized - CAMERA_OFFSET;
 		return 1;
@@ -170,12 +185,51 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 //Processes the image, but also returns a picture for a snapshot
 int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType WantedType, Image* ColoredBinaryImage, ImageType type)  
 	{
-		return 0;
-	};
-
-
-/*
-if(!imaqCast(ColoredBinaryImage, ReflectingTape, type, NULL, -1))
+	//Defining the needed variables
+		Image* ReflectingTape = frcCreateImage(IMAQ_IMAGE_U8);
+		int widestParticleIndex = 0;
+		ParticleAnalysisReport Biggest;
+		
+	//Isolate the targets in the image
+		//Transform the camera image into a binary image (Reflecting Tape) with only the targets as "on"
+		//WantedType determines which method of thresholding is called
+		if(WantedType = IMAQ_IMAGE_RGB)
+		{
+			if(!IsolateLightTargetRGB(ReflectingTape, srcimage))
+			{
+				int errCode = GetLastVisionError();
+				DPRINTF(LOG_INFO, "RGB Isolation of targets to binary failed - errorcode %i", errCode);
+				char *errString = GetVisionErrorText(errCode);
+				DPRINTF(LOG_INFO, "errString= %s", errString);
+				return 0;
+			}
+		}
+		else if(WantedType = IMAQ_IMAGE_HSL)
+		{
+			if(!IsolateLightTargetHSL(ReflectingTape, srcimage))
+			{
+				int errCode = GetLastVisionError();
+				DPRINTF(LOG_INFO, "HSL Isolation of targets to binary failed - errorcode %i", errCode);
+				char *errString = GetVisionErrorText(errCode);
+				DPRINTF(LOG_INFO, "errString= %s", errString);
+				return 0;
+			}
+		}
+		else {return 0; DPRINTF(LOG_INFO, "ProcessTheImage() does not support analysis of the wanted type.");}
+	
+	//Make the binary image more readable for analysis
+		//NOTE: As of now, CleanUpBinaryImage() does not do anything. 
+		if(!CleanUpBinary(ReflectingTape, DO_BINARY_IMAGE_CLEAN_UP))
+		{
+			int errCode = GetLastVisionError();
+			DPRINTF(LOG_INFO, "Binary Image enhancement failed - errorcode %i", errCode);
+			char *errString = GetVisionErrorText(errCode);
+			DPRINTF(LOG_INFO, "errString= %s", errString);
+			return 0;
+		}
+		
+	//Return the Binary Image to the user in a readable form
+		if(!imaqCast(ColoredBinaryImage, ReflectingTape, type, NULL, -1))
 		{
 			int errCode = GetLastVisionError();
 			DPRINTF(LOG_INFO, "Returning a colored binary image failed - errorcode %i", errCode);
@@ -183,5 +237,35 @@ if(!imaqCast(ColoredBinaryImage, ReflectingTape, type, NULL, -1))
 			DPRINTF(LOG_INFO, "errString= %s", errString);
 			return 0;
 		}
+		
+		
+	//Using usable image to return 
+		//Determine the wanted target: the central circle/the central circle and its strip-friend
+		//If it worked, analyze the particle
+		if(!GetWidestParticle(ReflectingTape, &widestParticleIndex)) 
+		{
+			int errCode = GetLastVisionError();
+			DPRINTF(LOG_INFO, "Widest particle identification failed - errorcode %i", errCode);
+			char *errString = GetVisionErrorText(errCode);
+			DPRINTF(LOG_INFO, "errString= %s", errString);
+			return 0;
+		} 
+		if(!frcParticleAnalysis(ReflectingTape, widestParticleIndex, &Biggest))
+		{
+			int errCode = GetLastVisionError();
+			DPRINTF(LOG_INFO, "Widest particle analysis failed - errorcode %i", errCode);
+			char *errString = GetVisionErrorText(errCode);
+			DPRINTF(LOG_INFO, "errString= %s", errString);
+			return 0;
+		}
+		
+		//Return the normalized center - points out which way to turn, accounting for camera's offset (if any)
+		*targetCenterNormalized = Biggest.center_mass_x_normalized - CAMERA_OFFSET;
+		return 1;
+	};
+
+
+/*
+
 */
 
