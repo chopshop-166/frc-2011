@@ -21,7 +21,7 @@
 #include "nivision.h"
 
 // To locally enable debug printing: set true, to disable false
-#define DPRINTF if(false)dprintf
+#define DPRINTF if(true)dprintf
 
 // Sample in memory buffer
 struct abuf
@@ -125,6 +125,8 @@ CameraTask::~CameraTask(void)
 int CameraTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
+	bool found = false;
+	
 	// Register our logger
 	CameraLog sl;                   // log
 	
@@ -151,11 +153,11 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		WaitForNextLoop();
 		
 		/* Store a picture to cRIO */
-		TakeSnapshot("cRIOimage.jpg");
+		//TakeSnapshot("cRIOimage.jpg");
 				
 		/* Look for target */
-		//bool found = FindCircleTargets();
-		bool found = FindLightTargets();
+		//found = FindCircleTargets();
+		found = FindLightTargets();
 
 	    // Logging values if a valid target found
 		if (found) {
@@ -164,7 +166,7 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		
 		// JUST FOR DEBUGGING - give us time to look at the screen
 		// REMOVE THIS WAIT to go operational!
-		Wait(10.0);
+		Wait(8.0);
 	}
 	return (0);
 	
@@ -182,34 +184,51 @@ bool CameraTask::FindLightTargets()  {
 	// get the camera image
 	HSLImage * image = camera.GetImage();	
 	Image *imaqImage = image->GetImaqImage();
+	if (!imaqImage) {
+		DPRINTF (LOG_INFO,"GetImaqImage failed - errorcode %i",GetLastVisionError()); 
+	}
 
 	// write the hsl image to cRIO
 	SaveImage("imaqImage.jpg", imaqImage);
 #endif
 #if 1
 	// get the camera image
-	Image *cameraImage = frcCreateImage(IMAQ_IMAGE_RGB);
-	success = camera.GetImage(cameraImage);
-	if (!success) {
-		int errCode = GetLastVisionError();
-		DPRINTF (LOG_INFO,"GetImage failed - errorcode %i", errCode);
-		char *errString = GetVisionErrorText(errCode);
-		DPRINTF (LOG_INFO,"errString= %s", errString);
-		return false;
+	Image* cameraImage = frcCreateImage(IMAQ_IMAGE_HSL);
+	if (!cameraImage) {
+		DPRINTF (LOG_INFO,"frcCreateImage failed - errorcode %i",GetLastVisionError()); 
 	}
-	// write the hsl image to cRIO
-	SaveImage("imaqImage.jpg", cameraImage);
+	Wait(1.0);
+	if ( myHandle->camera.IsFreshImage() ) {
+		if ( !myHandle->camera.GetImage(cameraImage) ) {
+			int errCode = GetLastVisionError();
+			DPRINTF (LOG_INFO,"\nGetImage failed errCode=%i", errCode);
+			char *errString = GetVisionErrorText(errCode);
+			DPRINTF (LOG_INFO,"errString= %s", errString);
+		  	// always dispose of image objects when done
+		  	frcDispose(cameraImage);
+		  	return false;
+		} else { 	
+			DPRINTF (LOG_INFO,"\nGetImage WORKED, calling SaveImage");
+			SaveImage("cameraImage.jpg", cameraImage);
+		} 
+	} else {
+		DPRINTF (LOG_INFO,"\nStale image - didn't get a good image\n");
+	}
 #endif	
 	
 	// do processing
 	double normalizedTargetReturn;
 	Image* processedImage = frcCreateImage(IMAQ_IMAGE_U8);
 	
-	success = ProcessTheImage(cameraImage, &normalizedTargetReturn, processedImage, IMAQ_IMAGE_U8);
+	success = ProcessTheImage(cameraImage, &normalizedTargetReturn, IMAQ_IMAGE_HSL,
+			processedImage, IMAQ_IMAGE_U8);
 	DPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
 
 	// write the binary image to cRIO
-	SaveImage("binImage.jpg", processedImage);
+	if (success) {
+		DPRINTF(LOG_DEBUG, "\nWriting BINARY image");
+		SaveImage("binImage.jpg", processedImage);
+	}
 		
 	//delete images;
 	frcDispose(cameraImage);
@@ -236,18 +255,6 @@ bool CameraTask::FindCircleTargets()  {
 	
 		if (targets.size()) {
 			DPRINTF(LOG_DEBUG, "targetImage SCORE = %f", targets[0].m_score);
-			/* do this in the target code
-			Image *tmpImage;
-			//if (frcCopyImage(tmpImage, (Image*)image) ) { 
-			if (imaqCast(NULL, image, IMAQ_IMAGE_HSL,NULL, -1) ) { 
-					int errCode = GetLastVisionError();
-					DPRINTF (LOG_INFO,"frcCopyImage failed - errorcode %i", errCode);
-					char *errString = GetVisionErrorText(errCode);
-					DPRINTF (LOG_INFO,"errString= %s", errString);
-			}
-			else {
-				SaveImage("targetImage.jpg", tmpImage);
-			} */
 		}	
 		//delete image;
 		delete image;
