@@ -46,7 +46,6 @@ public:
 unsigned int DriveLog::PutOne(float x, float y, float z, double LF, double RF, double LB, double RB, float FrontLeftWS, float FrontRightWS, float BackLeftWS, float BackRightWS)
 {
 	struct abuf166 *ob;               // Output buffer
-	printf("We PUT ONE");
 	// Get output buffer
 	if ((ob = (struct abuf166 *)GetNextBuffer(sizeof(struct abuf166)))) {
 		
@@ -76,7 +75,6 @@ unsigned int DriveLog::PutOne(float x, float y, float z, double LF, double RF, d
 unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf166 *ab = (struct abuf166 *)nptr;
-	printf("We're in Dump Buffer");
 	// Output the data into the file
 	fprintf(ofile, "%u,%u,%4.5f,%1.6f,%1.6f,%1.6f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
@@ -154,8 +152,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 {
 	// Register our logger
 	DriveLog sl;                   // log
-	lHandle->RegisterLogger(&sl);
-
+	
 	// Let the world know we're in
 	DPRINTF(LOG_DEBUG,"In the 166 Drive task\n");
 	
@@ -163,7 +160,9 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	WaitForGoAhead();
 	
 	lHandle = Robot::getInstance();
-    // General main loop (while in Autonomous or Tele mode)
+	lHandle->RegisterLogger(&sl);
+	
+	// General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		x=proxy->get("Joy1X");
 		y=proxy->get("Joy1Y");
