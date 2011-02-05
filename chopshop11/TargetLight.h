@@ -32,7 +32,7 @@ int ProcessTheImage(Image* ImageSource, double* targetCenterNormalized)
  		The closer to 1, the closer the target is to the right of the camera view.
  		The closer to -1, the closer the target is to the left of the camera view.
  */
-int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, ImageType* type)
+int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, ImageType type)
 /*
  This has the exact same script as above, but it returns a "colored binary image" as well. 
  In other words, the input image "ColoredBinaryImage" is transformed into a color image with binary properties. 

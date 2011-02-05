@@ -105,7 +105,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized)
 	*targetCenterNormalized = Biggest.center_mass_x_normalized - CAMERA_OFFSET;
 };
 
-int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, ImageType* type)  
+int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, ImageType type)  
 {
 //Defining the needed variables
 	Image* ReflectingTape = frcCreateImage(IMAQ_IMAGE_U8);
@@ -116,7 +116,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* Colo
 	//Transform the camera image into a binary image (Reflecting Tape) with only the targets as "on"
 	IsolateLightTarget(ReflectingTape, srcimage); 
 	//Return the binary image as the requested type for testing
-	imaqCast(ColoredBinaryImage, ReflectingTape, *type, NULL, -1); 
+	imaqCast(ColoredBinaryImage, ReflectingTape, type, NULL, -1); 
 	
 //Using usable image to return 
 	//Determine the wanted target: the central circle/the central circle and its strip-friends
