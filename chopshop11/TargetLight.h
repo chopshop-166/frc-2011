@@ -49,6 +49,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* Colo
  */
 
 private int GetWidestParticle(Image* binaryImage, int* widestParticleIndex);
-/*DO NOT CALL THIS FUNCTION
+private int IsolateLightTarget();
+/*DO NOT CALL THESE FUNCTIONS
  This function is called in ProcessTheImage.
  */
