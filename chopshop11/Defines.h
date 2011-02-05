@@ -10,9 +10,6 @@
 
 #pragma once
 
-#define AUTO_SPEED_FORWARD (-0.4)
-#define AUTO_SPEED_TURN (0.3)
-
 #define DRIVER_AUTOASSIST ("Joy1B5")
 #define COPILOT_AUTOASSIST ("Joy3B11")
 

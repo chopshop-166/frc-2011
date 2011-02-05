@@ -16,6 +16,7 @@
 
 #include "WPILib.h"
 #include "AutoAssist.h"
+#include "PhotoElectric.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -109,46 +110,85 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	
-	float r,y;
 	int curr_value;
+	x=y=r=lane=height=0;
+	
+	// "Actual" values to map to
+	double height_list[] = {0,30,37,67,74,104,111};
+	(void) height_list;
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
+		if(proxy->exists("Autonomous Lane")) {
+			lane = (int)proxy->get("Autonomous Lane");
+		}
+		if(proxy->exists("Autonomous Height")) {
+			height = (int)proxy->get("Autonomous Height");
+		}
+		wpi_assert(height >= 0 && height <= 6);
+		
 		if(proxy->get(DRIVER_AUTOASSIST)) {
+			// The driver activated their autoassist
 			proxy->UseUserJoystick(1,false);
 			proxy->set(DRIVER_AUTOASSIST, Joystick(1).GetRawButton(6));
 			if(proxy->exists("LineDirection")) {
 				curr_value = (int)proxy->get("LineDirection");
+				x=0;
 				switch(curr_value) {
-					case 2:
-						y = 0;
+					case lRight:
+						r = -AUTOASSIST_SPEED_TURN;
+						break;
 						r = 0;
 						break;
-					case 1:
-						y = 0;
-						r = -AUTO_SPEED_TURN;
+					case lLeft:
+						r = AUTOASSIST_SPEED_TURN;
 						break;
-					case 0:
-						y = AUTO_SPEED_FORWARD;
-						r = 0;
-						break;
-					case -1:
-						y = 0;
-						r = AUTO_SPEED_TURN;
-						break;
-					case -2:
+					case lNo_Line:
 						break;
 					default:
-						r=y=0;
+						r=0;
 						break;
 				}
-				proxy->set("joy1x",0);
-				proxy->set("joy1y",y);
-				proxy->set("joy1R",r);
 			}
+			if(proxy->exists("FrontSonar")) {
+				if(proxy->get("FrontSonar") < AUTOASSIST_SONAR_FRONT_DISTANCE) {
+					y=AUTOASSIST_SPEED_FORWARD;
+				}
+			}
+			if(lane == 1 && proxy->exists("LeftSonar")) {
+				// We want it to go to the left
+				if(proxy->get("LeftSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
+					
+				}
+			} else if(lane == 5 && proxy->exists("RightSonar")) {
+				// We want it to go to the right
+				if(proxy->get("RightSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
+					
+				}
+			}
+			
+			proxy->set("joy1x",x);
+			proxy->set("joy1y",y);
+			proxy->set("joy1r",r);
 		} else {
+			// Driver autoassist disabled
 			proxy->UseUserJoystick(1,true);
 		}
+		
+		if(proxy->exists(COPILOT_AUTOASSIST)) {
+			// Handle copilot stuffs here
+			proxy->UseUserJoystick(3,false);
+			proxy->set(DRIVER_AUTOASSIST, Joystick(1).GetRawButton(6));
+			if(lane == 3) {
+				
+			} else {
+				
+			}
+		} else {
+			// Copilot autoassist disabled
+			proxy->UseUserJoystick(3,true);
+		}
+		
 		sl.PutOne();
 		
 		// Wait for our next lap

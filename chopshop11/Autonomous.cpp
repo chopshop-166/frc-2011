@@ -35,6 +35,12 @@ AutonomousTask::AutonomousTask() {
 	if(height_choice & 4) {
 		height_choice = 0;
 	}
+	
+	height_choice = 2 * height_choice;
+	if(height_choice != 3) {
+		// We're going for the slightly lowered ones
+		height_choice = height_choice - 1;
+	}
 	proxy->add("Autonomous Height");
 	proxy->set("Autonomous Height", height_choice);
 	

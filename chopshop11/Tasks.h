@@ -4,10 +4,11 @@
 // Example:
 // DriveClass DriveObject;
 // No need for pointers, or anything else, if it's derived from Team166Task
-#define SUITCASE_BOT 1
+#define SUITCASE_BOT 0
 
 // tasks that run everywhere
 CameraTask CameraObject;
+TimerTask TimerTaskObject;
 
 
 #if SUITCASE_BOT
@@ -18,11 +19,10 @@ CameraTask CameraObject;
 // tasks that cannot run on suitcase
 AutonomousAssistTask AutoAssistObject;
 ColorLightTask ColorLightObject;
-//DriveTask DriveObject;
+DriveTask DriveObject;
 HeightTask166 HeightTaskObject;
 MiniDeploy166 MiniDeployObject;
 PhotoElectricTask PhotoElectricObject;
 PneumaticsTask PneumaticsTaskObject;
 SonarTask SonarTaskObject;
-TimerTask TimerTaskObject;
 #endif
