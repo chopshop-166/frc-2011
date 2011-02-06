@@ -103,7 +103,11 @@ void DriveTask::Normalize(double *wheelSpeeds)
 }
 
 // task constructor
-DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(10), fr(5), bl(7), br(9)
+DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80),
+	fl(FRONT_LEFT_JAGUAR),
+	fr(FRONT_RIGHT_JAGUAR),
+	bl(BACK_LEFT_JAGUAR),
+	br(BACK_RIGHT_JAGUAR)
 {
 	Start((char *)"166DriveTask", DRIVE_TASK_CYCLE_TIME);
 	wheelSpeeds[0] = wheelSpeeds[1] = wheelSpeeds[2] = wheelSpeeds[3] = 0;

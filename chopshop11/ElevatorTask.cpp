@@ -75,7 +75,9 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25)
+ElevatorTask::ElevatorTask(void):
+	elevator(ELEVATOR_JAGUAR),
+	speed(ELEVATOR_SPEED)
 {
 	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);	
 	// Register the proxy

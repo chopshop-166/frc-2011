@@ -78,7 +78,10 @@ unsigned int SonarLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-SonarTask::SonarTask(void): SonarCenter(1), SonarLeft(2), SonarRight(3)
+SonarTask::SonarTask(void):
+	SonarCenter(SONAR_CENTER),
+	SonarLeft(SONAR_LEFT),
+	SonarRight(SONAR_RIGHT)
 {
 	Start((char *)"166SonarTask", SONAR_CYCLE_TIME);
 	// Register the proxy
