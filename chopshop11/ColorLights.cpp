@@ -51,25 +51,25 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
     // General main loop (while in Autonomous or Tele mode)
 	while (true) 
 	{
-		if(proxy->get("Joy3B4N")) //red
+		if(proxy->get(RED_LIGHT_BUTTON)) //red
 		{
 			red.Set(Relay::kOn);
 			white.Set(Relay::kOff);
 			blue.Set(Relay::kOff);
 		}
-		else if(proxy->get("Joy3B3N")) //white
+		else if(proxy->get(WHITE_LIGHT_BUTTON)) //white
 		{
 			white.Set(Relay::kOn);
 			red.Set(Relay::kOff);
 			blue.Set(Relay::kOff);
 		}
-		else if(proxy->get("Joy3B5N")) //blue
+		else if(proxy->get(BLUE_LIGHT_BUTTON)) //blue
 		{
 			blue.Set(Relay::kOn);
 			red.Set(Relay::kOff);
 			white.Set(Relay::kOff);
 		}
-		else if(proxy->get("Joy3B2N")) //clear all
+		else if(proxy->get(TURNOFF_LIGHTS_BUTTON)) //clear all
 		{
 			red.Set(Relay::kOff);
 			white.Set(Relay::kOff);

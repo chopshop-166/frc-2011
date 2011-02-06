@@ -28,7 +28,7 @@ class ElevatorLog : public MemoryLog
 public:
 	ElevatorLog() : MemoryLog(
 			sizeof(struct abuf), ELEVATOR_CYCLE_TIME, "Elevator",
-			"Seconds,Nanoseconds,Elapsed Time,Target Height\n"
+			"Seconds,Nanoseconds,Elapsed Time\n"
 			) {
 		return;
 	};
@@ -112,7 +112,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		elevator.Set(proxy->get("Joy3Y"));
+		elevator.Set(proxy->get(ELEVATOR_AXIS));
 		
         // Logging any values
 		sl.PutOne();

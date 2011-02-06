@@ -37,10 +37,10 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	
-	void Normalize(double*);
+	void Normalize(float*);
 	float m_maxOutput;
 	int syncGroup;
 	CANJaguar fl, fr, bl, br;
-	double x,y,r;
-	double wheelSpeeds[4];
+	float x,y,r;
+	float wheelSpeeds[4];
 };
