@@ -164,9 +164,9 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	// General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		x=proxy->get("Joy1X");
-		y=proxy->get("Joy1Y");
-		r=proxy->get("Joy1R");
+		x=proxy->get(DRIVE_STRAFE);
+		y=proxy->get(DRIVE_FOWARD_BACK);
+		r=proxy->get(DRIVE_ROTATION);
 		
 		wheelSpeeds[0] = x - y + r;
 		wheelSpeeds[1] = -x - y - r;
