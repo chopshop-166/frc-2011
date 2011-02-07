@@ -76,7 +76,7 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf166 *ab = (struct abuf166 *)nptr;
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f,%1.6f,%1.6f,%1.6f\n",
+	fprintf(ofile, "%u,%u,%4.5f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->x,
@@ -145,6 +145,15 @@ DriveTask::~DriveTask(void)
 {
 	return;
 };
+
+double DriveTask::SignPreservingSquare(double raw)
+{
+	if(raw < 0) {
+		return -(raw * raw);
+	} else {
+		return (raw * raw);
+	}
+}
 	
 // Main function of the task
 int DriveTask::Main(int a2, int a3, int a4, int a5,
@@ -164,9 +173,12 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	// General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		x=proxy->get(DRIVE_STRAFE);
-		y=proxy->get(DRIVE_FOWARD_BACK);
-		r=proxy->get(DRIVE_ROTATION);
+		x=SignPreservingSquare(proxy->get(DRIVE_STRAFE));
+		y=SignPreservingSquare(proxy->get(DRIVE_FOWARD_BACK));
+		r=SignPreservingSquare(proxy->get(DRIVE_ROTATION));
+		SmartDashboard::Log(x,"X");
+		SmartDashboard::Log(y,"Y");
+		SmartDashboard::Log(r,"R");
 		
 		wheelSpeeds[0] = x - y + r;
 		wheelSpeeds[1] = -x - y - r;

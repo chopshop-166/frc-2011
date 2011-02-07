@@ -17,6 +17,7 @@
 #define BLUE_LIGHT_BUTTON ("Joy3B5N")
 #define TURNOFF_LIGHTS_BUTTON ("Joy3B2N")
 #define DEPLOY_MINIBOT ("joy1b6")
+
 #define DRIVE_STRAFE ("Joy1X")
 #define DRIVE_FOWARD_BACK ("Joy1Y")
 #define DRIVE_ROTATION ("Joy1R")
@@ -30,10 +31,10 @@
 #define COMPRESSORRELAY (1)
 #define PRESSURETRANSDUCER (7)
 
-#define FRONT_LEFT_JAGUAR (10)
-#define FRONT_RIGHT_JAGUAR (5)
-#define BACK_LEFT_JAGUAR (7)
-#define BACK_RIGHT_JAGUAR (9)
+#define FRONT_LEFT_JAGUAR (4)
+#define FRONT_RIGHT_JAGUAR (3)
+#define BACK_LEFT_JAGUAR (6)
+#define BACK_RIGHT_JAGUAR (5)
 
 #define SONAR_CENTER (1)
 #define SONAR_RIGHT (2)

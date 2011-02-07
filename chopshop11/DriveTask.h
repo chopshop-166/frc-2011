@@ -38,6 +38,7 @@ private:
 	Robot *lHandle;            // Local handle
 	
 	void Normalize(float*);
+	double SignPreservingSquare(double);
 	float m_maxOutput;
 	int syncGroup;
 	CANJaguar fl, fr, bl, br;
