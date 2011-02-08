@@ -122,6 +122,7 @@ int MemoryLog::DumpToFile(void)
 			BuffersRequested, BuffersObtained);
 	BuffersRequested = 0;
 	BuffersObtained = 0;
+	clock_gettime(CLOCK_REALTIME, &starttime);
 	
 	// Back to caller
 	return (0);
