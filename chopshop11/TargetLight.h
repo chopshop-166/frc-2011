@@ -49,6 +49,8 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
     	IMAQ_IMAGE_RGB_U64         = 6,           //The image type is 64-bit unsigned RGB color.
   
  */
+int ProcessImageForCircles(Image* srcimage, double* targetCenterNormalized);
+
 
 int GetWidestParticle(Image* binaryImage, int* widestParticleIndex);
 int IsolateLightTarget(Image* ReflectingTape, Image* srcimage);

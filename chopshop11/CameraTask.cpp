@@ -22,6 +22,8 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(true)dprintf
+#define DO_COLOR_THRESHOLD true
+#define DO_ELLIPSE_DETECTION false
 
 // Sample in memory buffer
 struct abuf
@@ -104,8 +106,8 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 	
 	SetDebugFlag ( DEBUG_SCREEN_ONLY  ) ;
 	camera.WriteResolution(AxisCamera::kResolution_320x240);
-	//camera.WriteCompression(20);
-	//camera.WriteBrightness(0);
+	camera.WriteCompression(20);
+	camera.WriteBrightness(0);
 
 	int fps = camera.GetMaxFPS();
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
@@ -217,22 +219,42 @@ bool CameraTask::FindLightTargets()  {
 #endif	
 	
 	// do processing
+#if DO_COLOR_THRESHOLD
 	double normalizedTargetReturn;
 	Image* processedImage = frcCreateImage(IMAQ_IMAGE_U8);
 	
 	success = ProcessTheImage(cameraImage, &normalizedTargetReturn, IMAQ_IMAGE_HSL,
 			processedImage, IMAQ_IMAGE_U8);
 	DPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
+	DPRINTF (LOG_INFO,"Normalized Center = %f", normalizedTargetReturn);
 
 	// write the binary image to cRIO
 	if (success) {
 		DPRINTF(LOG_DEBUG, "\nWriting BINARY image");
-		SaveImage("binImage.jpg", processedImage);
+		SaveImage("binImage.jpeg", processedImage);
 	}
+#endif
+	
+#if DO_ELLIPSE_DETECTION
+	double normalizedTargetReturn;
+		Image* processedImage = frcCreateImage(IMAQ_IMAGE_U8);
+		
+		success = ProcessImageForCircles(cameraImage, &normalizedTargetReturn);
+		DPRINTF (LOG_INFO,"ProcessImageForCircles success code=%i", success);
+		DPRINTF (LOG_INFO,"Normalized Center = %f", normalizedTargetReturn);
+
+		// write the binary image to cRIO
+		if (success) {
+			DPRINTF(LOG_DEBUG, "\nWriting BINARY image");
+			SaveImage("binImage.jpg", processedImage);
+		}
+#endif
 		
 	//delete images;
 	frcDispose(cameraImage);
+#if DO_COLOR_THRESHOLD
 	frcDispose(processedImage);
+#endif
 	
 	DPRINTF(LOG_DEBUG, "success value = %i\n", success);
 	return true;
