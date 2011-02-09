@@ -138,12 +138,27 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 					case lRight:
 						r = -AUTOASSIST_SPEED_TURN;
 						break;
+					case lCenter:
 						r = 0;
 						break;
 					case lLeft:
 						r = AUTOASSIST_SPEED_TURN;
 						break;
 					case lNo_Line:
+						break;
+					case lFork:
+						if(proxy->exists("Autonomous Lane")) {
+							if(proxy->get("Autonomous Lane")==2) {
+								x = -AUTOASSIST_SPEED_STRAFE;
+							}
+							else if(proxy->get("Autonomous Lane")==4) {
+								x = AUTOASSIST_SPEED_STRAFE;
+							}
+							else {
+								x = 0;
+							}
+						}
+						r = 0;
 						break;
 					default:
 						r=0;
