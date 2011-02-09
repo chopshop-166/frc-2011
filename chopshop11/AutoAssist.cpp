@@ -158,12 +158,16 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			if(lane == 1 && proxy->exists("LeftSonar")) {
 				// We want it to go to the left
 				if(proxy->get("LeftSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
-					
+					x = -AUTOASSIST_SPEED_STRAFE;
+				} else {
+					x = 0;
 				}
 			} else if(lane == 5 && proxy->exists("RightSonar")) {
 				// We want it to go to the right
 				if(proxy->get("RightSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
-					
+					x = AUTOASSIST_SPEED_STRAFE;
+				} else {
+					x = 0;
 				}
 			}
 			
