@@ -119,22 +119,34 @@ void DriveTask::Normalize(float *wheelSpeeds)
 }
 
 // task constructor
-DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80),
-	fl(FRONT_LEFT_JAGUAR, CANJaguar::kSpeed),
-	fr(FRONT_RIGHT_JAGUAR, CANJaguar::kSpeed),
-	bl(BACK_LEFT_JAGUAR, CANJaguar::kSpeed),
-	br(BACK_RIGHT_JAGUAR, CANJaguar::kSpeed)
+#if 1
+DriveTask::DriveTask(void): m_maxOutput(267.3), syncGroup(0x80), fl(4, CANJaguar::kSpeed), fr(3, CANJaguar::kSpeed), bl(6, CANJaguar::kSpeed), br(5, CANJaguar::kSpeed)
+#else 
+DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(4), fr(3), bl(6), br(5)
+#endif 
 {
 	Start((char *)"166DriveTask", DRIVE_TASK_CYCLE_TIME);
 	wheelSpeeds[0] = wheelSpeeds[1] = wheelSpeeds[2] = wheelSpeeds[3] = 0;
+	//Front Left
 	fl.ConfigEncoderCodesPerRev(1024);
-	fl.SetSpeedReference(CANJaguar::kSpeedRef_QuadEncoder);
+	fl.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
+	fl.SetPID(0.400, 0.003, 0.00);
+	fl.EnableControl(0);
+	//Front Right
 	fr.ConfigEncoderCodesPerRev(1024);
-	fr.SetSpeedReference(CANJaguar::kSpeedRef_QuadEncoder);
+	fr.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
+	fr.SetPID(0.400, 0.003, 0.00);
+	fr.EnableControl(0);
+	//Back Left
 	bl.ConfigEncoderCodesPerRev(1024);
-	bl.SetSpeedReference(CANJaguar::kSpeedRef_QuadEncoder);
+	bl.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
+	bl.SetPID(0.400, 0.003, 0.00);
+	bl.EnableControl(0);
+	//Back Right
 	br.ConfigEncoderCodesPerRev(1024);
-	br.SetSpeedReference(CANJaguar::kSpeedRef_QuadEncoder);
+	br.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
+	br.SetPID(0.400, 0.003, 0.00);
+	br.EnableControl(0);
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	return;
