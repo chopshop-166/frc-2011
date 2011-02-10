@@ -40,7 +40,8 @@
 #define SONAR_RIGHT (2)
 #define SONAR_LEFT (3)
 
-#define HEIGHT_INPUT (8)
+#define HEIGHT_INPUT_A (5)
+#define HEIGHT_INPUT_B (6)
 
 #define ELEVATOR_JAGUAR (11)
 #define ELEVATOR_SPEED (0.25)

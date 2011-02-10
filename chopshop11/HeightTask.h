@@ -19,7 +19,8 @@
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
 #define HEIGHTTASK_CYCLE_TIME (20) // 20ms
-#define InchesPerVolt 0.02  // This value is given in Spec sheet for LX-PA-50
+//6.2831 circumference of the drum...
+#define ClicksPerInch 162.977  //1024/circumference of drum
 
 class HeightTask166 : public Team166Task
 {
@@ -41,6 +42,6 @@ private:
 	Robot *lHandle;             // Local handle
 	
 	float HowHigh;
-	AnalogChannel Height;
+	Encoder Height;
 	
 };
