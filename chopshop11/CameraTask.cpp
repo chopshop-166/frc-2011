@@ -219,42 +219,26 @@ bool CameraTask::FindLightTargets()  {
 #endif	
 	
 	// do processing
-#if DO_COLOR_THRESHOLD
 	double normalizedTargetReturn;
 	Image* processedImage = frcCreateImage(IMAQ_IMAGE_HSL);
+	bool CanSeeTargets;
 	
-	success = ProcessTheImage(cameraImage, &normalizedTargetReturn, IMAQ_IMAGE_HSL,
-			processedImage, IMAQ_IMAGE_U8);
+	success = ProcessTheImage(cameraImage, &normalizedTargetReturn,
+			processedImage, IMAQ_IMAGE_U8, &CanSeeTargets);
 	DPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
-	DPRINTF (LOG_INFO,"Normalized Center = %f", normalizedTargetReturn);
+	DPRINTF (LOG_INFO,"Normalized Center = %f CanSeeTargets = %d", normalizedTargetReturn, CanSeeTargets);
 
 	// write the binary image to cRIO
 	if (success) {
 		DPRINTF(LOG_DEBUG, "\nWriting HSL image");
 		SaveImage("hslImage.jpg", processedImage);
 	}
-#endif
-	
-#if DO_ELLIPSE_DETECTION
-	double normalizedTargetReturn;
-		Image* processedImage = frcCreateImage(IMAQ_IMAGE_U8);
-		
-		success = ProcessImageForCircles(cameraImage, &normalizedTargetReturn);
-		DPRINTF (LOG_INFO,"ProcessImageForCircles success code=%i", success);
-		DPRINTF (LOG_INFO,"Normalized Center = %f", normalizedTargetReturn);
 
-		// write the binary image to cRIO
-		if (success) {
-			DPRINTF(LOG_DEBUG, "\nWriting BINARY image");
-			SaveImage("binImage.jpg", processedImage);
-		}
-#endif
 		
 	//delete images;
 	frcDispose(cameraImage);
-#if DO_COLOR_THRESHOLD
 	frcDispose(processedImage);
-#endif
+
 	
 	DPRINTF(LOG_DEBUG, "success value = %i\n", success);
 	return true;
