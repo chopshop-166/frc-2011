@@ -75,7 +75,7 @@ unsigned int HeightTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 }
 
 // task constructor
-HeightTask166::HeightTask166(void): Height(8)
+HeightTask166::HeightTask166(void): Height(5)
 {
 	Start((char *)"166HeightTask", HEIGHTTASK_CYCLE_TIME);
 	
@@ -112,13 +112,14 @@ int HeightTask166::Main(int a2, int a3, int a4, int a5,
 	proxy->add("ElevatorHeight");
 	
 	// Set variable values
-	HowHigh = 0;
-		
+	HowHigh = 0;//Lowest value ever!!!
+	int clicks=0;//Non existant yet
     // General main loop (while in Autonomous or Tele mode)
+	Height.start;
 	while (true) {
-		
+		clicks=Height.Get();//Saves value of clicks
 		// set howhigh to the height of the elevator
-		HowHigh = InchesPerVolt*Height.GetVoltage();
+		HowHigh = ClicksPerInch*clicks;
 		// tell proxy how high we are
 		proxy->set("ElevatorHeight",HowHigh);
 		SmartDashboard::Log(HowHigh, "Height");
