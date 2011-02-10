@@ -25,7 +25,7 @@
 #include "TrackAPI.h"
 #include "stdlib.h"
 
-#define CAMERA_OFFSET 0.0
+#define CAMERA_OFFSET 0.00625
 #define DO_BINARY_IMAGE_CLEAN_UP false
 
 // To locally enable debug printing: set true, to disable false
@@ -36,6 +36,7 @@
 
 //Converts the camera image by RGB threshold into a binary image with targets highlighted
 //Debugging info is reported where function is called
+#if 0
 int IsolateLightTargetRGB(Image* ReflectingTape, Image* srcimage)
 	{
 	//Create binary image with threshold technique
@@ -52,7 +53,7 @@ int IsolateLightTargetRGB(Image* ReflectingTape, Image* srcimage)
 		if(!frcColorThreshold(ReflectingTape, srcimage, IMAQ_RGB, &R_Range, &G_Range, &B_Range)) {return 0;} 
 		return 1;
 	}
-
+#endif
 //Converts the camera image by HSL threshold into a binary image with targets highlighted
 //Debugging info is reported where function is called
 int IsolateLightTargetHSL(Image* ReflectingTape, Image* srcimage)
@@ -64,9 +65,9 @@ int IsolateLightTargetHSL(Image* ReflectingTape, Image* srcimage)
 		//Define the HSL minimum values 
 			H_Range.minValue = 0;
 			H_Range.maxValue = 255;
-			S_Range.minValue = 0;
-			S_Range.maxValue = 45;
-			L_Range.minValue = 200;	
+			S_Range.minValue = 43;
+			S_Range.maxValue = 255;
+			L_Range.minValue = 155;	
 			L_Range.maxValue = 255;
 			/*H_Range.minValue = 0;
 			H_Range.maxValue = 255;
@@ -74,7 +75,7 @@ int IsolateLightTargetHSL(Image* ReflectingTape, Image* srcimage)
 			S_Range.maxValue = 255;
 			L_Range.minValue = 0;	
 			L_Range.maxValue = 255;*/
-		if(!frcColorThreshold(ReflectingTape, srcimage, IMAQ_HSL, &H_Range, &S_Range, &L_Range)) {return 0;} 
+		if(!frcColorThreshold(ReflectingTape, srcimage, 255, IMAQ_HSL, &H_Range, &S_Range, &L_Range)) {return 0;} 
 		return 1;
 	}
 
@@ -186,7 +187,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 	//Isolate the targets in the image
 		//Transform the camera image into a binary image (Reflecting Tape) with only the targets as "on"
 		//WantedType determines which method of thresholding is called
-		if(WantedType == IMAQ_IMAGE_RGB)
+		/*if(WantedType == IMAQ_IMAGE_RGB)
 		{
 			if(!IsolateLightTargetRGB(ReflectingTape, srcimage))
 			{
@@ -197,7 +198,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 				return 0;
 			} else {DPRINTF(LOG_INFO, "Isolated targets by RGB.");}
 		}
-		else if(WantedType == IMAQ_IMAGE_HSL)
+		else */if(WantedType == IMAQ_IMAGE_HSL)
 		{
 			if(!IsolateLightTargetHSL(ReflectingTape, srcimage))
 			{
@@ -260,7 +261,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 	//Isolate the targets in the image
 		//Transform the camera image into a binary image (Reflecting Tape) with only the targets as "on"
 		//WantedType determines which method of thresholding is called
-		if(WantedType == IMAQ_IMAGE_RGB)
+		/*if(WantedType == IMAQ_IMAGE_RGB)
 		{
 			if(!IsolateLightTargetRGB(ReflectingTape, srcimage))
 			{
@@ -271,7 +272,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 				return 0;
 			} else {DPRINTF(LOG_INFO, "Isolated targets by RGB.");}
 		}
-		else if(WantedType == IMAQ_IMAGE_HSL)
+		else */if(WantedType == IMAQ_IMAGE_HSL)
 		{
 			if(!IsolateLightTargetHSL(ReflectingTape, srcimage))
 			{
@@ -283,6 +284,15 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 			} else {DPRINTF(LOG_INFO, "Isolated targets by HSL.");}
 		}
 		else {return 0; DPRINTF(LOG_INFO, "ProcessTheImage() does not support analysis of the wanted type.");}
+		
+		
+		if(!imaqDuplicate(ColoredBinaryImage, ReflectingTape))
+				{
+					int errCode = GetLastVisionError();
+					DPRINTF(LOG_INFO, "Duplication failed - errorcode %i", errCode);
+					char *errString = GetVisionErrorText(errCode);
+					DPRINTF(LOG_INFO, "errString= %s", errString);
+				} else { DPRINTF(LOG_INFO, "YES YES YES!");}
 	
 	//Make the binary image more readable for analysis
 		//Debugging info is REPORTED IN THE FUNCTION BY ITSELF.
@@ -318,6 +328,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 		
 	//Return the normalized center - points out which way to turn, accounting for camera's offset (if any)
 		*targetCenterNormalized = Biggest.center_mass_x_normalized - CAMERA_OFFSET;
+		DPRINTF(LOG_INFO, "Widest Particle width = %d", Biggest.boundingRect.width);
 		DPRINTF(LOG_INFO, "Found target center.");
 		/*
 	//Returning colored binary image to user
@@ -335,14 +346,11 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
 					DPRINTF(LOG_INFO, "errString= %s", errString);
 					return 0;
 				} else {DPRINTF(LOG_INFO, "Changed Image Type");}*/
-		Point P;
-		P.x = 1;
-		P.y = 1;
-		imaqCopyRect(ColoredBinaryImage, srcimage, IMAQ_NO_RECT, P); 
+		
 			
 		return 1;
 };
-
+# if 0
 int ProcessImageForCircles(Image* srcimage, double* targetCenterNormalized)
 {
 	//Extract Luminance plane
@@ -395,7 +403,7 @@ int ProcessImageForCircles(Image* srcimage, double* targetCenterNormalized)
 			
 		return 1;
 }
-
+#endif
 /*
 if(!imaqCast(ColoredBinaryImage, ReflectingTape, type, NULL, -1))
 		{

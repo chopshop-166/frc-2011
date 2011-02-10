@@ -19,7 +19,7 @@
 #include "VisionAPI.h"
 #include "TrackAPI.h"
 
-#define CAMERA_OFFSET 0.0 //This needs to be changed in the .CPP file too
+#define CAMERA_OFFSET 0.00625 //This needs to be changed in the .CPP file too
 
 // A return of 0 is a fail.
 // A return of non-zero-ness is a win. Success. 

@@ -168,7 +168,7 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		
 		// JUST FOR DEBUGGING - give us time to look at the screen
 		// REMOVE THIS WAIT to go operational!
-		Wait(8.0);
+		Wait(.5);
 	}
 	return (0);
 	
@@ -221,7 +221,7 @@ bool CameraTask::FindLightTargets()  {
 	// do processing
 #if DO_COLOR_THRESHOLD
 	double normalizedTargetReturn;
-	Image* processedImage = frcCreateImage(IMAQ_IMAGE_U8);
+	Image* processedImage = frcCreateImage(IMAQ_IMAGE_HSL);
 	
 	success = ProcessTheImage(cameraImage, &normalizedTargetReturn, IMAQ_IMAGE_HSL,
 			processedImage, IMAQ_IMAGE_U8);
@@ -230,8 +230,8 @@ bool CameraTask::FindLightTargets()  {
 
 	// write the binary image to cRIO
 	if (success) {
-		DPRINTF(LOG_DEBUG, "\nWriting BINARY image");
-		SaveImage("binImage.jpeg", processedImage);
+		DPRINTF(LOG_DEBUG, "\nWriting HSL image");
+		SaveImage("hslImage.jpg", processedImage);
 	}
 #endif
 	
