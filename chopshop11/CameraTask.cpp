@@ -136,6 +136,9 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 	proxy = Proxy::getInstance();
 	DPRINTF(LOG_INFO,"CameraTask got proxy");
 	
+	proxy->add("CanSeeCameraTargets");
+	proxy->add("NormalizedTargetCenter");
+	
 	
 	// Let the world know we're in
 	DPRINTF(LOG_INFO,"In the 166 Camera task\n");
@@ -234,6 +237,8 @@ bool CameraTask::FindLightTargets()  {
 		SaveImage("hslImage.jpg", processedImage);
 	}
 
+	proxy->set("CanSeeCameraTargets", (float) CanSeeTargets);
+	proxy->set("NormalizedTargetCenter", normalizedTargetReturn);
 		
 	//delete images;
 	frcDispose(cameraImage);
