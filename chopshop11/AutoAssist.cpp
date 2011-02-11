@@ -113,10 +113,6 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	int curr_value;
 	x=y=r=lane=height=0;
 	
-	// "Actual" values to map to
-	double height_list[] = {0,30,37,67,74,104,111};
-	(void) height_list;
-	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		if(proxy->exists("Autonomous Lane")) {

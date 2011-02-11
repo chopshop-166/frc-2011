@@ -111,20 +111,30 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	
-	enum {hNone=-1, hFloor=0, hLow=1, hMid=2, hHigh=3} target_type = hNone;
+	enum {hNone=-1, hFloor=0,
+		hLowSide=1, hLowCenter=2,
+		hMidSide=3, hMidCenter=4,
+		hHighSide=5, hHighCenter=6} target_type = hNone;
 	
 	// Fix these heights once we can test
-	float target_heights[4] = {0,10,15,20};
+	// They currently don't take the arm height into account
+	const double height_list[] = {0,30,37,67,74,104,111};
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		if(proxy->get("Joy1B6")) {
-			target_type = hHigh;
-		} else if(proxy->get("Joy1B7")) {
-			target_type = hMid;
-		} else if(proxy->get("Joy1B8")) {
-			target_type = hLow;
-		} else if(proxy->get("Joy1B9")) {
+		if(proxy->get(TOP_CENTER_PRESET_BUTTON)) {
+			target_type = hHighCenter;
+		} else if(proxy->get(MIDDLE_CENTER_PRESET_BUTTON)) {
+			target_type = hMidCenter;
+		} else if(proxy->get(LOW_CENTER_PRESET_BUTTON)) {
+			target_type = hLowCenter;
+		} else if(proxy->get(TOP_SIDE_PRESET_BUTTON)) {
+			target_type = hHighSide;
+		} else if(proxy->get(MIDDLE_SIDE_PRESET_BUTTON)) {
+			target_type = hMidSide;
+		} else if(proxy->get(LOW_SIDE_PRESET_BUTTON)) {
+			target_type = hLowSide;
+		} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
 			target_type = hFloor;
 		} else {
 			target_type = hNone;
@@ -134,7 +144,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			float current = proxy->get("ElevatorHeight");
 			elevator.Set((target < current)? speed : ((target > current)? -speed : 0));
 		} else {
-			elevator.Set(proxy->get("Joy3Y"));
+			elevator.Set(proxy->get(ELEVATOR_AXIS));
 		}
 		
         // Logging any values
