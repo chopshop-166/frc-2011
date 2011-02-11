@@ -19,14 +19,13 @@
 #include "VisionAPI.h"
 #include "TrackAPI.h"
 
-#define CAMERA_OFFSET 0.0 //This needs to be changed in the .CPP file too
+#define CAMERA_OFFSET 0.00625 //This needs to be changed in the .CPP file too
 
 // A return of 0 is a fail.
 // A return of non-zero-ness is a win. Success. 
 
 
 // THESE ARE THE FUNCTIONS THAT MAY BE CALLED:
-int ProcessTheImage(Image* ImageSource, double* targetCenterNormalized, ImageType WantedType);
 /*
  This returns a value between -1 and 1. 
  	Set the CAMERA_OFFSET to perceived center (at distance wanted)
@@ -34,7 +33,7 @@ int ProcessTheImage(Image* ImageSource, double* targetCenterNormalized, ImageTyp
  		The closer to 1, the closer the target is to the right of the camera view.
  		The closer to -1, the closer the target is to the left of the camera view.
  */
-int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType WantedType, Image* ColoredBinaryImage, ImageType type);
+int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, ImageType type, bool* CanSeeTargets);
 /*
  This has the exact same script as above, but it returns a "colored binary image" as well. 
  In other words, the input image "ColoredBinaryImage" is transformed into a color image with binary properties. 
@@ -49,9 +48,12 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, ImageType W
     	IMAQ_IMAGE_RGB_U64         = 6,           //The image type is 64-bit unsigned RGB color.
   
  */
+int ProcessImageForCircles(Image* srcimage, double* targetCenterNormalized);
+
 
 int GetWidestParticle(Image* binaryImage, int* widestParticleIndex);
 int IsolateLightTarget(Image* ReflectingTape, Image* srcimage);
+int CleanUpBinary(Image* ReflectingTape, bool AttemptCleanUp);
 /*DO NOT CALL THESE FUNCTIONS
  This function is called in ProcessTheImage.
  */

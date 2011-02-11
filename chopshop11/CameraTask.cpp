@@ -22,6 +22,8 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(true)dprintf
+#define DO_COLOR_THRESHOLD true
+#define DO_ELLIPSE_DETECTION false
 
 // Sample in memory buffer
 struct abuf
@@ -104,8 +106,8 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 	
 	SetDebugFlag ( DEBUG_SCREEN_ONLY  ) ;
 	camera.WriteResolution(AxisCamera::kResolution_320x240);
-	//camera.WriteCompression(20);
-	//camera.WriteBrightness(0);
+	camera.WriteCompression(20);
+	camera.WriteBrightness(0);
 
 	int fps = camera.GetMaxFPS();
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
@@ -133,6 +135,9 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	DPRINTF(LOG_INFO,"CameraTask got proxy");
+	
+	proxy->add("CanSeeCameraTargets");
+	proxy->add("NormalizedTargetCenter");
 	
 	
 	// Let the world know we're in
@@ -166,7 +171,7 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		
 		// JUST FOR DEBUGGING - give us time to look at the screen
 		// REMOVE THIS WAIT to go operational!
-		Wait(8.0);
+		Wait(.5);
 	}
 	return (0);
 	
@@ -218,21 +223,27 @@ bool CameraTask::FindLightTargets()  {
 	
 	// do processing
 	double normalizedTargetReturn;
-	Image* processedImage = frcCreateImage(IMAQ_IMAGE_U8);
+	Image* processedImage = frcCreateImage(IMAQ_IMAGE_HSL);
+	bool CanSeeTargets;
 	
-	success = ProcessTheImage(cameraImage, &normalizedTargetReturn, IMAQ_IMAGE_HSL,
-			processedImage, IMAQ_IMAGE_U8);
+	success = ProcessTheImage(cameraImage, &normalizedTargetReturn,
+			processedImage, IMAQ_IMAGE_U8, &CanSeeTargets);
 	DPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
+	DPRINTF (LOG_INFO,"Normalized Center = %f CanSeeTargets = %d", normalizedTargetReturn, CanSeeTargets);
 
 	// write the binary image to cRIO
 	if (success) {
-		DPRINTF(LOG_DEBUG, "\nWriting BINARY image");
-		SaveImage("binImage.jpg", processedImage);
+		DPRINTF(LOG_DEBUG, "\nWriting HSL image");
+		SaveImage("hslImage.jpg", processedImage);
 	}
+
+	proxy->set("CanSeeCameraTargets", (float) CanSeeTargets);
+	proxy->set("NormalizedTargetCenter", normalizedTargetReturn);
 		
 	//delete images;
 	frcDispose(cameraImage);
 	frcDispose(processedImage);
+
 	
 	DPRINTF(LOG_DEBUG, "success value = %i\n", success);
 	return true;
