@@ -22,6 +22,7 @@
 #define DRIVE_FOWARD_BACK ("Joy1Y")
 #define DRIVE_ROTATION ("Joy1R")
 #define ELEVATOR_AXIS ("Joy3Y")
+#define WRIST_AXIS ("Joy3X")
 
 #define FLOOR_PRESET_BUTTON ("Joy3BT")
 #define TOP_SIDE_PRESET_BUTTON ("Joy3B6")

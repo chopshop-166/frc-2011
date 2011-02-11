@@ -81,7 +81,7 @@ unsigned int AutoAssistLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 AutonomousAssistTask::AutonomousAssistTask(void)
 {
-	Start((char *)"166TemplateTask", AUTOASSIST_CYCLE_TIME);
+	Start((char *)"166AutoAssistTask", AUTOASSIST_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	
@@ -111,17 +111,13 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	lHandle->RegisterLogger(&sl);
 	
 	int curr_value;
-	x=y=r=lane=height=0;
+	x=y=r=lane=0;
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		if(proxy->exists("Autonomous Lane")) {
 			lane = (int)proxy->get("Autonomous Lane");
 		}
-		if(proxy->exists("Autonomous Height")) {
-			height = (int)proxy->get("Autonomous Height");
-		}
-		wpi_assert(height >= 0 && height <= 6);
 		
 		if(proxy->get(DRIVER_AUTOASSIST)) {
 			// The driver activated their autoassist
