@@ -18,6 +18,7 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
+	int target_type;
 	
 };
 
@@ -28,7 +29,7 @@ class ElevatorLog : public MemoryLog
 public:
 	ElevatorLog() : MemoryLog(
 			sizeof(struct abuf), ELEVATOR_CYCLE_TIME, "Elevator",
-			"Seconds,Nanoseconds,Elapsed Time\n"
+			"Seconds,Nanoseconds,Elapsed Time,Target Height\n"
 			) {
 		return;
 	};
@@ -37,12 +38,12 @@ public:
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
 	
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+	unsigned int PutOne(int);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
 
-unsigned int ElevatorLog::PutOne(void)
+unsigned int ElevatorLog::PutOne(int height)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -50,6 +51,7 @@ unsigned int ElevatorLog::PutOne(void)
 	if ((ob = (struct abuf *)GetNextBuffer(sizeof(struct abuf)))) {
 		
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
+		ob->target_type = height;
 		
 		return (sizeof(struct abuf));
 	}
@@ -64,9 +66,10 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f\n",
+	fprintf(ofile, "%u,%u,%4.5f, %d\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+			ab->target_type
 	);
 	
 	// Done
@@ -75,9 +78,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void):
-	elevator(ELEVATOR_JAGUAR),
-	speed(ELEVATOR_SPEED)
+ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25)
 {
 	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);	
 	// Register the proxy
@@ -110,12 +111,34 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	
+	enum {hNone=-1, hFloor=0, hLow=1, hMid=2, hHigh=3} target_type = hNone;
+	
+	// Fix these heights once we can test
+	float target_heights[4] = {0,10,15,20};
+	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		elevator.Set(proxy->get(ELEVATOR_AXIS));
+		if(proxy->get("Joy1B6")) {
+			target_type = hHigh;
+		} else if(proxy->get("Joy1B7")) {
+			target_type = hMid;
+		} else if(proxy->get("Joy1B8")) {
+			target_type = hLow;
+		} else if(proxy->get("Joy1B9")) {
+			target_type = hFloor;
+		} else {
+			target_type = hNone;
+		}
+		if(target_type != hNone) {
+			float target = target_heights[target_type];
+			float current = proxy->get("ElevatorHeight");
+			elevator.Set((target < current)? speed : ((target > current)? -speed : 0));
+		} else {
+			elevator.Set(proxy->get("Joy3Y"));
+		}
 		
         // Logging any values
-		sl.PutOne();
+		sl.PutOne(target_type);
 		
 		// Wait for our next lap
 		WaitForNextLoop();		

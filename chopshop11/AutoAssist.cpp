@@ -194,20 +194,6 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			proxy->UseUserJoystick(1,true);
 		}
 		
-		if(proxy->exists(COPILOT_AUTOASSIST)) {
-			// Handle copilot stuffs here
-			proxy->UseUserJoystick(3,false);
-			proxy->set(DRIVER_AUTOASSIST, Joystick(1).GetRawButton(6));
-			if(lane == 3) {
-				
-			} else {
-				
-			}
-		} else {
-			// Copilot autoassist disabled
-			proxy->UseUserJoystick(3,true);
-		}
-		
 		sl.PutOne();
 		
 		// Wait for our next lap
