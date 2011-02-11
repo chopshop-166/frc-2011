@@ -139,8 +139,8 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		} else {
 			target_type = hNone;
 		}
-		if(target_type != hNone) {
-			float target = target_heights[target_type];
+		if(target_type != hNone && fabs(proxy->get("ElevatorHeight")) < 0.1) {
+			float target = height_list[target_type];
 			float current = proxy->get("ElevatorHeight");
 			elevator.Set((target < current)? speed : ((target > current)? -speed : 0));
 		} else {
