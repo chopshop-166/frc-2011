@@ -18,6 +18,9 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 #define ELEVATOR_CYCLE_TIME (25) // 10ms
 
+// Speed the elevator moves at
+#define ELEVATOR_SPEED (0.25)
+
 
 class ElevatorTask : public Team166Task
 {

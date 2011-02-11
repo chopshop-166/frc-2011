@@ -19,7 +19,7 @@ struct abuf
 {
 	struct timespec tp;               // Time of snapshot
 	int target_type;
-	
+	float motor_speed;
 };
 
 //  Memory Log
@@ -29,7 +29,7 @@ class ElevatorLog : public MemoryLog
 public:
 	ElevatorLog() : MemoryLog(
 			sizeof(struct abuf), ELEVATOR_CYCLE_TIME, "Elevator",
-			"Seconds,Nanoseconds,Elapsed Time,Target Height\n"
+			"Seconds,Nanoseconds,Elapsed Time,Target Height, Elevator Speed\n"
 			) {
 		return;
 	};
@@ -38,12 +38,12 @@ public:
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
 	
-	unsigned int PutOne(int);     // Log the values needed-add in arguments
+	unsigned int PutOne(int, float);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
 
-unsigned int ElevatorLog::PutOne(int height)
+unsigned int ElevatorLog::PutOne(int height, float motor_speed)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -52,6 +52,7 @@ unsigned int ElevatorLog::PutOne(int height)
 		
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		ob->target_type = height;
+		ob->motor_speed = motor_speed;
 		
 		return (sizeof(struct abuf));
 	}
@@ -66,10 +67,11 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f, %d\n",
+	fprintf(ofile, "%u,%u,%4.5f, %d, %f1.6\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
-			ab->target_type
+			ab->target_type,
+			ab->motor_speed
 	);
 	
 	// Done
@@ -136,10 +138,10 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			target_type = hLowSide;
 		} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
 			target_type = hFloor;
-		} else {
+		} else if(fabs(proxy->get("ElevatorHeight")) >= 0.1) {
 			target_type = hNone;
 		}
-		if(target_type != hNone && fabs(proxy->get("ElevatorHeight")) < 0.1) {
+		if(target_type != hNone) {
 			float target = height_list[target_type];
 			float current = proxy->get("ElevatorHeight");
 			elevator.Set((target < current)? speed : ((target > current)? -speed : 0));
@@ -148,7 +150,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
         // Logging any values
-		sl.PutOne(target_type);
+		sl.PutOne(target_type, elevator.Get());
 		
 		// Wait for our next lap
 		WaitForNextLoop();		
