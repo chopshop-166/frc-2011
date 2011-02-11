@@ -39,6 +39,7 @@ private:
 	
 	void Normalize(float*);
 	double SignPreservingSquare(double);
+	double TruncateDouble(double);
 	float m_maxOutput;
 	int syncGroup;
 	CANJaguar fl, fr, bl, br;
