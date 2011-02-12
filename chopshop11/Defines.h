@@ -17,6 +17,7 @@
 #define BLUE_LIGHT_BUTTON ("Joy3B5N")
 #define TURNOFF_LIGHTS_BUTTON ("Joy3B2N")
 #define DEPLOY_MINIBOT ("joy1b6")
+#define GRIPPER_BUTTON ("Joy1BT")
 
 #define DRIVE_STRAFE ("Joy1X")
 #define DRIVE_FOWARD_BACK ("Joy1Y")
@@ -60,3 +61,9 @@
 #define AUTONOMOUS_DIAL_LANE (5)
 #define AUTONOMOUS_DIAL_HEIGHT (6)
 #define PRESSURETRANSDUCER (7)
+
+// Pneumatics bumper
+#define MINIBOT_DEPLOYER_EXTENDER (1)
+#define MINIBOT_DEPLOYER (2)
+#define GRIPPER_OPEN (3)
+#define GRIPPER_CLOSE (4)

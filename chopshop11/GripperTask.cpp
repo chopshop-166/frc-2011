@@ -1,17 +1,16 @@
 /*******************************************************************************
-*  Project   		: Chopshop11
-*  File Name  		: MiniDeployTask.cpp     
+*  Project   		: Framework
+*  File Name  		: TaskTemplate.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  File Description	: Task to handle minibot deployment logic
+*  Creation Date	: January 18, 2010
+*  File Description	: Template source file for tasks, with template functions
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
-/*  Copyright (c) MHS Chopshop Team 166, 2011.  All Rights Reserved.          */
+/*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
-
 #include "WPILib.h"
-#include "MiniDeployTask.h"
-#include "Solenoid.h"
+#include "GripperTask.h"
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
@@ -20,27 +19,31 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
+	int state;						// Open vs closed
 };
 
 //  Memory Log
-class MiniDeployLog : public MemoryLog
+// <<CHANGEME>>
+class GripperLog : public MemoryLog
 {
 public:
-	MiniDeployLog() : MemoryLog(
-			sizeof(struct abuf), MINIDEPLOY_CYCLE_TIME, "MiniDeploy",
-			"Seconds,Nanoseconds,Elapsed Time\n"
+	GripperLog() : MemoryLog(
+			sizeof(struct abuf), TEMPLATE_CYCLE_TIME, "gripper",
+			"Seconds,Nanoseconds,Elapsed Time,Gripper State\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
-	~MiniDeployLog() {return;};
+	~GripperLog() {return;};
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+	// <<CHANGEME>>
+	unsigned int PutOne(int);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-unsigned int MiniDeployLog::PutOne(void)
+// <<CHANGEME>>
+unsigned int GripperLog::PutOne(int state)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -49,6 +52,7 @@ unsigned int MiniDeployLog::PutOne(void)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
+		ob->state = state;
 		return (sizeof(struct abuf));
 	}
 	
@@ -57,14 +61,15 @@ unsigned int MiniDeployLog::PutOne(void)
 }
 
 // Format the next buffer for file output
-unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
+unsigned int GripperLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f\n",
+	fprintf(ofile, "%u,%u,%4.5f,%d\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
+			,ab->state
 	);
 	
 	// Done
@@ -73,70 +78,48 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTENDER), MiniDeployer(MINIBOT_DEPLOYER),
-		Deploy_Limit(4), SolenoidExtended(5), MiniDeploySwinger(12)
+GripperTask::GripperTask(void):gripper(GRIPPER_OPEN,GRIPPER_CLOSE)
 {
-	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
+	Start((char *)"166GripperTask", TEMPLATE_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	Deploy_State = kWait;
+	// ^^^ Rename those ^^^
+	// <<CHANGEME>>
 	return;
 };
 	
 // task destructor
-MiniDeploy166::~MiniDeploy166(void)
+GripperTask::~GripperTask(void)
 {
 	return;
 };
 	
 // Main function of the task
-int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
+int GripperTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
-	// Register our logger
-	MiniDeployLog sl;                   // log
-		
+	GripperLog sl;                   // log
+	
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 MiniDeploy task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Gripper task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
+	// lHandle = Robot::getInstance() MUST go after this, otherwise code breaks
 	WaitForGoAhead();
-	// Register main robot task
+	
+	// Register our logger
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
-	
-    // General main loop (while in Autonomous or Tele mode)
-	while (true){
-		switch (Deploy_State) {
-			case kWait:
-			{
-				if(proxy->get(DEPLOY_MINIBOT)) {
-					if((proxy->get("MatchTimer") <= 10) || (proxy->get("joy1b7"))) {
-						Deploy_State = kSwing;
-					}
-				}
-			}
-			case kSwing:
-			{
-				MiniDeploySwinger.Set(25);
-				if (!MiniDeploySwinger.GetForwardLimitOK()){
-					MiniDeploySwinger.Set(0);
-					Deploy_State = kExtend;
-				}
-			}
-			case kExtend:
-				DeployerExtender.Set(1);
-				if(SolenoidExtended.Get()) {
-					Deploy_State = kDeploy;
-				}
-			case kDeploy:
-				MiniDeployer.Set(1);
-		}
-        // Logging any values
-		sl.PutOne();
 		
-		// Wait for our next loop
-		WaitForNextLoop();		
+    // General main loop (while in Autonomous or Tele mode)
+	while (true) {
+		gripper.Set(proxy->get(GRIPPER_BUTTON));
+		
+		// Make this match the declaraction above
+		sl.PutOne(gripper.Get());
+		
+		// Wait for our next lap
+		WaitForNextLoop();
 	}
 	return (0);
 	

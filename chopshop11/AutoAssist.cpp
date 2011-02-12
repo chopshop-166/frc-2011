@@ -8,12 +8,6 @@
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
-/*------------------------------------------------------------------------------*/
-/* Find & Replace "Template" with the name you would like to give this task     */
-/* Find & Replace "Testing" with the name you would like to give this task      */
-/* Find & Replace "TaskTemplate" with the name you would like to give this task */
-/*------------------------------------------------------------------------------*/
-
 #include "WPILib.h"
 #include "AutoAssist.h"
 #include "PhotoElectric.h"
