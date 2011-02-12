@@ -129,7 +129,12 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Fix these heights once we can test
 	// They currently don't take the arm height into account
-	const double height_list[] = {0,30,37,67,74,104,111};
+	//
+	const double angle_list[] = {0,30,37,67,74,104,111};
+	/* Since the pot has a range of 0-270 degrees and 0-5 volts,
+	 * We know that the degrees per volt has to be 270/5, or 54
+	 */ 
+	const double degrees_per_volt = 54.;
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
@@ -151,17 +156,23 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			target_type = hNone;
 		}
 		if(target_type != hNone) {
-			float target = height_list[target_type];
-			float current = proxy->get("ElevatorHeight");
+			// Choose a "target" angle
+			float target = angle_list[target_type];
+			// Get the arm angle
+			float current =
+				//armCan.GetPosition();
+				proxy->get("ElevatorHeight");
 			// Just get rid of annoying compiler warnings
 			(void)target,(void)current;
+			// Set the speed to go in the proper direction
 //			armJag.Set((target < current)? speed : ((target > current)? -speed : 0));
 		} else {
 //			armJag.Set(proxy->get(ELEVATOR_AXIS));
 		}
 		
-		SmartDashboard::Log(armChan.GetValue(),"Potentiometer Value");
-		SmartDashboard::Log(armChan.GetVoltage(),"Potentiometer Voltage");
+		double volts = armChan.GetVoltage();
+		SmartDashboard::Log(degrees_per_volt*volts,"Potentiometer Value");
+		SmartDashboard::Log(volts,"Potentiometer Voltage");
 		
         // Logging any values
 		sl.PutOne();
