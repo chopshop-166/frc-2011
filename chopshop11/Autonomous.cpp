@@ -41,8 +41,6 @@ AutonomousTask::AutonomousTask() {
 		// We're going for the slightly lowered ones
 		height_choice = height_choice - 1;
 	}
-	proxy->add("Autonomous Height");
-	proxy->set("Autonomous Height", height_choice);
 	
 	string copilot_button_name = "";
 	switch(height_choice) {

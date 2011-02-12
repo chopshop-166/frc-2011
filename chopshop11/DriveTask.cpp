@@ -120,7 +120,7 @@ void DriveTask::Normalize(float *wheelSpeeds)
 
 // task constructor
 #if 1
-DriveTask::DriveTask(void): m_maxOutput(267.3), syncGroup(0x80), fl(4, CANJaguar::kSpeed), fr(3, CANJaguar::kSpeed), bl(6, CANJaguar::kSpeed), br(5, CANJaguar::kSpeed)
+DriveTask::DriveTask(void): m_maxOutput(500), syncGroup(0x80), fl(4, CANJaguar::kSpeed), fr(3, CANJaguar::kSpeed), bl(6, CANJaguar::kSpeed), br(5, CANJaguar::kSpeed)
 #else 
 DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(4), fr(3), bl(6), br(5)
 #endif 
@@ -130,22 +130,22 @@ DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(4), fr(3), bl(6)
 	//Front Left
 	fl.ConfigEncoderCodesPerRev(1024);
 	fl.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
-	fl.SetPID(0.400, 0.003, 0.00);
+	fl.SetPID(0.150, 0.004, 0.00);
 	fl.EnableControl(0);
 	//Front Right
 	fr.ConfigEncoderCodesPerRev(1024);
 	fr.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
-	fr.SetPID(0.400, 0.003, 0.00);
+	fr.SetPID(0.150, 0.004, 0.00);
 	fr.EnableControl(0);
 	//Back Left
 	bl.ConfigEncoderCodesPerRev(1024);
 	bl.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
-	bl.SetPID(0.400, 0.003, 0.00);
+	bl.SetPID(0.150, 0.004, 0.00);
 	bl.EnableControl(0);
 	//Back Right
 	br.ConfigEncoderCodesPerRev(1024);
 	br.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
-	br.SetPID(0.400, 0.003, 0.00);
+	br.SetPID(0.150, 0.005, 0.00);
 	br.EnableControl(0);
 	// Register the proxy
 	proxy = Proxy::getInstance();
@@ -166,6 +166,12 @@ double DriveTask::SignPreservingSquare(double raw)
 		return (raw * raw);
 	}
 }
+double DriveTask::TruncateDouble(double input)
+{
+	char buffer[6];
+	sprintf(buffer,"%1.2f", input);
+	return atof(buffer);
+}
 	
 // Main function of the task
 int DriveTask::Main(int a2, int a3, int a4, int a5,
@@ -182,15 +188,28 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
-	
+	float FLSpeed = 0;
+	float FRSpeed = 0;
+	float BLSpeed = 0;
+	float BRSpeed = 0;
 	// General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		x=SignPreservingSquare(proxy->get(DRIVE_STRAFE));
-		y=SignPreservingSquare(proxy->get(DRIVE_FOWARD_BACK));
-		r=SignPreservingSquare(proxy->get(DRIVE_ROTATION));
+		FLSpeed = fl.GetSpeed();
+		FRSpeed = fr.GetSpeed();
+		BLSpeed = bl.GetSpeed();
+		BRSpeed = br.GetSpeed();
+		x=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_STRAFE)));
+		y=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_FOWARD_BACK)));
+		r=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_ROTATION)));
+		
 		SmartDashboard::Log(x,"X");
 		SmartDashboard::Log(y,"Y");
 		SmartDashboard::Log(r,"R");
+		
+		SmartDashboard::Log(FLSpeed, "FL Wheel Speed");
+		SmartDashboard::Log(FRSpeed, "FR Wheel Speed");
+		SmartDashboard::Log(BLSpeed, "BL Wheel Speed");
+		SmartDashboard::Log(BRSpeed, "BR Wheel Speed");
 		
 		wheelSpeeds[0] = x - y + r;
 		wheelSpeeds[1] = -x - y - r;
@@ -206,7 +225,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		
 		CANJaguar::UpdateSyncGroup(syncGroup);
 
-		sl.PutOne(x,y,r,fl.GetSpeed(),fr.GetSpeed(), bl.GetSpeed(), br.GetSpeed(), wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3]);
+		sl.PutOne(x,y,r,FLSpeed,FRSpeed,BLSpeed,BRSpeed, wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3]);
 		
 		// Wait for our next lap
 		WaitForNextLoop();
