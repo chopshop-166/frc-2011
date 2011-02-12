@@ -18,9 +18,9 @@
 struct abuf166
 {
 	struct timespec tp;             // Time of snapshot
-	float x,y,z;					// Joystick axis
 	double LF_Speed, RF_Speed, LB_Speed, RB_Speed;
 	float WS1, WS2, WS3, WS4; 
+	int LF_Fault, RF_Fault, LB_Fault, RB_Fault;
 };
 
 //  Memory Log
@@ -29,7 +29,7 @@ class DriveLog : public MemoryLog
 public:
 	DriveLog() : MemoryLog(
 			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "DriveTask",
-			"Seconds,Nanoseconds,Elapsed Time,X,Y,Z,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS\n" // Put the names of the values in here, comma-seperated
+			"Seconds,Nanoseconds,Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS, LF_Faults, RF_Faults, LB_Faults, RB_Faults\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
@@ -38,12 +38,14 @@ public:
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
 	
-	unsigned int PutOne(float,float,float,double,double,double, double, float, float, float, float);     // Log the values needed-add in arguments
+	unsigned int PutOne(double,double,double, double, float, float, float, float, int, int, int, int);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
 
-unsigned int DriveLog::PutOne(float x, float y, float z, double LF, double RF, double LB, double RB, float FrontLeftWS, float FrontRightWS, float BackLeftWS, float BackRightWS)
+unsigned int DriveLog::PutOne(double LF, double RF, double LB, double RB,
+		float FrontLeftWS, float FrontRightWS, float BackLeftWS, float BackRightWS,
+		int LF_Faults, int RF_Faults, int LB_Faults, int RB_Faults)
 {
 	struct abuf166 *ob;               // Output buffer
 	// Get output buffer
@@ -51,9 +53,6 @@ unsigned int DriveLog::PutOne(float x, float y, float z, double LF, double RF, d
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
-		ob->x = x;
-		ob->y = y;
-		ob->z = z;
 		ob->LF_Speed = LF;
 		ob->RF_Speed = RF;
 		ob->LB_Speed = LB;
@@ -62,6 +61,11 @@ unsigned int DriveLog::PutOne(float x, float y, float z, double LF, double RF, d
 		ob->WS2 = FrontRightWS;
 		ob->WS3 = BackLeftWS;
 		ob->WS4 = BackRightWS;
+		ob->LF_Fault = LF_Faults;
+		ob->RF_Fault = RF_Faults;
+		ob->LB_Fault = LB_Faults;
+		ob->RB_Fault = RB_Faults;
+		
 		// Add any values to be logged here
 		
 		return (sizeof(struct abuf166));
@@ -76,12 +80,9 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf166 *ab = (struct abuf166 *)nptr;
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f\n",
+	fprintf(ofile, "%u,%u,%4.5f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%d,%d,%d,%d\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
-			ab->x,
-			ab->y,
-			ab->z,
 			ab->LF_Speed,
 			ab->LB_Speed,
 			ab->RF_Speed,
@@ -89,7 +90,11 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 			ab->WS1,
 			ab->WS2,
 			ab->WS3,
-			ab->WS4
+			ab->WS4,
+			ab->LF_Fault,
+			ab->RF_Fault,
+			ab->LB_Fault,
+			ab->RB_Fault
 	);
 	
 	// Done
@@ -185,7 +190,23 @@ int DriveTask::LostComms(CANJaguar& CheckJag, int location)
 	}
 	return 1;
 }
-	
+string DriveTask::ControlModeString(CANJaguar::ControlMode ControlModeIn)
+{
+	switch(ControlModeIn) {
+		case CANJaguar::kVoltage:
+			return "Voltage";
+		case CANJaguar::kCurrent:
+			return "Current";
+		case CANJaguar::kPercentVbus:
+			return "Percent Vbus";
+		case CANJaguar::kPosition:
+			return "Position";
+		case CANJaguar::kSpeed:
+			return "Speed";
+		default:
+			return "";
+	}
+}
 // Main function of the task
 int DriveTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
@@ -227,6 +248,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		wheelSpeeds[1] = -x - y - r;
 		wheelSpeeds[2] = -x - y + r;
 		wheelSpeeds[3] = x - y - r;
+		
 		if ((++valuethrottle) % 10 ==0)
 		{
 			LostComms(fl, 0);
@@ -262,12 +284,12 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 			br.Set(-wheelSpeeds[3]* m_maxOutput, syncGroup);
 		}
 		
-		
-		
-		
 		CANJaguar::UpdateSyncGroup(syncGroup);
 
-		sl.PutOne(x,y,r,actualSpeed[0],actualSpeed[1],actualSpeed[2],actualSpeed[3], wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3]);
+		sl.PutOne(actualSpeed[0],actualSpeed[1],actualSpeed[2],actualSpeed[3],
+				wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3],
+				fl.GetFaults(), fr.GetFaults(), bl.GetFaults(), br.GetFaults()
+				);
 		
 		// Wait for our next lap
 		WaitForNextLoop();

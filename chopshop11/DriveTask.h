@@ -12,6 +12,7 @@
 
 #include "WPILib.h"
 #include "Robot.h"
+#include "string"
 
 //
 // This constant defines how often we want this task to run in the form
@@ -41,6 +42,7 @@ private:
 	double SignPreservingSquare(double);
 	double TruncateDouble(double);
 	int LostComms(CANJaguar&, int);
+	string ControlModeString(CANJaguar::ControlMode);
 	float m_maxOutput;
 	int syncGroup;
 	CANJaguar fl, fr, bl, br;
