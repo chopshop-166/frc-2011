@@ -37,7 +37,9 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	
-	Relay red;
-	Relay white;
-	Relay blue;
+	Relay RedWhite;
+	Relay Blue;
+//	Relay red;
+//	Relay white;
+//	Relay blue;
 };

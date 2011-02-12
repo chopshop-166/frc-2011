@@ -42,9 +42,8 @@
 
 // Relays
 #define COMPRESSORRELAY (1)
-#define RED_COLOR_LIGHT (4)
-#define WHITE_COLOR_LIGHT (5)
-#define BLUE_COLOR_LIGHT (6)
+#define RED_WHITE_COLOR_LIGHT (4)
+#define BLUE_COLOR_LIGHT (5)
 
 // Digital I/O
 #define LEFTPHOTOSENSE (1)

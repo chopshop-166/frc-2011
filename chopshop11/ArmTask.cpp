@@ -159,11 +159,11 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			// Choose a "target" angle
 			float target = angle_list[target_type];
 			// Get the arm angle
-			float current =
+			float currentAngle =
 				//armCan.GetPosition();
 				proxy->get("ElevatorHeight");
 			// Just get rid of annoying compiler warnings
-			(void)target,(void)current;
+			(void)target,(void)currentAngle;
 			// Set the speed to go in the proper direction
 //			armJag.Set((target < current)? speed : ((target > current)? -speed : 0));
 		} else {
@@ -178,7 +178,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		sl.PutOne();
 		
 		// Wait for our next lap
-		WaitForNextLoop();		
+		WaitForNextLoop();
 	}
 	return (0);
 	
