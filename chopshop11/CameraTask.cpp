@@ -21,9 +21,7 @@
 #include "nivision.h"
 
 // To locally enable debug printing: set true, to disable false
-#define DPRINTF if(true)dprintf
-#define DO_COLOR_THRESHOLD true
-#define DO_ELLIPSE_DETECTION false
+#define DPRINTF if(false)dprintf
 
 // Sample in memory buffer
 struct abuf
@@ -227,7 +225,7 @@ bool CameraTask::FindLightTargets()  {
 	bool CanSeeTargets;
 	
 	success = ProcessTheImage(cameraImage, &normalizedTargetReturn,
-			processedImage, IMAQ_IMAGE_U8, &CanSeeTargets);
+			processedImage, &CanSeeTargets);
 	DPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
 	DPRINTF (LOG_INFO,"Normalized Center = %f CanSeeTargets = %d", normalizedTargetReturn, CanSeeTargets);
 

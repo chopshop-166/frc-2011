@@ -10,12 +10,6 @@
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
 /*----------------------------------------------------------------------------*/
 
-/*------------------------------------------------------------------------------*/
-/* Find & Replace "Template" with the name you would like to give this task     */
-/* Find & Replace "Testing" with the name you would like to give this task      */
-/* Find & Replace "TaskTemplate" with the name you would like to give this task */
-/*------------------------------------------------------------------------------*/
-
 #include "WPILib.h"
 #include "Robot.h"
 #include "CameraTask.h"
@@ -25,11 +19,11 @@
 #include "TrackAPI.h"
 #include "stdlib.h"
 
-#define CAMERA_OFFSET 0.00625
-#define DO_BINARY_IMAGE_CLEAN_UP false
+#define CAMERA_OFFSET (0.00625)
+#define DO_BINARY_IMAGE_CLEAN_UP (true)
 
 // To locally enable debug printing: set true, to disable false
-#define DPRINTF if(true)dprintf
+#define DPRINTF if(false)dprintf
 //"Most of the vision functions return an integer value, 1 if the call was successful, and 0 if unsuccessful."
 
 
@@ -44,9 +38,9 @@ int IsolateLightTargetHSL(Image* ReflectingTape, Image* srcimage)
 		//Define the HSL minimum values 
 			H_Range.minValue = 0;
 			H_Range.maxValue = 255;
-			S_Range.minValue = 43;
-			S_Range.maxValue = 255;
-			L_Range.minValue = 155;	
+			S_Range.minValue = 0;
+			S_Range.maxValue = 100;
+			L_Range.minValue = 200;	
 			L_Range.maxValue = 255;
 		if(!frcColorThreshold(ReflectingTape, srcimage, 255, IMAQ_HSL, &H_Range, &S_Range, &L_Range)) {return 0;} 
 		return 1;
@@ -60,7 +54,7 @@ int CleanUpBinary(Image* ReflectingTape, bool AttemptCleanUp)
 	if (AttemptCleanUp)
 	{
 
-		/*//Separate particles that are barely connected
+		//Set up a structuring element for functions to use
 			StructuringElement myStructuringElement;
 			myStructuringElement.matrixCols = 3;
 			myStructuringElement.matrixRows = 3;
@@ -75,6 +69,12 @@ int CleanUpBinary(Image* ReflectingTape, bool AttemptCleanUp)
 			myStructuringElement.kernel[6] = 1;
 			myStructuringElement.kernel[7] = 0;
 			myStructuringElement.kernel[8] = 1;
+		//perform a series of manipulations to (hopefully) enhance the returned binary image
+			if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_OPEN, &myStructuringElement)){return 0;}
+			if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_DILATE, &myStructuringElement)){return 0;}
+			if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_CLOSE, &myStructuringElement)){return 0;}
+			if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_AUTOM, &myStructuringElement)){return 0;}
+			/*
 			if (!imaqSeparation(ReflectingTape, ReflectingTape, 1, &myStructuringElement))
 			{
 				int errCode = GetLastVisionError();
@@ -105,19 +105,40 @@ int CleanUpBinary(Image* ReflectingTape, bool AttemptCleanUp)
 				return 0;
 			}*/
 /*
-		
-		if(!imaqSizeFilter(ReflectingTape, ReflectingTape, 1, 0, IMAQ_KEEP_LARGE, NULL)) 
-		{
-			int errCode = GetLastVisionError();
-			DPRINTF(LOG_INFO, "Elimination of small particles in binary image failed - errorcode %i", errCode);
-			char *errString = GetVisionErrorText(errCode);
-			DPRINTF(LOG_INFO, "errString= %s", errString);
-			return 0;
-		}
+		//Filter out particles by size
+			if(!imaqSizeFilter(ReflectingTape, ReflectingTape, 1, 0, IMAQ_KEEP_LARGE, NULL)) 
+			{
+				int errCode = GetLastVisionError();
+				DPRINTF(LOG_INFO, "Elimination of small particles in binary image failed - errorcode %i", errCode);
+				char *errString = GetVisionErrorText(errCode);
+				DPRINTF(LOG_INFO, "errString= %s", errString);
+				return 0;
+			}
 */
+		/*
 		//Convex the hull
 			imaqLabel2(ReflectingTape, ReflectingTape, true, NULL);
 			imaqConvexHull(ReflectingTape, ReflectingTape, true); 
+*/
+		//set up particle filter criteria for size (eliminate small particles)
+			ParticleFilterCriteria2 PFC[1];
+			PFC[0].parameter = IMAQ_MT_AREA;
+			PFC[0].lower = 250;
+			PFC[0].upper = 1000;
+			PFC[0].calibrated = false;
+			PFC[0].exclude = false;
+			ParticleFilterOptions PFO;
+			PFO.rejectMatches = false;
+			PFO.rejectBorder = false;
+			PFO.connectivity8 = false;
+		
+		//Do particle filtering by above criteria
+			if(!imaqParticleFilter3(ReflectingTape, ReflectingTape, &PFC[0], 1, &PFO, NULL, NULL)) {return 0;}
+		
+		//change any non-zero pixel values to 255, which is white in Python script's returned images
+			short int table[256];
+			for (int i = 0; i<256; ++i){table[i] = 255;} table[0]=0;
+			imaqLookup(ReflectingTape, ReflectingTape, &table[0], NULL); 
 
 
 	}
@@ -157,7 +178,7 @@ int GetWidestParticle(Image* binaryImage, int* widestParticleIndex)
 	};
 
 //Processes the image, but also returns a picture for a snapshot
-int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, ImageType type, bool* CanSeeTargets)  
+int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, bool* CanSeeTargets)  
 {
 	//Defining the needed variables
 		Image* ReflectingTape = frcCreateImage(IMAQ_IMAGE_U8);
