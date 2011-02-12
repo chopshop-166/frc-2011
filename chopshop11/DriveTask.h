@@ -40,9 +40,12 @@ private:
 	void Normalize(float*);
 	double SignPreservingSquare(double);
 	double TruncateDouble(double);
+	int LostComms(CANJaguar&, int);
 	float m_maxOutput;
 	int syncGroup;
 	CANJaguar fl, fr, bl, br;
 	float x,y,r;
 	float wheelSpeeds[4];
+	float actualSpeed[4];
+	int encoderBad[4];
 };

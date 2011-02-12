@@ -172,6 +172,19 @@ double DriveTask::TruncateDouble(double input)
 	sprintf(buffer,"%1.2f", input);
 	return atof(buffer);
 }
+int DriveTask::LostComms(CANJaguar& CheckJag, int location)
+{
+
+	if((actualSpeed[location]==0) && ((wheelSpeeds[location]>0.02) || (wheelSpeeds[location]<-0.02)))
+	{
+		encoderBad[location]=1;
+		CheckJag.ChangeControlMode(CANJaguar::kPercentVbus);
+		CheckJag.EnableControl();
+	} else{
+		return 0;
+	}
+	return 1;
+}
 	
 // Main function of the task
 int DriveTask::Main(int a2, int a3, int a4, int a5,
@@ -188,16 +201,15 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
-	float FLSpeed = 0;
-	float FRSpeed = 0;
-	float BLSpeed = 0;
-	float BRSpeed = 0;
+	int valuethrottle=0;
 	// General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		FLSpeed = fl.GetSpeed();
-		FRSpeed = fr.GetSpeed();
-		BLSpeed = bl.GetSpeed();
-		BRSpeed = br.GetSpeed();
+
+		actualSpeed[0] = fl.GetSpeed();
+		actualSpeed[1] = fr.GetSpeed();
+		actualSpeed[2] = bl.GetSpeed();
+		actualSpeed[3] = br.GetSpeed();
+		
 		x=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_STRAFE)));
 		y=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_FOWARD_BACK)));
 		r=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_ROTATION)));
@@ -206,26 +218,56 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		SmartDashboard::Log(y,"Y");
 		SmartDashboard::Log(r,"R");
 		
-		SmartDashboard::Log(FLSpeed, "FL Wheel Speed");
-		SmartDashboard::Log(FRSpeed, "FR Wheel Speed");
-		SmartDashboard::Log(BLSpeed, "BL Wheel Speed");
-		SmartDashboard::Log(BRSpeed, "BR Wheel Speed");
+		SmartDashboard::Log(actualSpeed[0], "FL Wheel Speed");
+		SmartDashboard::Log(actualSpeed[1], "FR Wheel Speed");
+		SmartDashboard::Log(actualSpeed[2], "BL Wheel Speed");
+		SmartDashboard::Log(actualSpeed[3], "BR Wheel Speed");
 		
 		wheelSpeeds[0] = x - y + r;
 		wheelSpeeds[1] = -x - y - r;
 		wheelSpeeds[2] = -x - y + r;
 		wheelSpeeds[3] = x - y - r;
-		
+		if ((++valuethrottle) % 10 ==0)
+		{
+			LostComms(fl, 0);
+			LostComms(fr, 1);
+			LostComms(bl, 2);
+			LostComms(br, 3);
+			
+			SmartDashboard::Log(encoderBad[0], "FL Mode");
+			SmartDashboard::Log(encoderBad[1], "FR Mode");
+			SmartDashboard::Log(encoderBad[2], "BL Mode");
+			SmartDashboard::Log(encoderBad[3], "BR Mode");
+		}
+			
 		Normalize(wheelSpeeds);
+		if(encoderBad[0]==1){
+			fl.Set(wheelSpeeds[0], syncGroup);
+		} else {
+			fl.Set(wheelSpeeds[0]* m_maxOutput, syncGroup);
+		}
+		if(encoderBad[1]==1){
+			fr.Set(-wheelSpeeds[1], syncGroup);
+		} else {
+			fr.Set(-wheelSpeeds[1]* m_maxOutput, syncGroup);
+		}
+		if(encoderBad[2]==1){
+			bl.Set(wheelSpeeds[2], syncGroup);
+		} else {
+			bl.Set(wheelSpeeds[2]* m_maxOutput, syncGroup);
+		}
+		if(encoderBad[3]==1){
+			br.Set(-wheelSpeeds[3], syncGroup);
+		} else {
+			br.Set(-wheelSpeeds[3]* m_maxOutput, syncGroup);
+		}
 		
-		fl.Set(wheelSpeeds[0]* m_maxOutput, syncGroup);
-		fr.Set(-wheelSpeeds[1]* m_maxOutput, syncGroup);
-		bl.Set(wheelSpeeds[2]* m_maxOutput, syncGroup);
-		br.Set(-wheelSpeeds[3]* m_maxOutput, syncGroup);
+		
+		
 		
 		CANJaguar::UpdateSyncGroup(syncGroup);
 
-		sl.PutOne(x,y,r,FLSpeed,FRSpeed,BLSpeed,BRSpeed, wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3]);
+		sl.PutOne(x,y,r,actualSpeed[0],actualSpeed[1],actualSpeed[2],actualSpeed[3], wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3]);
 		
 		// Wait for our next lap
 		WaitForNextLoop();
