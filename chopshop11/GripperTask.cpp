@@ -113,7 +113,7 @@ int GripperTask::Main(int a2, int a3, int a4, int a5,
 		
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		gripper.Set(proxy->get(GRIPPER_BUTTON));
+		gripper.Set((int)proxy->get(GRIPPER_BUTTON)?DoubleSolenoid::kForward:DoubleSolenoid::kReverse);
 		
 		// Make this match the declaraction above
 		sl.PutOne(gripper.Get());
