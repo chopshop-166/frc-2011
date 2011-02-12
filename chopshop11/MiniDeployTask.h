@@ -33,9 +33,12 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
+	enum DeployState {kWait=0, kSwing = 1, kExtend = 2, kDeploy=3} Deploy_State;
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	Solenoid DeployerExtender;	// Extend the minibot deployment mechanism
-	Solenoid MiniCloser;		//Close the minibot on the pole
+	Solenoid MiniDeployer;		//Close the minibot on the pole
 	DigitalInput Deploy_Limit;
+	DigitalInput SolenoidExtended;	//Check if deployer is extended
+	CANJaguar MiniDeploySwinger;	//Motor for swinging deployer to pole
 };

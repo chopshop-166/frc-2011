@@ -73,12 +73,12 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-MiniDeploy166::MiniDeploy166(void): DeployerExtender(1), MiniCloser(2), Deploy_Limit(4)
+MiniDeploy166::MiniDeploy166(void): DeployerExtender(1), MiniDeployer(2), Deploy_Limit(4), SolenoidExtended(5),MiniDeploySwinger(12)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-
+	Deploy_State = kWait;
 	return;
 };
 	
@@ -106,18 +106,30 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true){
-		
-		if(proxy->get(DEPLOY_MINIBOT)) {
-			if(proxy->get("MatchTimer") <= 10) {
-				DeployerExtender.Set(1);
-			} else {
-				DeployerExtender.Set(0);
+		switch (Deploy_State) {
+			case kWait:
+			{
+				if(proxy->get(DEPLOY_MINIBOT)) {
+					if((proxy->get("MatchTimer") <= 10) || (proxy->get("joy1b7"))) {
+						Deploy_State = kSwing;
+					}
+				}
 			}
-		}
-		if(Deploy_Limit.Get() == 1){
-			MiniCloser.Set(1);
-		} else {
-			MiniCloser.Set(0);
+			case kSwing:
+			{
+				MiniDeploySwinger.Set(25);
+				if (!MiniDeploySwinger.GetForwardLimitOK()){
+					MiniDeploySwinger.Set(0);
+					Deploy_State = kExtend;
+				}
+			}
+			case kExtend:
+				DeployerExtender.Set(1);
+				if(SolenoidExtended.Get()) {
+					Deploy_State = kDeploy;
+				}
+			case kDeploy:
+				MiniDeployer.Set(1);
 		}
         // Logging any values
 		sl.PutOne();
