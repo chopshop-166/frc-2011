@@ -23,21 +23,20 @@ AutonomousTask::AutonomousTask() {
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
 	
-	AnalogChannel lane_switch(5);
+	AnalogChannel lane_switch(AUTONOMOUS_DIAL_LANE);
 	int lane_choice;
 	lane_choice = (int)lane_switch.GetVoltage();
 	proxy->add("Autonomous Lane");
 	proxy->set("Autonomous Lane", lane_choice);
 	
-	AnalogChannel height_switch(6);
+	AnalogChannel height_switch(AUTONOMOUS_DIAL_HEIGHT);
 	int height_choice;
 	height_choice = (int)height_switch.GetVoltage();
 	if(height_choice & 4) {
 		height_choice = 0;
 	}
-	
 	height_choice = 2 * height_choice;
-	if(height_choice != 3) {
+	if(lane_choice != 3 && height_choice != 0) {
 		// We're going for the slightly lowered ones
 		height_choice = height_choice - 1;
 	}

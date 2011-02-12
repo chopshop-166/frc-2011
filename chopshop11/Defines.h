@@ -37,6 +37,7 @@
 #define FRONT_LEFT_JAGUAR (4)
 #define BACK_RIGHT_JAGUAR (5)
 #define BACK_LEFT_JAGUAR (6)
+#define ARM_JAGUAR (10)
 #define ELEVATOR_JAGUAR (11)
 
 // Relays
@@ -57,4 +58,6 @@
 #define SONAR_CENTER (1)
 #define SONAR_RIGHT (2)
 #define SONAR_LEFT (3)
+#define AUTONOMOUS_DIAL_LANE (5)
+#define AUTONOMOUS_DIAL_HEIGHT (6)
 #define PRESSURETRANSDUCER (7)

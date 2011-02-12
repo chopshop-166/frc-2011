@@ -39,6 +39,8 @@ public:
 private:
 	//Declare Proxy and Robot handles
 	Proxy *proxy;				// Handle to proxy
-	Robot *lHandle;            // Local handle
-	
+	Robot *lHandle;				// Local handle
+//	CANJaguar armJag;			// Jaguar that controls arm's height
+	AnalogChannel armChan;		// Temporary analog channel for potentiometer
+	float speed;				// Speed that the arm moves at
 };

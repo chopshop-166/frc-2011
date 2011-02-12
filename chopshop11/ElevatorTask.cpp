@@ -138,7 +138,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			target_type = hLowSide;
 		} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
 			target_type = hFloor;
-		} else if(fabs(proxy->get("ElevatorHeight")) >= 0.1) {
+		} else if(fabs(proxy->get(ELEVATOR_AXIS)) >= 0.1) {
 			target_type = hNone;
 		}
 		if(target_type != hNone) {

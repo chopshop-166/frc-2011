@@ -87,11 +87,15 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ArmTask::ArmTask(void)
+ArmTask::ArmTask(void) :
+//	armJag(ARM_JAGUAR, CANJaguar::kPosition),
+	armChan(4), speed(0.25)
 {
 	Start((char *)"166ArmTask", ARM_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
+//	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
+//	armJag.EnableControl();
 	return;
 };
 	
@@ -117,13 +121,49 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	// Register our logger
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
-		
+	
+	enum {hNone=-1, hFloor=0,
+		hLowSide=1, hLowCenter=2,
+		hMidSide=3, hMidCenter=4,
+		hHighSide=5, hHighCenter=6} target_type = hNone;
+	
+	// Fix these heights once we can test
+	// They currently don't take the arm height into account
+	const double height_list[] = {0,30,37,67,74,104,111};
+	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
+		if(proxy->get(TOP_CENTER_PRESET_BUTTON)) {
+			target_type = hHighCenter;
+		} else if(proxy->get(MIDDLE_CENTER_PRESET_BUTTON)) {
+			target_type = hMidCenter;
+		} else if(proxy->get(LOW_CENTER_PRESET_BUTTON)) {
+			target_type = hLowCenter;
+		} else if(proxy->get(TOP_SIDE_PRESET_BUTTON)) {
+			target_type = hHighSide;
+		} else if(proxy->get(MIDDLE_SIDE_PRESET_BUTTON)) {
+			target_type = hMidSide;
+		} else if(proxy->get(LOW_SIDE_PRESET_BUTTON)) {
+			target_type = hLowSide;
+		} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
+			target_type = hFloor;
+		} else if(fabs(proxy->get(ELEVATOR_AXIS)) >= 0.1) {
+			target_type = hNone;
+		}
+		if(target_type != hNone) {
+			float target = height_list[target_type];
+			float current = proxy->get("ElevatorHeight");
+			// Just get rid of annoying compiler warnings
+			(void)target,(void)current;
+//			armJag.Set((target < current)? speed : ((target > current)? -speed : 0));
+		} else {
+//			armJag.Set(proxy->get(ELEVATOR_AXIS));
+		}
+		
+		SmartDashboard::Log(armChan.GetValue(),"Potentiometer Value");
+		SmartDashboard::Log(armChan.GetVoltage(),"Potentiometer Voltage");
 		
         // Logging any values
-		// <<CHANGEME>>
-		// Make this match the declaraction above
 		sl.PutOne();
 		
 		// Wait for our next lap

@@ -9,9 +9,10 @@
 TimerTask TimerTaskObject;
 
 // tasks that cannot run on suitcase
+ArmTask ArmTaskObject;
 //AutonomousAssistTask AutoAssistObject;
 //ColorLightTask ColorLightObject;
-DriveTask DriveObject;
+//DriveTask DriveObject;
 //HeightTask166 HeightTaskObject;
 //MiniDeploy166 MiniDeployObject;
 //PhotoElectricTask PhotoElectricObject;

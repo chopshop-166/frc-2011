@@ -3,6 +3,7 @@
 
 // <<CHANGEME>>
 // Add any #defines for your .h files for each seperate task
+#include "ArmTask.h"
 #include "AutoAssist.h"
 #include "CameraTask.h"
 #include "ColorLights.h"
