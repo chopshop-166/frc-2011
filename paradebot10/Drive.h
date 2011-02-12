@@ -1,6 +1,6 @@
 /*******************************************************************************
 *  Project   		: chopshop10 - 2010 Chopshop Robot Controller Code
-*  File Name  		: CANDrive166.h     
+*  File Name  		: Drive.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  Creation Date	: January 23, 2010
 *  Revision History	: From Explorer with TortoiseSVN, Use "Show log" menu item
@@ -39,21 +39,18 @@ public:
 	// get handle
 	static Team166CANDrive *getInstance(void);
 	
-	// Limit values to -1 - 1
-	float Limit(float);
-	void SquareInputs(float&,float&);
 	
 	// Main function of the task
 	virtual int Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10);
 	
-	CANJaguar leftJag,rightJag;
+	//CANJaguar leftJag,rightJag;
 
 private:
-	/**
-	 * @brief The single instance handle
-	 */
-	static Team166CANDrive* CANDriveHandle;
+	Victor leftmotor;
+	Victor rightmotor;
+	RobotDrive robotdrive;
+		
 };
 
 #endif // !defined(_CANDRIVE166)
