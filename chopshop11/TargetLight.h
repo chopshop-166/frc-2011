@@ -29,7 +29,7 @@
 /*
 
  */
-int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, bool* CanSeeTargets);
+int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, bool* CanSeeTargets, bool* ImageReturned);
 /*
  *  This returns a value between -1 and 1. 
  	The ProcessTheImage function will account for the distance and return targetCenterNormalized.

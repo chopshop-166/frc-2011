@@ -2,7 +2,7 @@
 *  Project   		: Chopshop11
 *  File Name  		: CameraTask.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  File Description	: Task to run the camera and tracking
+*  File Description	: Task to run the camera and tracking 
 *  File Description	: Definition of CameraTask class and associated data
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
