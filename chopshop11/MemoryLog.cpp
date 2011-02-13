@@ -52,7 +52,8 @@ MemoryLog::MemoryLog(unsigned int msize, unsigned int ltime, char *filename_, ch
 	
 	// Not yet registered
 	Registered = 0;
-	mlNext = 0;
+	nextLog = 0;
+	clock_gettime(CLOCK_REALTIME, &starttime);
 	
 	// Done
 	return;

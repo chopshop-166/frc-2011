@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
-*  File Name  		: Robot.cpp     
+*  Project   		: Chopshop11
+*  File Name  		: Robot.cpp
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Base class used in entire robot
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
@@ -17,6 +16,7 @@
 #include "WPILib.h"
 #include "Autonomous.h"
 #include "Robot.h"
+#include "SimpleTask.h"
 #include "Includes.h"
 #include <stdarg.h>
 
@@ -132,14 +132,14 @@ Robot *Robot::getInstance(void)
 /**
  * Register a log object
  */
-void Robot::RegisterLogger(MemoryLog *ml)
+void Robot::RegisterLogger(FrameworkLogger *ml)
 {
 	
 	// Has this handler been registered already?
 	if (!ml->Registered) {
 		
 		// No. Insert it at the head
-		ml->mlNext = mlHead;
+		ml->nextLog = mlHead;
 		mlHead = ml;
 		ml->Registered = 1;
 		clock_gettime(CLOCK_REALTIME, &(ml->starttime));
@@ -151,7 +151,7 @@ void Robot::RegisterLogger(MemoryLog *ml)
  */
 void Robot::DumpLoggers(int dnum)
 {
-	MemoryLog *ml;
+	FrameworkLogger *ml;
 	
 	// Iterate through the list of loggers
 	ml = mlHead;
@@ -161,7 +161,7 @@ void Robot::DumpLoggers(int dnum)
 		ml->DumpToFile();
 		
 		// Advance to the next log
-		ml = ml->mlNext;
+		ml = ml->nextLog;
 	}
 }
 
