@@ -134,7 +134,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	/* Since the pot has a range of 0-270 degrees and 0-5 volts,
 	 * We know that the degrees per volt has to be 270/5, or 54
 	 */ 
-	const double degrees_per_volt = 54.;
+	const double degrees_per_volt = 60.;
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
@@ -170,8 +170,9 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 //			armJag.Set(proxy->get(ELEVATOR_AXIS));
 		}
 		
-		double volts = armChan.GetVoltage();
-		SmartDashboard::Log(degrees_per_volt*volts,"Potentiometer Value");
+		double volts = -(armChan.GetVoltage() - 5);
+		//volts = int(volts * 10)/10.;
+		SmartDashboard::Log(int(degrees_per_volt*volts),"Potentiometer Value");
 		SmartDashboard::Log(volts,"Potentiometer Voltage");
 		
         // Logging any values
