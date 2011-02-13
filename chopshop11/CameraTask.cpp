@@ -21,9 +21,8 @@
 #include "nivision.h"
 
 // To locally enable debug printing: set true, to disable false
-#define DPRINTF if(true)dprintf
-#define DO_COLOR_THRESHOLD true
-#define DO_ELLIPSE_DETECTION false
+#define DPRINTF if(false)dprintf
+#define TPRINTF if(false)dprintf
 
 // Sample in memory buffer
 struct abuf
@@ -209,7 +208,7 @@ bool CameraTask::FindLightTargets()  {
 			DPRINTF (LOG_INFO,"\nGetImage failed errCode=%i", errCode);
 			char *errString = GetVisionErrorText(errCode);
 			DPRINTF (LOG_INFO,"errString= %s", errString);
-		  	// always dispose of image objects when done
+		  	// always dispose of image objects when done 
 		  	frcDispose(cameraImage);
 		  	return false;
 		} else { 	
@@ -225,20 +224,24 @@ bool CameraTask::FindLightTargets()  {
 	double normalizedTargetReturn;
 	Image* processedImage = frcCreateImage(IMAQ_IMAGE_HSL);
 	bool CanSeeTargets;
+	bool ImageReturned;
 	
 	success = ProcessTheImage(cameraImage, &normalizedTargetReturn,
-			processedImage, IMAQ_IMAGE_U8, &CanSeeTargets);
+			processedImage, &CanSeeTargets, &ImageReturned);
 	DPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
 	DPRINTF (LOG_INFO,"Normalized Center = %f CanSeeTargets = %d", normalizedTargetReturn, CanSeeTargets);
+	TPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
+	TPRINTF (LOG_INFO,"Normalized Center = %f CanSeeTargets = %d", normalizedTargetReturn, CanSeeTargets);
 
 	// write the binary image to cRIO
+	if (ImageReturned){
 	if (success) {
 		DPRINTF(LOG_DEBUG, "\nWriting HSL image");
 		SaveImage("hslImage.jpg", processedImage);
-	}
+	}}
 
 	proxy->set("CanSeeCameraTargets", (float) CanSeeTargets);
-	proxy->set("NormalizedTargetCenter", normalizedTargetReturn);
+	if(CanSeeTargets){proxy->set("NormalizedTargetCenter", normalizedTargetReturn);}
 		
 	//delete images;
 	frcDispose(cameraImage);
