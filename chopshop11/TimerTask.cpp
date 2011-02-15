@@ -35,7 +35,7 @@ int TimerTask::Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10)
 {
 	// Let the world know we're in
-	DPRINTF(LOG_DEBUG,"In the 166 Template task\n");
+	DPRINTF(LOG_DEBUG,"In the 166 Timer task\n");
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();

@@ -17,8 +17,8 @@
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
 
-#define SONAR_CYCLE_TIME (50) // 50ms
-#define AVERAGESIZE (10)	//Store 10 values
+#define SONAR_CYCLE_TIME (20) // 20ms
+#define AVERAGESIZE (100)	//Store 10 values
 #define SONARINPERVOLT (81.0)	//Number of inches per 1 volt of change
 class SonarTask : public Team166Task
 {

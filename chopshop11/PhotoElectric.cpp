@@ -152,6 +152,9 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		// Store that result in proxy
 		proxy->set("LineDirection",(float) LineState);
 		SmartDashboard::Log((int) LineState, "Line Result");
+		SmartDashboard::Log((int) left_result, "Left Photo Sensor");
+		SmartDashboard::Log((int) center_result, "Center Photo Sensor");
+		SmartDashboard::Log((int) right_result, "Right Photo Sensor");
 		
         // Logging any values
 		// <<CHANGEME>>

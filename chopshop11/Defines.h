@@ -47,8 +47,8 @@
 #define BLUE_COLOR_LIGHT (5)
 
 // Digital I/O
-#define LEFTPHOTOSENSE (1)
-#define CENTERPHOTOSENSE (2)
+#define CENTERPHOTOSENSE (1)
+#define LEFTPHOTOSENSE (2)
 #define RIGHTPHOTOSENSE (3)
 #define HEIGHT_INPUT_A (5)
 #define HEIGHT_INPUT_B (6)

@@ -142,21 +142,12 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 		voltscenter = SonarCenter.GetVoltage();
 		voltsleft = SonarLeft.GetVoltage();
 		voltsright = SonarRight.GetVoltage();
-		if(voltscenter<0){
-			voltscenter = 0;
-		}else if(voltscenter>3){
-			voltscenter = 3;
-		}
-		if(voltsleft<0){
-			voltsleft = 0;
-		}else if(voltsleft>3){
-			voltsleft = 3;
-		}
-		if(voltsright<0){
-			voltsright = 0;
-		}else if(voltsright>3){
-			voltsright = 3;
-		}
+
+		SmartDashboard::Log(voltscenter, "Front Voltage");
+		SmartDashboard::Log(voltsleft, "Left Voltage");
+		SmartDashboard::Log(voltsright, "Right Voltage");
+
+		
 		// Store each sensor's value into the rolling array
 		frontarray[(i%AVERAGESIZE)] = voltscenter;
 		leftarray[(i%AVERAGESIZE)] = voltsleft;
@@ -176,6 +167,7 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 		DistanceCenter/=AVERAGESIZE;
 		DistanceLeft/=AVERAGESIZE;
 		DistanceRight/=AVERAGESIZE;
+		
 		DistanceCenter*=SONARINPERVOLT;
 		DistanceLeft*=SONARINPERVOLT;
 		DistanceRight*=SONARINPERVOLT;

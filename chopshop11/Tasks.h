@@ -5,16 +5,16 @@
 // DriveClass DriveObject;
 // No need for pointers, or anything else, if it's derived from Team166Task
 // tasks that run everywhere
-CameraTask CameraObject;
+//CameraTask CameraObject;
 TimerTask TimerTaskObject;
 
 // tasks that cannot run on suitcase
-ArmTask ArmTaskObject;
-//AutonomousAssistTask AutoAssistObject;
+//ArmTask ArmTaskObject;
+//AutonomousAssistTask AutoAssistObject; // Test when all other sensors verified 
 //ColorLightTask ColorLightObject;
-//DriveTask DriveObject;
+DriveTask DriveObject; // Tested - account for joystick differences
 //HeightTask166 HeightTaskObject;
 //MiniDeploy166 MiniDeployObject;
-//PhotoElectricTask PhotoElectricObject;
-//PneumaticsTask PneumaticsTaskObject;
-//SonarTask SonarTaskObject;
+PhotoElectricTask PhotoElectricObject; // Tested - works fine
+//PneumaticsTask PneumaticsTaskObject; // Test this next - connected to a spike
+SonarTask SonarTaskObject; // Tested - small noise
