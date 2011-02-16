@@ -1,4 +1,3 @@
-// <<CHANGEME>>
 #pragma once
 // Declare your task objects here
 // Example:
