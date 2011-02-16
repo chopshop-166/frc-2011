@@ -160,7 +160,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			float target = angle_list[target_type];
 			// Get the arm angle
 			float currentAngle =
-				//armCan.GetPosition();
+//				armCan.GetPosition();
 				proxy->get("ElevatorHeight");
 			// Just get rid of annoying compiler warnings
 			(void)target,(void)currentAngle;

@@ -80,7 +80,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25)
+ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25), deadband(0.05)
 {
 	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);	
 	// Register the proxy
@@ -138,7 +138,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			target_type = hLowSide;
 		} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
 			target_type = hFloor;
-		} else if(fabs(proxy->get(ELEVATOR_AXIS)) >= 0.1) {
+		} else if(fabs(proxy->get(ELEVATOR_AXIS)) >= deadband) {
 			target_type = hNone;
 		}
 		if(target_type != hNone) {

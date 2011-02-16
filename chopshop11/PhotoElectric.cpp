@@ -135,9 +135,7 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		 * -2 means it's not on the line at all
 		*/
 		// Figure out if 1 is "on the line" or "off the line"
-		if(left_result&&center_result&&right_result) {
-			LineState = lT;
-		} else if(left_result&&right_result) {
+		if(left_result&&right_result) {
 			LineState = lFork;
 		} else if(left_result) {
 			LineState = lLeft;
