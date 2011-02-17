@@ -98,9 +98,10 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 	
 	while(MyTaskInitialized) {
 		setNewpress();
-		if(lHandle->IsOperatorControl() && true) {
+		if(lHandle->IsOperatorControl()) {
 			if(manualJoystick[0]) {
 				SetJoystick(1, stick1);
+				printf("MANUAL MODE\n");
 			}
 			if(manualJoystick[1]) {
 				SetJoystick(2, stick2);

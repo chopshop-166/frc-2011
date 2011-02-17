@@ -63,10 +63,20 @@ AutonomousTask::AutonomousTask() {
 			break;
 	}
 	
+	string lane_string = "";
+	if(lane_choice==2) {
+		lane_string = LINE_STRAFE_LEFT_BUTTON;
+	} else if(lane_choice==4) {
+		lane_string = LINE_STRAFE_RIGHT_BUTTON;
+	}
+	
 	while( lHandle->IsAutonomous() ) {
 		proxy->set(DRIVER_AUTOASSIST,true);
 		if(copilot_button_name.size()) {
 			proxy->set(copilot_button_name,true);
+		}
+		if(lane_string.size()) {
+			proxy->set(lane_string,true);
 		}
 		
 		// This wait is required, it makes sure no task uses too much memory

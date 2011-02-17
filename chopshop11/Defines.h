@@ -11,21 +11,23 @@
 #pragma once
 
 // Driver and copilot buttons
-#define DRIVER_AUTOASSIST ("Joy1B5")
-#define RED_LIGHT_BUTTON ("Joy3B4N")
-#define WHITE_LIGHT_BUTTON ("Joy3B3N")
-#define BLUE_LIGHT_BUTTON ("Joy3B5N")
-#define TURNOFF_LIGHTS_BUTTON ("Joy3B2N")
-#define DEPLOY_MINIBOT ("joy1b6")
-#define GRIPPER_BUTTON ("Joy1BT")
-
 #define DRIVE_STRAFE ("Joy1X")
 #define DRIVE_FOWARD_BACK ("Joy1Y")
 #define DRIVE_ROTATION ("Joy1R")
-#define ELEVATOR_AXIS ("Joy3Y")
-#define WRIST_AXIS ("Joy3X")
+#define GRIPPER_BUTTON ("Joy1BT")
+#define DRIVER_AUTOASSIST ("Joy1B2")
+#define DRIVER_AUTOASSIST_REAL (2)
+#define LINE_STRAFE_LEFT_BUTTON ("Joy1B3")
+#define LINE_STRAFE_RIGHT_BUTTON ("Joy1B4")
+#define DEPLOY_MINIBOT ("joy1b6")
 
+#define WRIST_AXIS ("Joy3X")
+#define ELEVATOR_AXIS ("Joy3Y")
 #define FLOOR_PRESET_BUTTON ("Joy3BT")
+#define TURNOFF_LIGHTS_BUTTON ("Joy3B2N")
+#define WHITE_LIGHT_BUTTON ("Joy3B3N")
+#define RED_LIGHT_BUTTON ("Joy3B4N")
+#define BLUE_LIGHT_BUTTON ("Joy3B5N")
 #define TOP_SIDE_PRESET_BUTTON ("Joy3B6")
 #define MIDDLE_SIDE_PRESET_BUTTON ("Joy3B7")
 #define LOW_SIDE_PRESET_BUTTON ("Joy3B8")

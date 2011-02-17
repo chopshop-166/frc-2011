@@ -113,36 +113,32 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			lane = (int)proxy->get("Autonomous Lane");
 		}
 		
-		if(proxy->get(DRIVER_AUTOASSIST)) {
+		if(Joystick(1).GetRawButton(DRIVER_AUTOASSIST_REAL)) {
+			printf("AUTOASSIST ENABLED*****************\n");
 			// The driver activated their autoassist
 			proxy->UseUserJoystick(1,false);
-			proxy->set(DRIVER_AUTOASSIST, Joystick(1).GetRawButton(6));
 			if(proxy->exists("LineDirection")) {
 				curr_value = (int)proxy->get("LineDirection");
 				x=0;
 				switch(curr_value) {
 					case lRight:
-						r = -AUTOASSIST_SPEED_TURN;
+						r = AUTOASSIST_SPEED_TURN;
 						break;
 					case lCenter:
 						r = 0;
 						break;
 					case lLeft:
-						r = AUTOASSIST_SPEED_TURN;
+						r = -AUTOASSIST_SPEED_TURN;
 						break;
 					case lNo_Line:
 						break;
 					case lFork:
-						if(proxy->exists("Autonomous Lane")) {
-							if(proxy->get("Autonomous Lane")==2) {
-								x = -AUTOASSIST_SPEED_STRAFE;
-							}
-							else if(proxy->get("Autonomous Lane")==4) {
-								x = AUTOASSIST_SPEED_STRAFE;
-							}
-							else {
-								x = 0;
-							}
+						if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
+							x = -AUTOASSIST_SPEED_STRAFE;
+						} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON)) {
+							x = AUTOASSIST_SPEED_STRAFE;
+						} else {
+							x = 0;
 						}
 						r = 0;
 						break;
@@ -152,9 +148,13 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				}
 			}
 			if(proxy->exists("FrontSonar")) {
-				if(proxy->get("FrontSonar") < AUTOASSIST_SONAR_FRONT_DISTANCE) {
+				if(proxy->get("FrontSonar") > AUTOASSIST_SONAR_FRONT_DISTANCE) {
 					y=AUTOASSIST_SPEED_FORWARD;
+				} else {
+					y=0;
 				}
+			} else {
+				y=0;
 			}
 			if(lane == 1 && proxy->exists("LeftSonar")) {
 				// We want it to go to the left

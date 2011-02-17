@@ -9,11 +9,11 @@
 
 // tasks that cannot run on suitcase
 //ArmTask ArmTaskObject;
-//AutonomousAssistTask AutoAssistObject; // Test when all other sensors verified 
+AutonomousAssistTask AutoAssistObject; // Test when all other sensors verified 
 //ColorLightTask ColorLightObject;
-//DriveTask DriveObject; // Tested - account for joystick differences
+DriveTask DriveObject; // Tested - account for joystick differences
 //HeightTask166 HeightTaskObject;
 //MiniDeploy166 MiniDeployObject;
-//PhotoElectricTask PhotoElectricObject; // Tested - works fine
+PhotoElectricTask PhotoElectricObject; // Tested - works fine
 //PneumaticsTask PneumaticsTaskObject; // Test this next - connected to a spike
-//SonarTask SonarTaskObject; // Tested - small noise
+SonarTask SonarTaskObject; // Tested - small noise

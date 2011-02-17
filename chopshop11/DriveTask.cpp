@@ -235,6 +235,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		y=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_FOWARD_BACK)));
 		r=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_ROTATION)));
 		
+#if 0
 		SmartDashboard::Log(x,"X");
 		SmartDashboard::Log(y,"Y");
 		SmartDashboard::Log(r,"R");
@@ -243,23 +244,24 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		SmartDashboard::Log(actualSpeed[1], "FR Wheel Speed");
 		SmartDashboard::Log(actualSpeed[2], "BL Wheel Speed");
 		SmartDashboard::Log(actualSpeed[3], "BR Wheel Speed");
+#endif
 		
 		wheelSpeeds[0] = x - y + r;
 		wheelSpeeds[1] = -x - y - r;
 		wheelSpeeds[2] = -x - y + r;
 		wheelSpeeds[3] = x - y - r;
 		
-		if ((++valuethrottle) % 10 ==0)
+		if ((++valuethrottle) % 50 ==0)
 		{
 			LostComms(fl, 0);
 			LostComms(fr, 1);
 			LostComms(bl, 2);
 			LostComms(br, 3);
 			
-			SmartDashboard::Log(encoderBad[0], "FL Mode");
-			SmartDashboard::Log(encoderBad[1], "FR Mode");
-			SmartDashboard::Log(encoderBad[2], "BL Mode");
-			SmartDashboard::Log(encoderBad[3], "BR Mode");
+//			SmartDashboard::Log(encoderBad[0], "FL Mode");
+//			SmartDashboard::Log(encoderBad[1], "FR Mode");
+//			SmartDashboard::Log(encoderBad[2], "BL Mode");
+//			SmartDashboard::Log(encoderBad[3], "BR Mode");
 		}
 			
 		Normalize(wheelSpeeds);
