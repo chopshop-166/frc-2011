@@ -81,7 +81,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25), deadband(0.05)
-	, brakeSolenoid(ELEVATOR_BRAKE_EXTEND, ELEVATOR_BRAKE_RETRACT)
+	, brakeSolenoid(ELEVATOR_BRAKE_EXTEND)
 {
 	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);	
 	// Register the proxy
@@ -122,7 +122,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	// Fix these heights once we can test
 	// They currently don't take the arm height into account
 	const double height_list[] = {0,30,37,67,74,104,111};
-	brakeSolenoid.Set(DoubleSolenoid::kReverse);
+	brakeSolenoid.Set(0);
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
@@ -150,10 +150,10 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		} else {
 			float axis = proxy->get(ELEVATOR_AXIS);
 			if(axis >= deadband) {
-				brakeSolenoid.Set(DoubleSolenoid::kReverse);
+				brakeSolenoid.Set(1);
 				elevator.Set(axis);
 			} else {
-				brakeSolenoid.Set(DoubleSolenoid::kForward);
+				brakeSolenoid.Set(0);
 				elevator.Set(0);
 			}
 		}

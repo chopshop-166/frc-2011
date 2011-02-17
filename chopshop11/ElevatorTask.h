@@ -40,5 +40,5 @@ private:
 	
 	CANJaguar elevator;
 	const float speed, deadband;
-	DoubleSolenoid brakeSolenoid;
+	Solenoid brakeSolenoid;
 };
