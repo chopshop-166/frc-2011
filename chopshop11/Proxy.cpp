@@ -1,8 +1,7 @@
 /*******************************************************************************
-*  Project   		: Framework
+*  Project   		: Chopshop11
 *  File Name  		: Proxy.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  Creation Date	: January 18, 2010
 *  File Description	: Code for Proxy class to hold shared variables
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
@@ -98,7 +97,8 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 	
 	while(MyTaskInitialized) {
 		setNewpress();
-		if(lHandle->IsOperatorControl() && true) {
+		SetEnhancedIO();
+		if(lHandle->IsOperatorControl()) {
 			if(manualJoystick[0]) {
 				SetJoystick(1, stick1);
 			}
