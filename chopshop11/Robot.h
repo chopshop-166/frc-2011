@@ -1,7 +1,8 @@
 /*******************************************************************************
-*  Project   		: Chopshop11
-*  File Name  		: Robot.h
+*  Project   		: Framework
+*  File Name  		: Robot.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
+*  Creation Date	: January 18, 2010
 *  File Description	: Header for base class used in entire robot
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
@@ -34,7 +35,6 @@
 class Robot : public SimpleRobot
 {
 private:
-    DriverStation *dsHandle;					// Driver Station handle
     DriverStationLCD *dsHandleLCD;				// Driver Station display handle
     FrameworkLogger *mlHead;					// Memory log head
     int maxLogId;								// Max log file id
@@ -48,4 +48,5 @@ public:
 	void RegisterLogger(FrameworkLogger *ml);			// Register memory logger
 	void DumpLoggers(int dnum);					// Dump all logs
 	int DriverStationDisplay (const char*, ...);			// Display text on DS
+	DriverStation *dsHandle;					// Driver Station handle
 };

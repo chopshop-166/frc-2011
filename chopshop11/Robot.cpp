@@ -1,7 +1,8 @@
 /*******************************************************************************
-*  Project   		: Chopshop11
-*  File Name  		: Robot.cpp
+*  Project   		: Framework
+*  File Name  		: Robot.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
+*  Creation Date	: January 18, 2010
 *  File Description	: Base class used in entire robot
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
@@ -64,7 +65,7 @@ Robot::Robot(void)
 		printf("\n");
 		Wait (0.100);
 	}
-	printf("All tasks we depend upon are up!\n");
+	printf("All tasks we depend upon are up!\n");	
 }
 
 /**
