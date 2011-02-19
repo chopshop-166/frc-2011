@@ -28,7 +28,7 @@ class GripperLog : public MemoryLog
 {
 public:
 	GripperLog() : MemoryLog(
-			sizeof(struct abuf), TEMPLATE_CYCLE_TIME, "gripper",
+			sizeof(struct abuf), GRIPPER_CYCLE_TIME, "gripper",
 			"Seconds,Nanoseconds,Elapsed Time,Gripper State\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
@@ -80,7 +80,7 @@ unsigned int GripperLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 GripperTask::GripperTask(void):gripper(GRIPPER_OPEN,GRIPPER_CLOSE)
 {
-	Start((char *)"166GripperTask", TEMPLATE_CYCLE_TIME);
+	Start((char *)"166GripperTask", GRIPPER_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	// ^^^ Rename those ^^^

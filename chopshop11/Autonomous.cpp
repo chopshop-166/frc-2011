@@ -79,6 +79,12 @@ AutonomousTask::AutonomousTask() {
 			proxy->set(lane_string,true);
 		}
 		
+		if(proxy->get("matchtimer") < 1.5) {
+			proxy->set(GRIPPER_BUTTON,false);
+		} else {
+			proxy->set(GRIPPER_BUTTON,true);
+		}
+		
 		// This wait is required, it makes sure no task uses too much memory
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
