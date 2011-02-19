@@ -80,10 +80,11 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25), deadband(0.05)
+ElevatorTask::ElevatorTask(void): elevator(13), speed(0.25), deadband(0.05)
 	, brakeSolenoid(ELEVATOR_BRAKE_EXTEND)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
+	MovementMode = kUnKnown;
 	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);	
 	// Register the proxy
 	proxy = Proxy::getInstance();
@@ -129,14 +130,21 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	Height.Start();
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
+		
 		if(!elevator.GetForwardLimitOK()) {
-			HowHigh = MINHEIGHT;
+			MovementMode = kDown;
+			Height.Reset();
 		} else if (!elevator.GetReverseLimitOK()) {
-			HowHigh = MAXHEIGHT;
+			MovementMode = kUp;
+			Height.Reset();
 		}
 		clicks=Height.Get();//Saves value of clicks
-		// set howhigh to the height of the elevator
-		HowHigh = ClicksPerInch*clicks;
+		if(MovementMode == kDown) {
+			HowHigh = MAXHEIGHT-(ClicksPerInch*clicks);
+		}
+		if(MovementMode == kUp) {
+			HowHigh = MINHEIGHT+(ClicksPerInch*clicks);
+		}
 		SmartDashboard::Log(HowHigh, "Height");
 		
 		if(proxy->get(TOP_CENTER_PRESET_BUTTON)) {
@@ -158,8 +166,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		if(target_type != hNone) {
 			float target = height_list[target_type];
-			float current = proxy->get("ElevatorHeight");
-			elevator.Set((target < current)? speed : ((target > current)? -speed : 0));
+			elevator.Set((target < HowHigh)? speed : ((target > HowHigh)? -speed : 0));
 		} else {
 			float axis = proxy->get(ELEVATOR_AXIS);
 			if(axis >= deadband) {

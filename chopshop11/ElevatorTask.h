@@ -39,6 +39,7 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
+	enum {kDown=-1, kUnKnown=0, kUp=1} MovementMode;
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	
