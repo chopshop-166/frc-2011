@@ -64,9 +64,9 @@ AutonomousTask::AutonomousTask() {
 	}
 	
 	string lane_string = "";
-	if(lane_choice==2) {
+	if(lane_choice==2 || lane_choice==1) {
 		lane_string = LINE_STRAFE_LEFT_BUTTON;
-	} else if(lane_choice==4) {
+	} else if(lane_choice==4 || lane_choice==5) {
 		lane_string = LINE_STRAFE_RIGHT_BUTTON;
 	}
 	

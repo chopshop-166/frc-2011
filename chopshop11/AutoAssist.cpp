@@ -106,6 +106,7 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	
 	int curr_value;
 	x=y=r=lane=0;
+	bool auto_enabled = false;
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
@@ -113,8 +114,13 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			lane = (int)proxy->get("Autonomous Lane");
 		}
 		
-		if(Joystick(1).GetRawButton(DRIVER_AUTOASSIST_REAL)) {
-			printf("AUTOASSIST ENABLED*****************\n");
+		if(lHandle->IsEnabled()) {
+			auto_enabled = Joystick(1).GetRawButton(DRIVER_AUTOASSIST_REAL);
+		} else {
+			auto_enabled = (bool)proxy->get(DRIVER_AUTOASSIST);
+		}
+		
+		if(auto_enabled) {
 			// The driver activated their autoassist
 			proxy->UseUserJoystick(1,false);
 			if(proxy->exists("LineDirection")) {
@@ -156,20 +162,23 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			} else {
 				y=0;
 			}
-			if(lane == 1 && proxy->exists("LeftSonar")) {
-				// We want it to go to the left
+			
+			if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
+				// We want it to go to the left, according to the sonar
 				if(proxy->get("LeftSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
 					x = -AUTOASSIST_SPEED_STRAFE;
 				} else {
 					x = 0;
 				}
-			} else if(lane == 5 && proxy->exists("RightSonar")) {
-				// We want it to go to the right
+			} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON) && proxy->exists("RightSonar")) {
+				// We want it to go to the right, according to the sonar
 				if(proxy->get("RightSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
 					x = AUTOASSIST_SPEED_STRAFE;
 				} else {
 					x = 0;
 				}
+			} else {
+				x = 0;
 			}
 			
 			proxy->set("joy1x",x);
