@@ -80,7 +80,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(13), speed(0.25), deadband(0.05), height_deadband(2)
+ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.25), deadband(0.05), height_deadband(2)
 	, brakeSolenoid(ELEVATOR_BRAKE_EXTEND)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
@@ -145,23 +145,23 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			HowHigh = MINHEIGHT+(ClicksPerInch*clicks);
 		}
 		SmartDashboard::Log(HowHigh, "Height");
-		
-		if(proxy->get(TOP_CENTER_PRESET_BUTTON)) {
-			target_type = hHighCenter;
-		} else if(proxy->get(MIDDLE_CENTER_PRESET_BUTTON)) {
-			target_type = hMidCenter;
-		} else if(proxy->get(LOW_CENTER_PRESET_BUTTON)) {
-			target_type = hLowCenter;
-		} else if(proxy->get(TOP_SIDE_PRESET_BUTTON)) {
-			target_type = hHighSide;
-		} else if(proxy->get(MIDDLE_SIDE_PRESET_BUTTON)) {
-			target_type = hMidSide;
-		} else if(proxy->get(LOW_SIDE_PRESET_BUTTON)) {
-			target_type = hLowSide;
-		} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
-			target_type = hFloor;
-		} else if(fabs(proxy->get(ELEVATOR_AXIS)) >= deadband) {
-			target_type = hNone;
+		switch ((int)proxy->get("HeightLocation")) {
+			case -1:
+				target_type = hNone;
+			case 0:
+				target_type = hLowSide;
+			case 1:
+				target_type = hLowCenter;
+			case 2:
+				target_type = hMidSide;
+			case 3:
+				target_type = hMidCenter;
+			case 4:
+				target_type = hHighSide;
+			case 5:
+				target_type = hHighCenter;
+			case 6:
+				target_type = hFloor;
 		}
 		
 		if(target_type != hNone) {

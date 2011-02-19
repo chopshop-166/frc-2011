@@ -133,21 +133,25 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		if(proxy->get(TOP_CENTER_PRESET_BUTTON)) {
-			target_type = hHighCenter;
-		} else if(proxy->get(MIDDLE_CENTER_PRESET_BUTTON)) {
-			target_type = hMidCenter;
-		} else if(proxy->get(LOW_CENTER_PRESET_BUTTON)) {
-			target_type = hLowCenter;
-		} else if(proxy->get(TOP_SIDE_PRESET_BUTTON)) {
-			target_type = hHighSide;
-		} else if(proxy->get(MIDDLE_SIDE_PRESET_BUTTON)) {
-			target_type = hMidSide;
-		} else if(proxy->get(LOW_SIDE_PRESET_BUTTON)) {
-			target_type = hLowSide;
-		} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
-			target_type = hFloor;
-		} else if(fabs(proxy->get(ELEVATOR_AXIS)) >= 0.1) {
+		switch ((int)proxy->get("HeightLocation")) {
+			case -1:
+				target_type = hNone;
+			case 0:
+				target_type = hLowSide;
+			case 1:
+				target_type = hLowCenter;
+			case 2:
+				target_type = hMidSide;
+			case 3:
+				target_type = hMidCenter;
+			case 4:
+				target_type = hHighSide;
+			case 5:
+				target_type = hHighCenter;
+			case 6:
+				target_type = hFloor;
+		}
+		if(fabs(proxy->get(ELEVATOR_AXIS)) >= 0.1) {
 			target_type = hNone;
 		}
 		if(target_type != hNone) {
