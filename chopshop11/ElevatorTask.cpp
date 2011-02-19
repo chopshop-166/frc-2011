@@ -82,6 +82,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 ElevatorTask::ElevatorTask(void): elevator(11), speed(0.25), deadband(0.05)
 	, brakeSolenoid(ELEVATOR_BRAKE_EXTEND)
+	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
 	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);	
 	// Register the proxy
@@ -123,9 +124,21 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	// They currently don't take the arm height into account
 	const double height_list[] = {0,30,37,67,74,104,111};
 	brakeSolenoid.Set(0);
-	
+	float HowHigh=0;
+	int clicks = 0;
+	Height.Start();
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
+		if(!elevator.GetForwardLimitOK()) {
+			HowHigh = MINHEIGHT;
+		} else if (!elevator.GetReverseLimitOK()) {
+			HowHigh = MAXHEIGHT;
+		}
+		clicks=Height.Get();//Saves value of clicks
+		// set howhigh to the height of the elevator
+		HowHigh = ClicksPerInch*clicks;
+		SmartDashboard::Log(HowHigh, "Height");
+		
 		if(proxy->get(TOP_CENTER_PRESET_BUTTON)) {
 			target_type = hHighCenter;
 		} else if(proxy->get(MIDDLE_CENTER_PRESET_BUTTON)) {
@@ -157,6 +170,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				elevator.Set(0);
 			}
 		}
+
 		
         // Logging any values
 		sl.PutOne(target_type, elevator.Get());

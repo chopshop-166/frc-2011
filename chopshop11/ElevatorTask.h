@@ -18,6 +18,10 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 #define ELEVATOR_CYCLE_TIME (25) // 10ms
 
+#define ClicksPerInch 162.977  //1024/circumference of drum
+
+#define MINHEIGHT (0)
+#define MAXHEIGHT (100)
 
 class ElevatorTask : public Team166Task
 {
@@ -41,4 +45,5 @@ private:
 	CANJaguar elevator;
 	const float speed, deadband;
 	Solenoid brakeSolenoid;
+	Encoder Height;
 };
