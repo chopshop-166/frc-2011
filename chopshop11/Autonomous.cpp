@@ -2,7 +2,7 @@
 *  Project   		: Chopshop11
 *  File Name  		: Autonomous.cpp
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  File Description	: Robot code to execute in autonomous mode
+*  File Description	: Set outputs to automate scoring
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */

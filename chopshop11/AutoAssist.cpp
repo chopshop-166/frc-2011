@@ -160,30 +160,31 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			} else {
 				y=0;
 			}
-			
-			if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
-				// We want it to go to the left, according to the sonar
-				if(proxy->get("LeftSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
-					x = -AUTOASSIST_SPEED_STRAFE;
+			if (y==0) {
+				if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
+					// We want it to go to the left, according to the sonar
+					if(proxy->get("LeftSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
+						x = -AUTOASSIST_SPEED_STRAFE;
+					} else {
+						x = 0;
+					}
+				} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON) && proxy->exists("RightSonar")) {
+					// We want it to go to the right, according to the sonar
+					if(proxy->get("RightSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
+						x = AUTOASSIST_SPEED_STRAFE;
+					} else {
+						x = 0;
+					}
 				} else {
 					x = 0;
 				}
-			} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON) && proxy->exists("RightSonar")) {
-				// We want it to go to the right, according to the sonar
-				if(proxy->get("RightSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
-					x = AUTOASSIST_SPEED_STRAFE;
-				} else {
-					x = 0;
-				}
-			} else {
-				x = 0;
 			}
 			
-			proxy->set("joy1x",x);
-			proxy->set("joy1y",y);
-			proxy->set("joy1r",r);
+			proxy->set(DRIVE_STRAFE,x);
+			proxy->set(DRIVE_FOWARD_BACK,y);
+			proxy->set(DRIVE_ROTATION,r);
 			
-			if(x==y && y==r && r==0) {
+			if(x==0 && y==0 && r==0) {
 				//The robot's not moving
 				proxy->set("AutoassistReadyPosition",true);
 			} else {
