@@ -223,6 +223,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	int valuethrottle=0;
+	int Throttle=0;
 	// General main loop (while in Autonomous or Tele mode)
 	while (true) {
 
@@ -287,12 +288,12 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
 		CANJaguar::UpdateSyncGroup(syncGroup);
-
-		sl.PutOne(actualSpeed[0],actualSpeed[1],actualSpeed[2],actualSpeed[3],
-				wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3],
-				fl.GetFaults(), fr.GetFaults(), bl.GetFaults(), br.GetFaults()
-				);
-		
+		if((++Throttle % (500/DRIVE_TASK_CYCLE_TIME)) == 0) {
+			sl.PutOne(actualSpeed[0],actualSpeed[1],actualSpeed[2],actualSpeed[3],
+					wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3],
+					fl.GetFaults(), fr.GetFaults(), bl.GetFaults(), br.GetFaults()
+					);
+		}
 		// Wait for our next lap
 		WaitForNextLoop();
 	}
