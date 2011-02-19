@@ -130,7 +130,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	// They currently don't take the arm height into account
 	//
 	const double angle_list[] = {0,30,37,67,74,104,111};
-	
+	proxy->add("ArmReadyPosition");
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		switch ((int)proxy->get("HeightLocation")) {
@@ -162,6 +162,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			proxy->get("ElevatorHeight");
 			// Set the speed to go in the proper direction
 			armJag.Set((target < currentAngle)? speed : ((target > currentAngle)? -speed : 0));
+			proxy->set("ArmReadyPosition", true);
 		} else {
 			armJag.Set(proxy->get(ELEVATOR_AXIS));
 		}

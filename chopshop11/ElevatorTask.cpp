@@ -124,6 +124,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	// Fix these heights once we can test
 	// They currently don't take the arm height into account
 	const double height_list[] = {0,30,37,67,74,104,111};
+	proxy->add("ElevatorReadyPosition");
 	brakeSolenoid.Set(0);
 	float HowHigh=0;
 	int clicks = 0;
@@ -170,6 +171,8 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			if(fabs(target-HowHigh) < height_deadband) {
 				target_type = hNone;
 			}
+			proxy->set("ElevatorReadyPosition", true);
+			
 		} else {
 			float axis = proxy->get(ELEVATOR_AXIS);
 			if(axis >= deadband || axis <= -deadband) {

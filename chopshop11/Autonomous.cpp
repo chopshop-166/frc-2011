@@ -70,8 +70,14 @@ AutonomousTask::AutonomousTask() {
 			gripper_state = true;
 		}
 		
-		if(proxy->exists("AutoassistReadyPosition")) {
-			if(proxy->get("AutoassistReadyPosition")) {
+		if(proxy->exists("AutoassistReadyPosition") &&
+				proxy->exists("ArmReadyPosition") &&
+				proxy->exists("ElevatorReadyPosition")) 
+		{
+			if((proxy->get("AutoassistReadyPosition")) && 
+					(proxy->get("ArmReadyPosition")) &&  
+					(proxy->get("ElevatorReadyPosition"))) 
+			{
 				gripper_state = false;
 			}
 		}
