@@ -107,6 +107,7 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	int curr_value;
 	x=y=r=lane=0;
 	bool auto_enabled = false;
+	proxy->add("AutoassistReadyPosition");
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
@@ -184,6 +185,13 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			proxy->set("joy1x",x);
 			proxy->set("joy1y",y);
 			proxy->set("joy1r",r);
+			
+			if(x==y && y==r && r==0) {
+				//The robot's not moving
+				proxy->set("AutoassistReadyPosition",true);
+			} else {
+				proxy->set("AutoassistReadyPosition",false);
+			}
 		} else {
 			// Driver autoassist disabled
 			proxy->UseUserJoystick(1,true);

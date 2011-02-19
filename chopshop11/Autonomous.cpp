@@ -69,6 +69,7 @@ AutonomousTask::AutonomousTask() {
 	} else if(lane_choice==4 || lane_choice==5) {
 		lane_string = LINE_STRAFE_RIGHT_BUTTON;
 	}
+	bool gripper_state=true;
 	
 	while( lHandle->IsAutonomous() ) {
 		proxy->set(DRIVER_AUTOASSIST,true);
@@ -80,10 +81,18 @@ AutonomousTask::AutonomousTask() {
 		}
 		
 		if(proxy->get("matchtimer") < 1.5) {
-			proxy->set(GRIPPER_BUTTON,false);
+			gripper_state = false;
 		} else {
-			proxy->set(GRIPPER_BUTTON,true);
+			gripper_state = true;
 		}
+		
+		if(proxy->exists("AutoassistReadyPosition")) {
+			if(proxy->get("AutoassistReadyPosition")) {
+				gripper_state = false;
+			}
+		}
+		
+		proxy->set(GRIPPER_BUTTON,gripper_state);
 		
 		// This wait is required, it makes sure no task uses too much memory
 		Wait(AUTONOMOUS_WAIT_TIME);
