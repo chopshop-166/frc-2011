@@ -44,7 +44,7 @@ private:
 	Robot *lHandle;            // Local handle
 	
 	CANJaguar elevator;
-	const float speed, deadband;
+	const float speed, deadband, height_deadband;
 	Solenoid brakeSolenoid;
 	Encoder Height;
 };

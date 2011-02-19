@@ -80,7 +80,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(13), speed(0.25), deadband(0.05)
+ElevatorTask::ElevatorTask(void): elevator(13), speed(0.25), deadband(0.05), height_deadband(2)
 	, brakeSolenoid(ELEVATOR_BRAKE_EXTEND)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
@@ -130,7 +130,6 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	Height.Start();
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		
 		if(!elevator.GetForwardLimitOK()) {
 			MovementMode = kDown;
 			Height.Reset();
@@ -140,7 +139,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		clicks=Height.Get();//Saves value of clicks
 		if(MovementMode == kDown) {
-			HowHigh = MAXHEIGHT-(ClicksPerInch*clicks);
+			HowHigh = MAXHEIGHT+(ClicksPerInch*clicks);
 		}
 		if(MovementMode == kUp) {
 			HowHigh = MINHEIGHT+(ClicksPerInch*clicks);
@@ -164,12 +163,16 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		} else if(fabs(proxy->get(ELEVATOR_AXIS)) >= deadband) {
 			target_type = hNone;
 		}
+		
 		if(target_type != hNone) {
 			float target = height_list[target_type];
 			elevator.Set((target < HowHigh)? speed : ((target > HowHigh)? -speed : 0));
+			if(fabs(target-HowHigh) < height_deadband) {
+				target_type = hNone;
+			}
 		} else {
 			float axis = proxy->get(ELEVATOR_AXIS);
-			if(axis >= deadband) {
+			if(axis >= deadband || axis <= -deadband) {
 				brakeSolenoid.Set(1);
 				elevator.Set(axis);
 			} else {
