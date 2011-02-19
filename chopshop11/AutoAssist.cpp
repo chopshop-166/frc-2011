@@ -2,7 +2,7 @@
 *  Project   		: Chopshop11
 *  File Name  		: AutoAssist.cpp
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
-*  File Description	: Template source file for tasks, with template functions
+*  File Description	: Task that controls logic to adjust drive to score automatically
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
 /*  Copyright (c) MHS Chopshop Team 166, 2010.  All Rights Reserved.          */
@@ -107,6 +107,7 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	int curr_value;
 	x=y=r=0;
 	bool auto_enabled = false;
+	bool reverse = false; // Go backwards after releasing
 	proxy->add("AutoassistReadyPosition");
 	
     // General main loop (while in Autonomous or Tele mode)
@@ -184,15 +185,46 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			proxy->set(DRIVE_FOWARD_BACK,y);
 			proxy->set(DRIVE_ROTATION,r);
 			
+			if(proxy->exists("CanSeeCameraTargets")) {
+				if(proxy->get("CanSeeCameraTargets") && proxy->exists("NormalizedTargetCenter")) {
+					// It sees targets
+					if(proxy->get("NormalizedTargetCenter") < 0) {
+						// We need to go right
+						x += AUTOASSIST_SPEED_CAMERA_STRAFE;
+					} else if(proxy->get("NormalizedTargetCenter") > 0) {
+						// We need to go left
+						x -= AUTOASSIST_SPEED_CAMERA_STRAFE;
+					} else {
+						x=0;
+					}
+				}
+			}
+			
+			if(reverse) {
+				// It's let go, so back away.
+				x=r=0;
+				y=-AUTOASSIST_SPEED_FORWARD;
+			}
+			
 			if(x==0 && y==0 && r==0) {
 				//The robot's not moving
 				proxy->set("AutoassistReadyPosition",true);
+				reverse = true;
+				while(proxy->get(GRIPPER_BUTTON)==0) {
+					// Wait until it releases the tube
+					WaitForNextLoop();
+				}
+				for(unsigned i=0;i<10;i++) {
+					// Slight delay between releasing and moving away
+					WaitForNextLoop();
+				}
 			} else {
 				proxy->set("AutoassistReadyPosition",false);
 			}
 		} else {
 			// Driver autoassist disabled
 			proxy->UseUserJoystick(1,true);
+			reverse = false;
 		}
 		
 		sl.PutOne();

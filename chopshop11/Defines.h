@@ -27,7 +27,7 @@
 #define WHITE_LIGHT_BUTTON ("Joy3B3N")
 #define RED_LIGHT_BUTTON ("Joy3B4N")
 #define BLUE_LIGHT_BUTTON ("Joy3B5N")
-#define GRIPPER_BUTTON ("Joy3B5")
+#define GRIPPER_BUTTON ("Joy3B5N")
 
 // Jaguars
 #define FRONT_RIGHT_JAGUAR (3)
