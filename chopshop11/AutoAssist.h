@@ -46,5 +46,4 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;				// Local handle
 	float x,y,r;				// Local versions of the joystick's axes
-	int lane;					// Autonomous lane
 };

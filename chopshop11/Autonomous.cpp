@@ -25,16 +25,18 @@ AutonomousTask::AutonomousTask() {
 	
 	AnalogChannel lane_switch(AUTONOMOUS_DIAL_LANE);
 	int lane_choice;
+	// Each Volt is the right number, +- a couple millivolts
 	lane_choice = (int)lane_switch.GetVoltage();
-	proxy->add("Autonomous Lane");
-	proxy->set("Autonomous Lane", lane_choice);
 	
 	AnalogChannel height_switch(AUTONOMOUS_DIAL_HEIGHT);
 	int height_choice;
 	height_choice = (int)height_switch.GetVoltage();
 	if(height_choice & 4) {
+		// If it's 4 or 5, it's no good and disable
 		height_choice = 0;
 	}
+	// Turns [0 1 2 3] into [0 2 4 6]
+	// Heights are numbered 1-6 going up from the floor
 	height_choice = 2 * height_choice;
 	if(lane_choice != 3 && height_choice != 0) {
 		// We're going for the slightly lowered ones
@@ -81,8 +83,10 @@ AutonomousTask::AutonomousTask() {
 		}
 		
 		if(proxy->get("matchtimer") < 1.5) {
+			// Time's running out, so release
 			gripper_state = false;
 		} else {
+			// Keep holding it
 			gripper_state = true;
 		}
 		

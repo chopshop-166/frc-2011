@@ -88,14 +88,13 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 ArmTask::ArmTask(void) :
-//	armJag(ARM_JAGUAR, CANJaguar::kPosition),
-	armChan(4), speed(0.25)
+	armJag(ARM_JAGUAR, CANJaguar::kPosition), speed(0.25)
 {
 	Start((char *)"166ArmTask", ARM_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-//	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
-//	armJag.EnableControl();
+	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
+	armJag.EnableControl();
 	return;
 };
 	
@@ -131,10 +130,6 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	// They currently don't take the arm height into account
 	//
 	const double angle_list[] = {0,30,37,67,74,104,111};
-	/* Since the pot has a range of 0-270 degrees and 0-5 volts,
-	 * We know that the degrees per volt has to be 270/5, or 54
-	 */ 
-	const double degrees_per_volt = 60.;
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
@@ -159,21 +154,15 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			// Choose a "target" angle
 			float target = angle_list[target_type];
 			// Get the arm angle
-			float currentAngle =
-//				armCan.GetPosition();
-				proxy->get("ElevatorHeight");
-			// Just get rid of annoying compiler warnings
-			(void)target,(void)currentAngle;
+			float currentAngle = armJag.GetPosition();
+			proxy->get("ElevatorHeight");
 			// Set the speed to go in the proper direction
-//			armJag.Set((target < current)? speed : ((target > current)? -speed : 0));
+			armJag.Set((target < currentAngle)? speed : ((target > currentAngle)? -speed : 0));
 		} else {
-//			armJag.Set(proxy->get(ELEVATOR_AXIS));
+			armJag.Set(proxy->get(ELEVATOR_AXIS));
 		}
 		
-		double volts = -(armChan.GetVoltage() - 5);
-		//volts = int(volts * 10)/10.;
-		SmartDashboard::Log(int(degrees_per_volt*volts),"Potentiometer Value");
-		SmartDashboard::Log(volts,"Potentiometer Voltage");
+		SmartDashboard::Log(armJag.GetPosition(),"Potentiometer Value");
 		
         // Logging any values
 		sl.PutOne();

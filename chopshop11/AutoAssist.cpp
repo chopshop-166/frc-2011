@@ -1,6 +1,6 @@
 /*******************************************************************************
 *  Project   		: Chopshop11
-*  File Name  		: TaskTemplate.cpp
+*  File Name  		: AutoAssist.cpp
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
 *  File Description	: Template source file for tasks, with template functions
 *******************************************************************************/ 
@@ -105,15 +105,12 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	lHandle->RegisterLogger(&sl);
 	
 	int curr_value;
-	x=y=r=lane=0;
+	x=y=r=0;
 	bool auto_enabled = false;
 	proxy->add("AutoassistReadyPosition");
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		if(proxy->exists("Autonomous Lane")) {
-			lane = (int)proxy->get("Autonomous Lane");
-		}
 		
 		if(lHandle->IsEnabled()) {
 			auto_enabled = Joystick(1).GetRawButton(DRIVER_AUTOASSIST_REAL);

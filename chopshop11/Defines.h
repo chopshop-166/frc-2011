@@ -40,8 +40,8 @@
 #define FRONT_LEFT_JAGUAR (4)
 #define BACK_RIGHT_JAGUAR (5)
 #define BACK_LEFT_JAGUAR (6)
-#define ARM_JAGUAR (10)
 #define ELEVATOR_JAGUAR (11)
+#define ARM_JAGUAR (16)
 
 // Relays
 #define COMPRESSORRELAY (1)
