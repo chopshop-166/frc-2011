@@ -9,8 +9,8 @@ TimerTask TimerTaskObject;
 
 // tasks that cannot run on suitcase
 //ArmTask ArmTaskObject;
-AutonomousAssistTask AutoAssistObject; // Test when all other sensors verified 
-//ColorLightTask ColorLightObject;
+//AutonomousAssistTask AutoAssistObject; // Test when all other sensors verified 
+ColorLightTask ColorLightObject;
 //DriveTask DriveObject; // Tested - account for joystick differences
 //HeightTask166 HeightTaskObject;
 //MiniDeploy166 MiniDeployObject;

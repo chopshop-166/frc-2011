@@ -16,8 +16,7 @@
 
 // task constructor
 ColorLightTask::ColorLightTask(void):Team166Task(0),
-	RedWhite(RED_WHITE_COLOR_LIGHT),
-	Blue(BLUE_COLOR_LIGHT,Relay::kForwardOnly)
+	Red(COLOR_PIN_RED), White(COLOR_PIN_WHITE), Blue(COLOR_PIN_BLUE)
 {
 	Start((char *)"166ColorLightsTask", COLORLIGHT_CYCLE_TIME);
 	
@@ -52,23 +51,27 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
 	{
 		if(proxy->get(RED_LIGHT_BUTTON)) //red
 		{
-			RedWhite.Set(Relay::kForward);
-			Blue.Set(Relay::kOff);
+			Red.Set(true);
+			White.Set(false);
+			Blue.Set(false);
 		}
 		else if(proxy->get(WHITE_LIGHT_BUTTON)) //white
 		{
-			RedWhite.Set(Relay::kReverse);
-			Blue.Set(Relay::kOff);
+			Red.Set(false);
+			White.Set(true);
+			Blue.Set(false);
 		}
 		else if(proxy->get(BLUE_LIGHT_BUTTON)) //blue
 		{
-			RedWhite.Set(Relay::kOff);
-			Blue.Set(Relay::kOn);
+			Red.Set(false);
+			White.Set(false);
+			Blue.Set(true);
 		}
 		else if(proxy->get(TURNOFF_LIGHTS_BUTTON)) //clear all
 		{
-			RedWhite.Set(Relay::kOff);
-			Blue.Set(Relay::kOff);
+			Red.Set(false);
+			White.Set(false);
+			Blue.Set(false);
 		}
 		
 		// Wait for our next lap

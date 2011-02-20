@@ -49,6 +49,9 @@
 #define HEIGHT_INPUT_A (5)
 #define HEIGHT_INPUT_B (6)
 #define PRESSURESWITCH (7)
+#define COLOR_PIN_RED (8)
+#define COLOR_PIN_WHITE (9)
+#define COLOR_PIN_BLUE (10)
 
 // Analog input
 #define SONAR_CENTER (1)
@@ -63,4 +66,4 @@
 #define MINIBOT_DEPLOYER (2)
 #define GRIPPER_OPEN (3)
 #define GRIPPER_CLOSE (4)
-#define ELEVATOR_BRAKE_EXTEND (5)
+#define ELEVATOR_BRAKE_RETRACT (5)

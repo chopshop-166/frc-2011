@@ -81,7 +81,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.25), deadband(0.05), height_deadband(2)
-	, brakeSolenoid(ELEVATOR_BRAKE_EXTEND)
+	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
 	MovementMode = kUnKnown;
