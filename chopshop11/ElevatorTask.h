@@ -16,12 +16,10 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-#define ELEVATOR_CYCLE_TIME (25) // 10ms
+#define ELEVATOR_CYCLE_TIME (40) // 40ms
 
 #define ClicksPerInch 162.977  //1024/circumference of drum
 
-#define MINHEIGHT (0)
-#define MAXHEIGHT (100)
 
 class ElevatorTask : public Team166Task
 {

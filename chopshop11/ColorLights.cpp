@@ -49,6 +49,10 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
     // General main loop (while in Autonomous or Tele mode)
 	while (true) 
 	{
+		if(proxy->get("Joy3B5") || proxy->get("Joy3B6")) {
+			WaitForNextLoop();
+			continue;
+		}
 		if(proxy->get(RED_LIGHT_BUTTON)) //red
 		{
 			Red.Set(true);

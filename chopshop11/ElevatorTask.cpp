@@ -80,7 +80,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.25), deadband(0.05), height_deadband(2)
+ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.3), deadband(0.05), height_deadband(50)
 	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
@@ -122,7 +122,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Fix these heights once we can test
 	// They currently don't take the arm height into account
-//	const double height_list[] = {0,30,37,67,74,104,111};
+	const double height_list[] = {0,1000,2500,4000,5000,6000,7500};
 	proxy->add("ElevatorReadyPosition");
 	brakeSolenoid.Set(0);
 	float HowHigh=0;
@@ -136,7 +136,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		
 		if (!elevator.GetReverseLimitOK()) {
 			bottom_press++;
-			if(bottom_press >= 4) {
+			if(bottom_press >= 5) {
 				Height.Reset();
 			}
 		} else {
@@ -144,7 +144,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
 		clicks=-Height.Get();//Saves value of clicks
-		HowHigh = MINHEIGHT+(ClicksPerInch*clicks);
+		HowHigh = (ClicksPerInch/clicks);
 
 		SmartDashboard::Log(clicks, "Clicks");
 		SmartDashboard::Log(HowHigh, "Height");
@@ -199,17 +199,55 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				elevator.Set(0);
 			}
 		}
-#endif
-		if(proxy->get("joy3b6")) {
-			if (clicks < 3000) {
-				elevator.Set(.2);
-				brakeSolenoid.Set(false);
-			} else if (clicks > 3200) {
-				elevator.Set(-.2);
-				brakeSolenoid.Set(false);
+#else
+		if(proxy->get("joy3b5")) {
+			if(proxy->get("joy3b4")) {
+				// Y button of the controller
+				target_type = hHighSide;
+			} else if(proxy->get("joy3b3")) {
+				// X button of the controller
+				target_type = hMidSide;
+			} else if(proxy->get("joy3b1")) {
+				// A button of the controller
+				target_type = hLowSide;
+			} else if(proxy->get("joy3b2")) {
+				target_type = hFloor;
 			} else {
+				// None of the important buttons are pressed
+				target_type = hNone;
+			}
+		} else if(proxy->get("joy3b6")) {
+			if(proxy->get("joy3b4")) {
+				// Y button of the controller
+				target_type = hHighCenter;
+			} else if(proxy->get("joy3b3")) {
+				// X button of the controller
+				target_type = hMidCenter;
+			} else if(proxy->get("joy3b1")) {
+				// A button of the controller
+				target_type = hLowCenter;
+			} else if(proxy->get("joy3b2")) {
+				target_type = hFloor;
+			} else {
+				// None of the important buttons are pressed
+				target_type = hNone;
+			}
+		}
+#endif
+		if(target_type != hNone) {
+			if (clicks < (height_list[(int)target_type] - height_deadband)) {
+				elevator.Set(speed);
+				brakeSolenoid.Set(false);
+				proxy->set("ElevatorReadyPosition", false);
+			} else if (clicks > (height_list[(int)target_type] + height_deadband)) {
+				elevator.Set(-speed);
+				brakeSolenoid.Set(false);
+				proxy->set("ElevatorReadyPosition", false);
+			} else {
+				target_type = hNone;
 				elevator.Set(0);
 				brakeSolenoid.Set(true);
+				proxy->set("ElevatorReadyPosition", true);
 			}
 		} else {
 			brakeSolenoid.Set((bool)proxy->get("Joy3B2"));
@@ -220,7 +258,10 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				elevator.Set(0);
 			}
 		}
-		
+		SmartDashboard::Log(target_type, "TargetType");
+		if(target_type != hNone) {
+			SmartDashboard::Log(height_list[(int)target_type], "Target Height");
+		}
         // Logging any values
 		sl.PutOne(target_type, elevator.Get());
 		
