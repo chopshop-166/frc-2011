@@ -1,7 +1,8 @@
 /*******************************************************************************
-*  Project   		: Chopshop11
+*  Project   		: Framework
 *  File Name  		: Proxy.cpp     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
+*  Creation Date	: January 18, 2010
 *  File Description	: Code for Proxy class to hold shared variables
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
@@ -56,6 +57,11 @@ Proxy::Proxy(void):
 			add(joywid + "T");
 			add(joywid + "BT");
 			add(joywid + "BTN");
+			for(int AxisId=1; AxisId<7; AxisId++) {
+				char tmp[32];
+				sprintf(tmp, "%sA%d", joywid.c_str(), AxisId);
+				add(tmp);
+			}
 			//Add Buttons, and newpress
 			for (int buttonid=1;buttonid<NUMBER_OF_JOY_BUTTONS+1;buttonid++) {
 				char tmp[32];
@@ -64,6 +70,16 @@ Proxy::Proxy(void):
 				add(butwid);
 				add(butwid + "N");
 			}
+		}
+		for(int i=1; i<NUMBER_OF_SWITCHES+1; i++) {
+			char tmp[32];
+			sprintf(tmp, "Switch%d", i);
+			add(tmp);
+		}
+		for(int i=1; i<NUMBER_OF_ANALOG_IN+1; i++) {
+			char tmp[32];
+			sprintf(tmp, "AnalogIn%d", i);
+			add(tmp);
 		}
 		//Make sure they're only added once
 		runonce = 1;
@@ -97,8 +113,8 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 	
 	while(MyTaskInitialized) {
 		setNewpress();
-		SetEnhancedIO();
 		if(lHandle->IsOperatorControl()) {
+			SetEnhancedIO();
 			if(manualJoystick[0]) {
 				SetJoystick(1, stick1);
 			}
@@ -135,16 +151,14 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 void Proxy::SetEnhancedIO()
 {
 	Robot *lHandle = Robot::getInstance();
-	for(int i=1; i<NUMBER_OF_SWITCHES+1; i++) {
+	for(int i=1; i<=NUMBER_OF_SWITCHES; i++) {
 		char tmp[32];
 		sprintf(tmp, "Switch%d", i);
-		add(tmp);
 		set(tmp, lHandle->dsHandle->GetDigitalIn(i));
 	}
-	for(int i=1; i<NUMBER_OF_ANALOG_IN+1; i++) {
+	for(int i=1; i<+NUMBER_OF_ANALOG_IN; i++) {
 		char tmp[32];
 		sprintf(tmp, "AnalogIn%d", i);
-		add(tmp);
 		set(tmp, lHandle->dsHandle->GetAnalogIn(i));
 	}
 }
@@ -272,24 +286,26 @@ bool Proxy::exists(string name)
 void Proxy::SetJoystick(int joy_id, Joystick & stick)
 {
 	wpi_assert(joy_id < NUMBER_OF_JOYSTICKS+1 && joy_id >= 0);
-	string name;
 	char tmp[32];
 	sprintf(tmp, "Joy%d", joy_id);
-	name = tmp;
+	string name = tmp;
 	set(name + 'X', stick.GetX());
 	set(name + 'Y', stick.GetY());
 	set(name + 'Z', stick.GetZ());
 	set(name + 'R', stick.GetTwist());
 	set(name + 'T', stick.GetThrottle());
-	string bname;
+	for(int AxisId=1; AxisId<7; AxisId++) {
+		char tmp[32];
+		sprintf(tmp, "%sA%d", name.c_str(), AxisId);
+		set(tmp, stick.GetRawAxis(AxisId));
+	}
 	for(unsigned i=1;i<NUMBER_OF_JOY_BUTTONS+1;i++) {
 		char tmp1[32];
 		sprintf(tmp1, "%sB%d", name.c_str(), i);
-		bname = tmp1;
-		set(bname,stick.GetRawButton(i));
+		set(tmp1,stick.GetRawButton(i));
 		
 	}
-	set(name+"BT", stick.GetTrigger());
+	set(name + "BT", stick.GetTrigger());
 }
 
 /**

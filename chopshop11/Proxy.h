@@ -1,7 +1,8 @@
 /*******************************************************************************
-*  Project   		: Chopshop11
-*  File Name  		: Proxy.h     
+*  Project   		: Framework
+*  File Name  		: Proxy166.h     
 *  Owner		   	: Software Group (FIRST Chopshop Team 166)
+*  Creation Date	: January 18, 2010
 *  File Description	: Header for Proxy class
 *******************************************************************************/ 
 /*----------------------------------------------------------------------------*/
@@ -16,8 +17,8 @@
 #include <map>
 
 #define NUMBER_OF_JOYSTICKS (4)
-#define NUMBER_OF_SWITCHES (16)
-#define NUMBER_OF_ANALOG_IN (8)
+#define NUMBER_OF_SWITCHES (8)
+#define NUMBER_OF_ANALOG_IN (4)
 #define NUMBER_OF_JOY_BUTTONS (12)
 
 //

@@ -94,6 +94,7 @@ ArmTask::ArmTask(void) :
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
+	armJag.SetPID(PCOEFF,ICOEFF,DCOEFF);
 	armJag.EnableControl();
 	return;
 };
@@ -151,7 +152,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			case 6:
 				target_type = hFloor;
 		}
-		if(fabs(proxy->get(ELEVATOR_AXIS)) >= 0.1) {
+		if(fabs(proxy->get(ELBOW_AXIS)) >= 0.1) {
 			target_type = hNone;
 		}
 		if(target_type != hNone) {
@@ -161,13 +162,14 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			float currentAngle = armJag.GetPosition();
 			proxy->get("ElevatorHeight");
 			// Set the speed to go in the proper direction
-			armJag.Set((target < currentAngle)? speed : ((target > currentAngle)? -speed : 0));
+			//armJag.Set((target < currentAngle)? speed : ((target > currentAngle)? -speed : 0));
+			armJag.Set(target);
 			proxy->set("ArmReadyPosition", true);
 		} else {
-			armJag.Set(proxy->get(ELEVATOR_AXIS));
+			armJag.Set(proxy->get(ELBOW_AXIS));
 		}
 		
-		SmartDashboard::Log(armJag.GetPosition(),"Potentiometer Value");
+		SmartDashboard::Log(currentAngle,"Potentiometer Value");
 		
         // Logging any values
 		sl.PutOne();

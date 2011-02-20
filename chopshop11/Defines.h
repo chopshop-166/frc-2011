@@ -20,7 +20,7 @@
 #define LINE_STRAFE_RIGHT_BUTTON ("Joy1B4")
 #define DEPLOY_MINIBOT ("joy1b6")
 
-#define WRIST_AXIS ("Joy3X")
+#define ELBOW_AXIS ("Joy3X")
 #define ELEVATOR_AXIS ("Joy3Y")
 #define FLOOR_PRESET_BUTTON ("Joy3B2")
 #define TURNOFF_LIGHTS_BUTTON ("Joy3B2N")

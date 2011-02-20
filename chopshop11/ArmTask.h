@@ -19,7 +19,9 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 
 #define ARM_CYCLE_TIME (10) // 10ms
-
+#define PCOEFF (0)	//P coefficient for arm
+#define ICOEFF (0)	//I coefficient for arm
+#define DCOEFF (0) 	//D coefficient for arm
 
 class ArmTask : public Team166Task
 {
