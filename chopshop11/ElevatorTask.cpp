@@ -200,12 +200,25 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			}
 		}
 #endif
-		brakeSolenoid.Set((bool)proxy->get("Joy3B2"));
-		float axis = -proxy->get(ELEVATOR_AXIS);
-		if(axis >= deadband || axis <= -deadband) {
-			elevator.Set(axis/2);
+		if(proxy->get("joy3b6")) {
+			if (clicks < 3000) {
+				elevator.Set(.2);
+				brakeSolenoid.Set(false);
+			} else if (clicks > 3200) {
+				elevator.Set(-.2);
+				brakeSolenoid.Set(false);
+			} else {
+				elevator.Set(0);
+				brakeSolenoid.Set(true);
+			}
 		} else {
-			elevator.Set(0);
+			brakeSolenoid.Set((bool)proxy->get("Joy3B2"));
+			float axis = -proxy->get(ELEVATOR_AXIS);
+			if(axis >= deadband || axis <= -deadband) {
+				elevator.Set(axis/2);
+			} else {
+				elevator.Set(0);
+			}
 		}
 		
         // Logging any values
