@@ -22,12 +22,12 @@
 
 #define ELBOW_AXIS ("Joy3X")
 #define ELEVATOR_AXIS ("Joy3Y")
-#define FLOOR_PRESET_BUTTON ("Joy3B2")
-#define TURNOFF_LIGHTS_BUTTON ("Joy3B2N")
-#define WHITE_LIGHT_BUTTON ("Joy3B3N")
-#define RED_LIGHT_BUTTON ("Joy3B4N")
-#define BLUE_LIGHT_BUTTON ("Joy3B5N")
+#define TURNOFF_LIGHTS_BUTTON ("Joy3B1")
+#define BLUE_LIGHT_BUTTON ("Joy3B2")
+#define RED_LIGHT_BUTTON ("Joy3B3")
+#define WHITE_LIGHT_BUTTON ("Joy3B4")
 #define GRIPPER_BUTTON ("Joy3B5N")
+#define FLOOR_PRESET_BUTTON ("Joy3B6")
 
 // Jaguars
 #define FRONT_RIGHT_JAGUAR (3)
@@ -39,8 +39,6 @@
 
 // Relays
 #define COMPRESSORRELAY (1)
-#define RED_WHITE_COLOR_LIGHT (4)
-#define BLUE_COLOR_LIGHT (5)
 
 // Digital I/O
 #define CENTERPHOTOSENSE (1)
