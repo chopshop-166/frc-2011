@@ -43,5 +43,5 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;				// Local handle
 	CANJaguar armJag;			// Jaguar that controls arm's height
-	float speed;				// Speed that the arm moves at
+	float speed, deadband;				// Speed that the arm moves at
 };

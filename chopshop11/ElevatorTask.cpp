@@ -84,7 +84,6 @@ ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.25), deadba
 	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
-	MovementMode = kUnKnown;
 	Start((char *)"166ElevatorTask", ELEVATOR_CYCLE_TIME);	
 	// Register the proxy
 	proxy = Proxy::getInstance();
@@ -123,67 +122,91 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Fix these heights once we can test
 	// They currently don't take the arm height into account
-	const double height_list[] = {0,30,37,67,74,104,111};
+//	const double height_list[] = {0,30,37,67,74,104,111};
 	proxy->add("ElevatorReadyPosition");
 	brakeSolenoid.Set(0);
 	float HowHigh=0;
 	int clicks = 0;
+	int bottom_press=0; // Counts the amount of loops a limit has been help down
 	Height.Start();
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		if(!elevator.GetForwardLimitOK()) {
-			MovementMode = kDown;
-			Height.Reset();
-		} else if (!elevator.GetReverseLimitOK()) {
-			MovementMode = kUp;
-			Height.Reset();
-		}
-		clicks=Height.Get();//Saves value of clicks
-		if(MovementMode == kDown) {
-			HowHigh = MAXHEIGHT+(ClicksPerInch*clicks);
-		}
-		if(MovementMode == kUp) {
-			HowHigh = MINHEIGHT+(ClicksPerInch*clicks);
-		}
-		SmartDashboard::Log(HowHigh, "Height");
-		switch ((int)proxy->get("HeightLocation")) {
-			case -1:
-				target_type = hNone;
-			case 0:
-				target_type = hLowSide;
-			case 1:
-				target_type = hLowCenter;
-			case 2:
-				target_type = hMidSide;
-			case 3:
-				target_type = hMidCenter;
-			case 4:
-				target_type = hHighSide;
-			case 5:
-				target_type = hHighCenter;
-			case 6:
-				target_type = hFloor;
+		SmartDashboard::Log(!elevator.GetForwardLimitOK(), "Top");
+		SmartDashboard::Log(!elevator.GetReverseLimitOK(), "Bottom");
+		
+		if (!elevator.GetReverseLimitOK()) {
+			bottom_press++;
+			if(bottom_press >= 4) {
+				Height.Reset();
+			}
+		} else {
+			bottom_press = 0;
 		}
 		
-		if(target_type != hNone) {
+		clicks=-Height.Get();//Saves value of clicks
+		HowHigh = MINHEIGHT+(ClicksPerInch*clicks);
+
+		SmartDashboard::Log(clicks, "Clicks");
+		SmartDashboard::Log(HowHigh, "Height");
+#if 0
+		if(proxy->get(FLOOR_PRESET_BUTTON)) {
+			target_type = hFloor;
+		} else {
+			// This isn't set in Teleop...
+			switch ((int)proxy->get("HeightLocation")) {
+				default:
+				case -1:
+					target_type = hNone;
+					break;
+				case 0:
+					target_type = hLowSide;
+					break;
+				case 1:
+					target_type = hLowCenter;
+					break;
+				case 2:
+					target_type = hMidSide;
+					break;
+				case 3:
+					target_type = hMidCenter;
+					break;
+				case 4:
+					target_type = hHighSide;
+					break;
+				case 5:
+					target_type = hHighCenter;
+					break;
+				case 6:
+					target_type = hFloor;
+					break;
+			}
+		}
+		
+		if((target_type != hNone && proxy->get(ARM_PRESET_BUTTON)) || proxy->get(FLOOR_PRESET_BUTTON)) {
 			float target = height_list[target_type];
 			elevator.Set((target < HowHigh)? speed : ((target > HowHigh)? -speed : 0));
 			if(fabs(target-HowHigh) < height_deadband) {
 				target_type = hNone;
+				proxy->set("ElevatorReadyPosition", true);
 			}
-			proxy->set("ElevatorReadyPosition", true);
-			
 		} else {
 			float axis = proxy->get(ELEVATOR_AXIS);
 			if(axis >= deadband || axis <= -deadband) {
-				brakeSolenoid.Set(1);
+				brakeSolenoid.Set(0);
 				elevator.Set(axis);
 			} else {
-				brakeSolenoid.Set(0);
+				brakeSolenoid.Set(1);
 				elevator.Set(0);
 			}
 		}
-
+#endif
+		brakeSolenoid.Set((bool)proxy->get("Joy3B2"));
+		float axis = -proxy->get(ELEVATOR_AXIS);
+		if(axis >= deadband || axis <= -deadband) {
+			elevator.Set(axis/2);
+		} else {
+			elevator.Set(0);
+		}
 		
         // Logging any values
 		sl.PutOne(target_type, elevator.Get());

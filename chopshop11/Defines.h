@@ -23,11 +23,12 @@
 #define ELBOW_AXIS ("Joy3X")
 #define ELEVATOR_AXIS ("Joy3Y")
 #define TURNOFF_LIGHTS_BUTTON ("Joy3B1")
-#define BLUE_LIGHT_BUTTON ("Joy3B2")
-#define RED_LIGHT_BUTTON ("Joy3B3")
+#define RED_LIGHT_BUTTON ("Joy3B2")
+#define BLUE_LIGHT_BUTTON ("Joy3B3")
 #define WHITE_LIGHT_BUTTON ("Joy3B4")
 #define GRIPPER_BUTTON ("Joy3B5N")
-#define FLOOR_PRESET_BUTTON ("Joy3B6")
+#define ARM_PRESET_BUTTON ("Joy3B6")
+#define FLOOR_PRESET_BUTTON ("Joy3B7")
 
 // Jaguars
 #define FRONT_RIGHT_JAGUAR (3)
