@@ -109,19 +109,15 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	bool auto_enabled = false;
 	bool reverse = false; // Go backwards after releasing
 	proxy->add("AutoassistReadyPosition");
+	proxy->DisableJoystickAxesByButton(1,DRIVER_AUTOASSIST_REAL);
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		
-		if(lHandle->IsEnabled()) {
-			auto_enabled = Joystick(1).GetRawButton(DRIVER_AUTOASSIST_REAL);
-		} else {
-			auto_enabled = (bool)proxy->get(DRIVER_AUTOASSIST);
-		}
-		
+		auto_enabled = ((lHandle->IsOperatorControl() && proxy->JoystickAxesDisabled(1))
+				|| lHandle->IsAutonomous());
+		SmartDashboard::Log(auto_enabled, "Autoassist Enabled");
+
 		if(auto_enabled) {
-			// The driver activated their autoassist
-			proxy->UseUserJoystick(1,false);
 			if(proxy->exists("LineDirection")) {
 				curr_value = (int)proxy->get("LineDirection");
 				x=0;
@@ -181,9 +177,9 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				}
 			}
 			
-			proxy->set(DRIVE_STRAFE,x);
-			proxy->set(DRIVE_FOWARD_BACK,y);
-			proxy->set(DRIVE_ROTATION,r);
+//			proxy->set(DRIVE_STRAFE,x);
+//			proxy->set(DRIVE_FOWARD_BACK,y);
+//			proxy->set(DRIVE_ROTATION,r);
 			
 			if(proxy->exists("CanSeeCameraTargets")) {
 				if(proxy->get("CanSeeCameraTargets") && proxy->exists("NormalizedTargetCenter")) {
@@ -222,8 +218,6 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				proxy->set("AutoassistReadyPosition",false);
 			}
 		} else {
-			// Driver autoassist disabled
-			proxy->UseUserJoystick(1,true);
 			reverse = false;
 		}
 		
