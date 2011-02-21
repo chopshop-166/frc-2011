@@ -17,7 +17,7 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-#define DRIVE_TASK_CYCLE_TIME (20) // 20ms
+#define DRIVE_TASK_CYCLE_TIME (30) // 30ms
 
 class DriveTask : public Team166Task
 {
