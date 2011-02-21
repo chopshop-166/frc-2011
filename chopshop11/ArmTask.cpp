@@ -25,18 +25,15 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
-	// Any values that need to be logged go here
-	// <<CHANGEME>>
 };
 
 //  Memory Log
-// <<CHANGEME>>
 class ArmLog : public MemoryLog
 {
 public:
 	ArmLog() : MemoryLog(
 			sizeof(struct abuf), ARM_CYCLE_TIME, "arm",
-			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
+			"Seconds,Nanoseconds,Elapsed Time\n"
 			) {
 		return;
 	};
@@ -44,12 +41,10 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	// <<CHANGEME>>
 	unsigned int PutOne(void);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-// <<CHANGEME>>
 unsigned int ArmLog::PutOne(void)
 {
 	struct abuf *ob;               // Output buffer
@@ -59,8 +54,6 @@ unsigned int ArmLog::PutOne(void)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
-		// Add any values to be logged here
-		// <<CHANGEME>>
 		return (sizeof(struct abuf));
 	}
 	
@@ -77,8 +70,6 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 	fprintf(ofile, "%u,%u,%4.5f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
-			// Add values here
-			// <<CHANGEME>>
 	);
 	
 	// Done
@@ -88,14 +79,14 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 ArmTask::ArmTask(void) :
-	armJag(ARM_JAGUAR, CANJaguar::kPosition), speed(0.25), deadband(0.1)
+	armJag(ARM_JAGUAR), speed(0.25), deadband(0.1)
 {
 	Start((char *)"166ArmTask", ARM_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
-	armJag.SetPID(PCOEFF,ICOEFF,DCOEFF);
-	armJag.EnableControl();
+//	armJag.SetPID(PCOEFF,ICOEFF,DCOEFF);
+//	armJag.EnableControl();
 	return;
 };
 	
@@ -122,6 +113,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	
+#if 0
 	enum {hNone=-1, hFloor=0,
 		hLowSide=1, hLowCenter=2,
 		hMidSide=3, hMidCenter=4,
@@ -131,12 +123,13 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	// They currently don't take the arm height into account
 	//
 	const double angle_list[] = {0,30,37,67,74,104,111};
+#endif
 	proxy->add("ArmReadyPosition");
 	float currentAngle;
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		// Fill this logic in again AFTER we verify the logic for Elevator
-		// Figure out how the fact that it's in position mode affects joystick movement
+		armJag.Set(0.5 * proxy->get(ELBOW_AXIS));
+		currentAngle = armJag.GetPosition();
 		
 		SmartDashboard::Log(currentAngle,"Potentiometer Value");
 		

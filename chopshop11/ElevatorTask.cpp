@@ -195,12 +195,13 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				proxy->set("ElevatorReadyPosition", true);
 			}
 		} else {
-			brakeSolenoid.Set((bool)proxy->get("Joy3B2"));
 			float axis = -proxy->get(ELEVATOR_AXIS);
 			if(axis >= deadband || axis <= -deadband) {
 				elevator.Set(axis/2);
+				brakeSolenoid.Set(false);
 			} else {
 				elevator.Set(0);
+				brakeSolenoid.Set(true);
 			}
 		}
 		SmartDashboard::Log(target_type, "TargetType");

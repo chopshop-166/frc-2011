@@ -25,8 +25,8 @@
 #define LINE_STRAFE_RIGHT_BUTTON ("Joy1B4")
 
 // Copilot axes
-#define ELBOW_AXIS ("Joy3X")
-#define ELEVATOR_AXIS ("Joy3A5")
+#define ELEVATOR_AXIS ("Joy3X")
+#define ELBOW_AXIS ("Joy3A5")
 // Color light buttons
 #define TURNOFF_LIGHTS_BUTTON ("Joy3B1")
 #define RED_LIGHT_BUTTON ("Joy3B2")
