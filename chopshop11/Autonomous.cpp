@@ -70,16 +70,28 @@ AutonomousTask::AutonomousTask() {
 			gripper_state = true;
 		}
 		
-		if(proxy->exists("AutoassistReadyPosition") &&
-				proxy->exists("ArmReadyPosition") &&
-				proxy->exists("ElevatorReadyPosition")) 
-		{
-			if((proxy->get("AutoassistReadyPosition")) && 
-					(proxy->get("ArmReadyPosition")) &&  
-					(proxy->get("ElevatorReadyPosition"))) 
-			{
-				gripper_state = false;
+		int ready_values = 0;
+		int possible_ready_values = 0;
+		if(proxy->exists("AutoassistReadyPosition")) {
+			possible_ready_values++;
+			if(proxy->get("AutoassistReadyPosition")) {
+				ready_values++;
 			}
+		}
+		if(proxy->exists("ArmReadyPosition")) {
+			possible_ready_values++;
+			if(proxy->get("ArmReadyPosition")) {
+				ready_values++;
+			}
+		}
+		if(proxy->exists("ElevatorReadyPosition")) {
+			possible_ready_values++;
+			if(proxy->get("ElevatorReadyPosition")) {
+				ready_values++;
+			}
+		} 
+		if(possible_ready_values == ready_values) {
+			gripper_state = false;
 		}
 		
 		proxy->set(GRIPPER_BUTTON,gripper_state);
