@@ -49,7 +49,7 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
     // General main loop (while in Autonomous or Tele mode)
 	while (true) 
 	{
-		if(proxy->get("Joy3B5") || proxy->get("Joy3B6")) {
+		if(proxy->get(SIDE_PRESET_BUTTON) || proxy->get(CENTER_PRESET_BUTTON)) {
 			WaitForNextLoop();
 			continue;
 		}

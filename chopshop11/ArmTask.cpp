@@ -135,60 +135,8 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	float currentAngle;
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		if(proxy->get(FLOOR_PRESET_BUTTON)) {
-			target_type = hFloor;
-		} else {
-			// This isn't set in Teleop...
-			switch ((int)proxy->get("HeightLocation")) {
-				default:
-				case -1:
-					target_type = hNone;
-					break;
-				case 0:
-					target_type = hLowSide;
-					break;
-				case 1:
-					target_type = hLowCenter;
-					break;
-				case 2:
-					target_type = hMidSide;
-					break;
-				case 3:
-					target_type = hMidCenter;
-					break;
-				case 4:
-					target_type = hHighSide;
-					break;
-				case 5:
-					target_type = hHighCenter;
-					break;
-				case 6:
-					target_type = hFloor;
-					break;
-			}
-		}
-		
-		if(fabs(proxy->get(ELBOW_AXIS)) >= 0.1) {
-			target_type = hNone;
-		}
-		if((target_type != hNone && proxy->get(ARM_PRESET_BUTTON)) || proxy->get(FLOOR_PRESET_BUTTON)) {
-			// Choose a "target" angle
-			float target = angle_list[target_type];
-			// Get the arm angle
-			currentAngle = armJag.GetPosition();
-			proxy->get("ElevatorHeight");
-			// Set the speed to go in the proper direction
-			//armJag.Set((target < currentAngle)? speed : ((target > currentAngle)? -speed : 0));
-			armJag.Set(target);
-			proxy->set("ArmReadyPosition", true);
-		} else {
-			float axis = proxy->get(ELBOW_AXIS);
-			if(axis >= deadband || axis <= -deadband) {
-				armJag.Set(proxy->get(ELBOW_AXIS));
-			} else {
-				armJag.Set(0);
-			}
-		}
+		// Fill this logic in again AFTER we verify the logic for Elevator
+		// Figure out how the fact that it's in position mode affects joystick movement
 		
 		SmartDashboard::Log(currentAngle,"Potentiometer Value");
 		

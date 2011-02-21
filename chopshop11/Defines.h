@@ -10,25 +10,36 @@
 
 #pragma once
 
-// Driver and copilot buttons
+// Driver axes and buttons
 #define DRIVE_STRAFE ("Joy1X")
 #define DRIVE_FOWARD_BACK ("Joy1Y")
-#define DRIVE_ROTATION ("Joy1R")
+// This is Joy1Z for Nick's joystick,
+// but Joy1R for the other one
+#define DRIVE_ROTATION ("Joy1Z")
+#define DEPLOY_MINIBOT ("joy1b6")
+// Make sure this doesn't interfere with the logic
+// Autoassist buttons
 #define DRIVER_AUTOASSIST ("Joy1B2")
 #define DRIVER_AUTOASSIST_REAL (2)
 #define LINE_STRAFE_LEFT_BUTTON ("Joy1B3")
 #define LINE_STRAFE_RIGHT_BUTTON ("Joy1B4")
-#define DEPLOY_MINIBOT ("joy1b6")
 
+// Copilot axes
 #define ELBOW_AXIS ("Joy3X")
-#define ELEVATOR_AXIS ("Joy3Y")
+#define ELEVATOR_AXIS ("Joy3A5")
+// Color light buttons
 #define TURNOFF_LIGHTS_BUTTON ("Joy3B1")
 #define RED_LIGHT_BUTTON ("Joy3B2")
 #define BLUE_LIGHT_BUTTON ("Joy3B3")
 #define WHITE_LIGHT_BUTTON ("Joy3B4")
 #define GRIPPER_BUTTON ("Joy3B5N")
-#define ARM_PRESET_BUTTON ("Joy3B6")
-#define FLOOR_PRESET_BUTTON ("Joy3B7")
+// Preset buttons (xbox controller)
+#define LOW_PRESET_BUTTON ("Joy3B1")
+#define FLOOR_PRESET_BUTTON ("Joy3B2")
+#define MID_PRESET_BUTTON ("Joy3B3")
+#define HIGH_PRESET_BUTTON ("Joy3B4")
+#define SIDE_PRESET_BUTTON ("Joy3B5")
+#define CENTER_PRESET_BUTTON ("Joy3B6")
 
 // Jaguars
 #define FRONT_RIGHT_JAGUAR (3)

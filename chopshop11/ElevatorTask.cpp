@@ -200,33 +200,33 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			}
 		}
 #else
-		if(proxy->get("joy3b5")) {
-			if(proxy->get("joy3b4")) {
+		if(proxy->get(SIDE_PRESET_BUTTON)) {
+			if(proxy->get(HIGH_PRESET_BUTTON)) {
 				// Y button of the controller
 				target_type = hHighSide;
-			} else if(proxy->get("joy3b3")) {
+			} else if(proxy->get(MID_PRESET_BUTTON)) {
 				// X button of the controller
 				target_type = hMidSide;
-			} else if(proxy->get("joy3b1")) {
+			} else if(proxy->get(LOW_PRESET_BUTTON)) {
 				// A button of the controller
 				target_type = hLowSide;
-			} else if(proxy->get("joy3b2")) {
+			} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
 				target_type = hFloor;
 			} else {
 				// None of the important buttons are pressed
 				target_type = hNone;
 			}
-		} else if(proxy->get("joy3b6")) {
-			if(proxy->get("joy3b4")) {
+		} else if(proxy->get(CENTER_PRESET_BUTTON)) {
+			if(proxy->get(HIGH_PRESET_BUTTON)) {
 				// Y button of the controller
 				target_type = hHighCenter;
-			} else if(proxy->get("joy3b3")) {
+			} else if(proxy->get(MID_PRESET_BUTTON)) {
 				// X button of the controller
 				target_type = hMidCenter;
-			} else if(proxy->get("joy3b1")) {
+			} else if(proxy->get(LOW_PRESET_BUTTON)) {
 				// A button of the controller
 				target_type = hLowCenter;
-			} else if(proxy->get("joy3b2")) {
+			} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
 				target_type = hFloor;
 			} else {
 				// None of the important buttons are pressed

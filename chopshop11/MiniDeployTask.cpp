@@ -111,7 +111,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			case kWait:
 			{
 				if(proxy->get(DEPLOY_MINIBOT)) {
-					if((proxy->get("MatchTimer") <= 10) || (proxy->get("joy1b7"))) {
+					if((proxy->get("MatchTimer") <= 10) || (proxy->get(DEPLOY_MINIBOT))) {
 						Deploy_State = kSwing;
 					}
 				}
