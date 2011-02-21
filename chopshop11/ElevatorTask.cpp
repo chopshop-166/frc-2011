@@ -125,7 +125,6 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	const double height_list[] = {0,1000,2500,4000,5000,6000,7500};
 	proxy->add("ElevatorReadyPosition");
 	brakeSolenoid.Set(0);
-	float HowHigh=0;
 	int clicks = 0;
 	int bottom_press=0; // Counts the amount of loops a limit has been help down
 	Height.Start();
@@ -144,62 +143,9 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
 		clicks=-Height.Get();//Saves value of clicks
-		HowHigh = (ClicksPerInch/clicks);
 
 		SmartDashboard::Log(clicks, "Clicks");
-		SmartDashboard::Log(HowHigh, "Height");
-#if 0
-		if(proxy->get(FLOOR_PRESET_BUTTON)) {
-			target_type = hFloor;
-		} else {
-			// This isn't set in Teleop...
-			switch ((int)proxy->get("HeightLocation")) {
-				default:
-				case -1:
-					target_type = hNone;
-					break;
-				case 0:
-					target_type = hLowSide;
-					break;
-				case 1:
-					target_type = hLowCenter;
-					break;
-				case 2:
-					target_type = hMidSide;
-					break;
-				case 3:
-					target_type = hMidCenter;
-					break;
-				case 4:
-					target_type = hHighSide;
-					break;
-				case 5:
-					target_type = hHighCenter;
-					break;
-				case 6:
-					target_type = hFloor;
-					break;
-			}
-		}
-		
-		if((target_type != hNone && proxy->get(ARM_PRESET_BUTTON)) || proxy->get(FLOOR_PRESET_BUTTON)) {
-			float target = height_list[target_type];
-			elevator.Set((target < HowHigh)? speed : ((target > HowHigh)? -speed : 0));
-			if(fabs(target-HowHigh) < height_deadband) {
-				target_type = hNone;
-				proxy->set("ElevatorReadyPosition", true);
-			}
-		} else {
-			float axis = proxy->get(ELEVATOR_AXIS);
-			if(axis >= deadband || axis <= -deadband) {
-				brakeSolenoid.Set(0);
-				elevator.Set(axis);
-			} else {
-				brakeSolenoid.Set(1);
-				elevator.Set(0);
-			}
-		}
-#else
+
 		if(proxy->get(SIDE_PRESET_BUTTON)) {
 			if(proxy->get(HIGH_PRESET_BUTTON)) {
 				// Y button of the controller
@@ -233,7 +179,6 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				target_type = hNone;
 			}
 		}
-#endif
 		if(target_type != hNone) {
 			if (clicks < (height_list[(int)target_type] - height_deadband)) {
 				elevator.Set(speed);
