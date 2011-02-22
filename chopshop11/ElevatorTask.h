@@ -16,7 +16,7 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-#define ELEVATOR_CYCLE_TIME (40) // 40ms
+#define ELEVATOR_CYCLE_TIME (25) // 25ms
 
 #define ClicksPerInch 162.977  //1024/circumference of drum
 

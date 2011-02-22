@@ -80,7 +80,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.3), deadband(0.05), height_deadband(50)
+ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.3), deadband(0.1), height_deadband(50)
 	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
@@ -127,6 +127,8 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	brakeSolenoid.Set(0);
 	int clicks = 0;
 	int bottom_press=0; // Counts the amount of loops a limit has been help down
+	float new_speed=0;
+	
 	Height.Start();
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
@@ -181,29 +183,36 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 
 		if(target_type != hNone) {
 			if (clicks < (height_list[(int)target_type] - height_deadband)) {
-				elevator.Set(speed);
-				brakeSolenoid.Set(false);
+				new_speed = speed;
 				proxy->set("ElevatorReadyPosition", false);
 			} else if (clicks > (height_list[(int)target_type] + height_deadband)) {
-				elevator.Set(-speed);
-				brakeSolenoid.Set(false);
+				new_speed = -speed;
 				proxy->set("ElevatorReadyPosition", false);
 			} else {
 				target_type = hNone;
-				elevator.Set(0);
-				brakeSolenoid.Set(true);
+				new_speed = 0;
 				proxy->set("ElevatorReadyPosition", true);
 			}
 		} else {
+			brakeSolenoid.Set((bool)proxy->get("Joy1B2"));
 			float axis = -proxy->get(ELEVATOR_AXIS);
+			SmartDashboard::Log(axis, "Axis Raw");
 			if(axis >= deadband || axis <= -deadband) {
-				elevator.Set(axis/2);
-				brakeSolenoid.Set(false);
+				new_speed = (axis/2);
 			} else {
-				elevator.Set(0);
-				brakeSolenoid.Set(true);
+				new_speed = 0;
 			}
 		}
+		
+		if(fabs(new_speed)<=0.1) {
+			brakeSolenoid.Set(true);
+		} else {
+			brakeSolenoid.Set(false);
+		}
+		
+		// Adjust down speed to be half as fast
+		elevator.Set(new_speed);
+		
 		SmartDashboard::Log(target_type, "TargetType");
 		if(target_type != hNone) {
 			SmartDashboard::Log(height_list[(int)target_type], "Target Height");
