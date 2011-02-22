@@ -74,7 +74,7 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTENDER), MiniDeployer(MINIBOT_DEPLOYER),
-		Deploy_Limit(4), SolenoidExtended(5), MiniDeploySwinger(12)
+		MiniRelease(12), Deploy_Limit(DEPLOYLIMIT), SolenoidExtended(5)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
@@ -118,9 +118,8 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			}
 			case kSwing:
 			{
-				MiniDeploySwinger.Set(25);
-				if (!MiniDeploySwinger.GetForwardLimitOK()){
-					MiniDeploySwinger.Set(0);
+				MiniRelease.Set(1);
+				if (Deploy_Limit.Get()){
 					Deploy_State = kExtend;
 				}
 			}

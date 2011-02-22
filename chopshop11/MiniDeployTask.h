@@ -38,7 +38,7 @@ private:
 	Robot *lHandle;            // Local handle
 	Solenoid DeployerExtender;	// Extend the minibot deployment mechanism
 	Solenoid MiniDeployer;		//Close the minibot on the pole
+	Solenoid MiniRelease;		//Release MiniBot Deployer
 	DigitalInput Deploy_Limit;
 	DigitalInput SolenoidExtended;	//Check if deployer is extended
-	CANJaguar MiniDeploySwinger;	//Motor for swinging deployer to pole
 };
