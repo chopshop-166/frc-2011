@@ -23,6 +23,7 @@
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
 #define TPRINTF if(false)dprintf
+#define SAVE_IMAGES (1)
 
 // Sample in memory buffer
 struct abuf
@@ -170,7 +171,7 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
 		
 		// JUST FOR DEBUGGING - give us time to look at the screen
 		// REMOVE THIS WAIT to go operational!
-		Wait(.5);
+		Wait(0.0);
 	}
 	return (0);
 	
@@ -227,18 +228,22 @@ bool CameraTask::FindLightTargets()  {
 	bool ImageReturned;
 	
 	success = ProcessTheImage(cameraImage, &normalizedTargetReturn,
-			processedImage, &CanSeeTargets, &ImageReturned);
+			processedImage, &CanSeeTargets, &ImageReturned, SAVE_IMAGES);
 	DPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
 	DPRINTF (LOG_INFO,"Normalized Center = %f CanSeeTargets = %d", normalizedTargetReturn, CanSeeTargets);
 	TPRINTF (LOG_INFO,"ProcessTheImage success code=%i", success);
-	TPRINTF (LOG_INFO,"Normalized Center = %f CanSeeTargets = %d", normalizedTargetReturn, CanSeeTargets);
+	TPRINTF (LOG_INFO,"NC = %f CanSee = %d", normalizedTargetReturn, CanSeeTargets);
+	SmartDashboard::Log(targetCenterNormalized,"Normalized Center");
+	SmartDashboard::Log(CanSeeTargets, "Can see?");
 
 	// write the binary image to cRIO
+#if SAVE_IMAGES
 	if (ImageReturned){
 	if (success) {
 		DPRINTF(LOG_DEBUG, "\nWriting HSL image");
 		SaveImage("hslImage.jpg", processedImage);
 	}}
+#endif
 
 	proxy->set("CanSeeCameraTargets", (float) CanSeeTargets);
 	if(CanSeeTargets){proxy->set("NormalizedTargetCenter", normalizedTargetReturn);}
@@ -303,6 +308,7 @@ bool CameraTask::FindCircleTargets()  {
  * Take a picture and store it to the cRIO in the specified path
  * Any task should be able to call this to take and save a snapshot
  */
+#if SAVE_IMAGES
 void CameraTask::TakeSnapshot(char* imageName)  {
 	
 	myHandle->lHandle->DriverStationDisplay("storing %s",imageName);
@@ -340,4 +346,5 @@ void SaveImage(char* imageName, Image* image)  {
 		DPRINTF (LOG_INFO,"errString= %s", errString);
 	} 
 };
+#endif
 

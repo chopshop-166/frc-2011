@@ -19,29 +19,18 @@
 #include "VisionAPI.h"
 #include "TrackAPI.h"
 
-#define CAMERA_OFFSET 0.00625 //This needs to be changed in the .CPP file too
-
 // A return of 0 is a fail.
 // A return of non-zero-ness is a win. 
 
-
-// THESE ARE THE FUNCTIONS THAT MAY BE CALLED:
+int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, bool* CanSeeTargets, bool* ImageReturned, bool SaveImages);
 /*
-
- */
-int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, bool* CanSeeTargets, bool* ImageReturned);
-/*
- *  This returns a value between -1 and 1. 
- 	The ProcessTheImage function will account for the distance and return targetCenterNormalized.
- 		The closer to 1, the closer the target is to the right of the camera view.
- 		The closer to -1, the closer the target is to the left of the camera view.
+ VARIABLE:					RETURNED/FED:		IS:
+ srcimage 					fed					source image
+ targetCenterNormalized		returned			return value of location of target
+												-1 is left, 0 is center, 1 is right
+ ColoredBinaryImage			returned			processed image (is returned)
+ ImageReturned 				returned			if true, a processed image was returned
+ SaveImages 				fed					if true, tries to return ColoredBinaryImage		
  	
  */
 
-
-int GetWidestParticle(Image* binaryImage, int* widestParticleIndex);
-int IsolateLightTarget(Image* ReflectingTape, Image* srcimage);
-int CleanUpBinary(Image* ReflectingTape, bool AttemptCleanUp);
-/*DO NOT CALL THESE FUNCTIONS
- This function is called in ProcessTheImage.
- */
