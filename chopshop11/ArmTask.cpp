@@ -80,15 +80,12 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 ArmTask::ArmTask(void) :
 	armJag(ARM_JAGUAR), speed(0.25), deadband(0.1),
-	gripper(GRIPPER_OPEN,GRIPPER_CLOSE), potentiometer(ARM_POT)
+	gripper(GRIPPER_OPEN,GRIPPER_CLOSE), potentiometer(ARM_POT),
+	high_limit(3.6), low_limit(1.58)
 {
 	Start((char *)"166ArmTask", ARM_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-//	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
-//	armJag.ConfigSoftPositionLimits(0.55, 0.95);
-//	armJag.SetPID(PCOEFF,ICOEFF,DCOEFF);
-//	armJag.EnableControl();
 	return;
 };
 	
@@ -118,7 +115,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	proxy->add("ArmReadyPosition");
 	float currentAngle;
 	float axis;
-	float desiredAngle;
+	float output;
 	float previousAngles[ANGLE_LIST_SIZE];
 	for(unsigned i=0;i<ANGLE_LIST_SIZE;i++) {
 		previousAngles[i] = potentiometer.GetVoltage();
@@ -134,7 +131,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		}
 		currentAngle /= ANGLE_LIST_SIZE;
 		
-		axis = proxy->get(ELBOW_AXIS);
+		axis = -proxy->get(ELBOW_AXIS);
 		if(fabs(axis) < deadband) {
 			axis=0;
 		}
@@ -144,12 +141,9 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			axis += deadband;
 		}
 		
-		desiredAngle = currentAngle-(0.1 * axis);
-		if(desiredAngle < currentAngle) {
-			armJag.Set(-speed);
-		} else {
-			armJag.Set(speed);
-		}
+		axis /= 3;
+		
+		armJag.Set(axis);
 		
 		if(proxy->get(GRIPPER_BUTTON)) {
 			if(gripper.Get() == DoubleSolenoid::kReverse) {
@@ -161,10 +155,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		
 		SmartDashboard::Log(currentAngle,"Current Angle");
 		SmartDashboard::Log(axis,"Elbow Axis");
-		SmartDashboard::Log(desiredAngle,"Target Angle");
-		SmartDashboard::Log(armJag.GetP(),"P");
-		SmartDashboard::Log(armJag.GetI(),"I");
-		SmartDashboard::Log(armJag.GetD(),"D");
+		SmartDashboard::Log(output,"Output");
 		
         // Logging any values
 		sl.PutOne();

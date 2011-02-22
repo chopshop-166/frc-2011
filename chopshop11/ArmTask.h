@@ -50,4 +50,5 @@ private:
 	float speed, deadband;		// Speed that the arm moves at
 	DoubleSolenoid gripper;		// The solenoid that controls the gripper
 	AnalogChannel potentiometer;	// Potentiometer
+	float high_limit, low_limit;	// High and Low limits 
 };
