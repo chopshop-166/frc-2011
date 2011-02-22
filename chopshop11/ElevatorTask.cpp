@@ -194,7 +194,6 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				proxy->set("ElevatorReadyPosition", true);
 			}
 		} else {
-			brakeSolenoid.Set((bool)proxy->get("Joy1B2"));
 			float axis = -proxy->get(ELEVATOR_AXIS);
 			SmartDashboard::Log(axis, "Axis Raw");
 			if(axis >= deadband || axis <= -deadband) {
@@ -205,9 +204,9 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
 		if(fabs(new_speed)<=0.1) {
-			brakeSolenoid.Set(true);
-		} else {
 			brakeSolenoid.Set(false);
+		} else {
+			brakeSolenoid.Set(true);
 		}
 		
 		// Adjust down speed to be half as fast
