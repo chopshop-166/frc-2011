@@ -144,7 +144,11 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		axis /= 3;
 		
 		armJag.Set(axis);
-		
+		if (currentAngle >= MAXHEIGHT) {
+			if (axis >=0) {
+				axis = 0;
+			}
+		}
 		if(proxy->get(GRIPPER_BUTTON)) {
 			if(gripper.Get() == DoubleSolenoid::kReverse) {
 				gripper.Set(DoubleSolenoid::kForward);

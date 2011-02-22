@@ -20,12 +20,7 @@
 
 #define ARM_CYCLE_TIME (10) // 10ms
 #define ANGLE_LIST_SIZE (10) // Number of angles to average as the current
-#define P_DOWN (75)		//P coefficient for arm going down
-#define I_DOWN (.04)	//I coefficient for arm going down
-#define D_DOWN (.025) 	//D coefficient for arm going down
-#define P_UP (175)		//P coefficient for arm going up
-#define I_UP (.035)		//I coefficient for arm going up
-#define D_UP (.025)		//D coefficient for arm going up
+#define MAXHEIGHT (4.15)	//Maximum angle of arm
 
 class ArmTask : public Team166Task
 {

@@ -55,7 +55,7 @@ Robot::Robot(void)
 	DriverStationDisplay("Starting Robot");
 	
 	// Setup expiration for task watchdog.
-	GetWatchdog().SetExpiration(5.0); // 5 seconds
+	//GetWatchdog().SetExpiration(5.0); // 5 seconds
 
 	// Wait for all of our tasks to come up
 	printf("Getting ready to check if tasks are up.\n");
@@ -73,7 +73,7 @@ Robot::Robot(void)
  */
 void Robot::Autonomous(void)
 {
-	GetWatchdog().SetEnabled(false);
+	//GetWatchdog().SetEnabled(false);
 	Proxy::getInstance()->ToggleSettingJoysticks(false);
 	AutonomousTask();
 }
@@ -97,7 +97,7 @@ void Robot::OperatorControl(void)
 	Proxy::getInstance()->ToggleSettingJoysticks(true);
 	
 	printf("Operator control\n");
-	GetWatchdog().SetEnabled(true);
+	//GetWatchdog().SetEnabled(true);
 	DriverStationDisplay("Teleoperated Enabled.");
 	while (IsOperatorControl())
 	{
