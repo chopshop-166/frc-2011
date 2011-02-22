@@ -19,9 +19,22 @@
 	#include "VisionAPI.h"
 	#include "TrackAPI.h"
 	#include "stdlib.h"
-
-/*******************************************************************************
-PRECURSORY SETUP: ProcessTheImage() does the following things:
+#define CAMERA_OFFSET (0.00625)			//how offset the camera is when normalized
+#define REGULAR_METHOD (1)
+	#define CHECK_IMAGE (1) 
+		#define HISTOGRAM_MAX_LUM (75.0)
+	#define ISOLATE_NUM (3)	
+		#define ISO1_LOWER_THRESH (200) //extract luminance plane, exp lookup, threshold
+		#define ISO2_LOWER_THRESH (200) //extract blue plane, smooth, threshold
+		#define ISO3_LOWER_THRESH (50)  //extract blue plane, smooth, exp lookup, threshold
+		#define ISO4_LOWER_THRESH (50)  //extract luminance plane, smooth, exp lookup, threshold
+	#define DO_BINARY_IMAGE_CLEAN_UP (1)
+	#define IDENTIFY_NUM (0)
+	#define DPRINTF if(false)dprintf 		//debugging info
+	#define TPRINTF if(false)dprintf 		//testing info
+#if REGULAR_METHOD
+ /*******************************************************************************
+PRECURSORY SETUP: ProcessTheImage() can do the following things:
 	1. Test the image to see if a target is visible. 
 	2. Examine image and find points of interest.
 	3. Clean up the points of interest, leaving the target.
@@ -36,15 +49,6 @@ methods are used.
 successful, and 0 if unsuccessful." - FIRST Robotics Competition (FRC)
 Application Programming Interface (API) Specification For Machine Vision
 *******************************************************************************/ 
-#define CAMERA_OFFSET (0.00625)			//how offset the camera is when normalized
-	#define CHECK_IMAGE (0) 
-	#define ISOLATE_NUM (2)	
-	#define DO_BINARY_IMAGE_CLEAN_UP (1)
-	#define IDENTIFY_NUM (0)
-	#define DPRINTF if(false)dprintf 		//debugging info
-	#define TPRINTF if(false)dprintf 		//testing info
- 
-/*******************************************************************************/ 
 // Step 1: Test the image to see if a target is visible.
 		// CHECK_IMAGE: if 1, checks image with histogram report
 /*******************************************************************************/ 
@@ -52,10 +56,11 @@ Application Programming Interface (API) Specification For Machine Vision
 		//This step takes a source image and returns a binary image (an image with only
 		//some regions 'on') with the points of interest 'on'.
 		// ISOLATE_NUM determines how light color is found. 
-			// 0 = use HSL threshold (hue-saturation-luminance, or color-grayness-brightness)
-			// 1 = extract luminance plane, threshold
-			// 2 = extract blue plane (from RGB), increase contrast, threshold
-			// 3 = 2, but lower threshold (intended for pattern matching)
+			// 0 = HSL threshold
+			// 1 = extract luminance plane, exp lookup, threshold
+			// 2 = extract blue plane, smooth, threshold
+			// 3 = 2, extract blue plane, smooth, exp lookup, threshold
+			// 4 = 1, extract luminance plane, smooth, exp lookup, threshold
 
 /*******************************************************************************/ 
 //Step 3: Clean up the points of interest, leaving the target.
@@ -121,7 +126,7 @@ int IsolateLightTarget(Image* ReflectingTape, Image* srcimage)
 		if(!imaqMathTransform(ReflectingTape, ReflectingTape, IMAQ_TRANSFORM_EXP, 0, 1000, 2, NULL)){return 0;}
 			
 	//threshold light/dark to return binary image
-		if(!frcSimpleThreshold(ReflectingTape, ReflectingTape, 200, 255)){return 0;}
+		if(!frcSimpleThreshold(ReflectingTape, ReflectingTape, ISO1_LOWER_THRESH, 255)){return 0;}
 		
 	//let higher function know this worked
 		return 1;
@@ -147,7 +152,7 @@ int IsolateLightTarget(Image* ReflectingTape, Image* srcimage)
 			if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_OPEN, &SE)){return 0;}
 		
 	//threshold light/dark to return binary image
-		if(!frcSimpleThreshold(ReflectingTape, ReflectingTape, 220, 255)){return 0;}
+		if(!frcSimpleThreshold(ReflectingTape, ReflectingTape, ISO2_LOWER_THRESH, 255)){return 0;}
 		
 	//let higher function know this worked
 		imaqDispose(&SE);
@@ -166,11 +171,11 @@ int IsolateLightTarget(Image* ReflectingTape, Image* srcimage)
 	//Smooth out the image while eliminating small bits of light
 		//create a 3x3 structuring element for smoothing function
 			StructuringElement SE;
-			SE.matrixCols = 3;
-			SE.matrixRows = 3;
+			SE.matrixCols = 7;
+			SE.matrixRows = 7;
 			SE.hexa = FALSE;
-			SE.kernel = (int*) malloc(9 * sizeof(int));
-			for(int i; i<9; ++i){SE.kernel[i] = 1;}
+			SE.kernel = (int*) malloc(49 * sizeof(int));
+			for(int i; i<49; ++i){SE.kernel[i] = 1;}
 		//smooth
 			if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_OPEN, &SE)){return 0;}
 		
@@ -178,14 +183,43 @@ int IsolateLightTarget(Image* ReflectingTape, Image* srcimage)
 		if(!imaqMathTransform(ReflectingTape, ReflectingTape, IMAQ_TRANSFORM_EXP, 0, 1000, 2, NULL)){return 0;}
 		
 	//threshold light/dark to return binary image
-		if(!frcSimpleThreshold(ReflectingTape, ReflectingTape, 105, 255)){return 0;}
+		if(!frcSimpleThreshold(ReflectingTape, ReflectingTape, ISO3_LOWER_THRESH, 255)){return 0;}
 
 	//let higher function know this worked
 		imaqDispose(&SE);
 		return 1;
 }
 #endif
-
+/*******************************************************************************/
+#if (ISOLATE_NUM == 4)
+int IsolateLightTarget(Image* ReflectingTape, Image* srcimage)
+//return binary image from source image using the very edited luminance plane
+{
+	//Get the luminance plane - targets should be light
+		if(!imaqExtractColorPlanes(srcimage, IMAQ_HSL, NULL, NULL, ReflectingTape)) {return 0;}
+	
+	//Smooth out the image while eliminating small bits of light
+		//create a 3x3 structuring element for smoothing function
+			StructuringElement SE;
+			SE.matrixCols = 3;
+			SE.matrixRows = 3;
+			SE.hexa = FALSE;
+			SE.kernel = (int*) malloc(9 * sizeof(int));
+			for(int i; i<9; ++i){SE.kernel[i] = 1;}
+		//smooth
+			if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_OPEN, &SE)){return 0;}
+				
+	//exaggerate the dark/light contrast
+		if(!imaqMathTransform(ReflectingTape, ReflectingTape, IMAQ_TRANSFORM_EXP, 0, 1000, 2, NULL)){return 0;}
+			
+	//threshold light/dark to return binary image
+		if(!frcSimpleThreshold(ReflectingTape, ReflectingTape, ISO4_LOWER_THRESH, 255)){return 0;}
+		
+	//let higher function know this worked
+		imaqDispose(&SE);
+		return 1;
+}
+#endif
 /*******************************************************************************
 CLEANING THE IMAGE: Often, the binary image contains small specks or lines from
 bright objects beside the target. The objective of this function is to clean
@@ -231,8 +265,8 @@ int CleanUpBinary(Image* ReflectingTape)
 		//set up particle filter criteria for size (eliminate small particles)
 			ParticleFilterCriteria2 PFC[1];
 			PFC[0].parameter = IMAQ_MT_AREA;
-			PFC[0].lower = 50;
-			PFC[0].upper = 1000;
+			PFC[0].lower = 75;
+			PFC[0].upper = 0xFFFFFF;
 			PFC[0].calibrated = false;
 			PFC[0].exclude = false;
 			ParticleFilterOptions PFO;
@@ -459,22 +493,18 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* Colo
 
 #if (CHECK_IMAGE == 1)
 	//Test image to make sure it has targets: histogram mean is lower when there are very bright points in image/the image is dark		
-	//get blue plane histogram, report stdDev
+	/*//get blue plane histogram
 		if(!imaqExtractColorPlanes(srcimage, IMAQ_RGB, NULL, NULL, ReflectingTape)) {return 0;}
 		HistogramReport* HR = imaqHistogram(ReflectingTape, 1, 0, 999999, NULL);
-		SmartDashboard::Log(HR->stdDev,"Blue Standard Deviation");
-		SmartDashboard::Log(HR->mean,"Blue Mean");
 		TPRINTF(LOG_INFO, "Blue stdDev=%f", HR->stdDev);
-		TPRINTF(LOG_INFO, "Blue mean=%f", HR->mean);
+		TPRINTF(LOG_INFO, "Blue mean=%f", HR->mean);*/
 	//get luminance plane 
 		if(!imaqExtractColorPlanes(srcimage, IMAQ_HSL, NULL, NULL, ReflectingTape)) {return 0;}
-		HistogramReport* HR = imaqHistogram(ReflectingTape, 1, 0, 999999, NULL);
-		SmartDashboard::Log(HR->stdDev,"Lum Standard Deviation");
-		SmartDashboard::Log(HR->mean,"Lum Mean");
-		TPRINTF(LOG_INFO, "Lum stdDev=%f", HR->stdDev);
-		TPRINTF(LOG_INFO, "Lum mean=%f", HR->mean);
+		HistogramReport* HR2 = imaqHistogram(ReflectingTape, 1, 0, 999999, NULL);
+		TPRINTF(LOG_INFO, "Lum stdDev=%f", HR2->stdDev);
+		TPRINTF(LOG_INFO, "Lum mean=%f", HR2->mean);
 	//logic based on image clarity
-		/*if(HR->stdDev < 27)
+		if(HR2->mean > HISTOGRAM_MAX_LUM)
 		{
 			TPRINTF(LOG_INFO, "Not suitable image.");
 			DPRINTF(LOG_INFO, "Not suitable image.");
@@ -485,7 +515,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* Colo
 		{
 			TPRINTF(LOG_INFO, "Suitable image.");
 			DPRINTF(LOG_INFO, "Suitable image.");
-		}*/
+		}
 #endif
 		
 	//Isolate target with threshold
@@ -543,6 +573,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* Colo
 
 		return 1;
 };
+#endif
 
 /*
 						_____	   _____
@@ -565,9 +596,33 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* Colo
 
 
  */
-
-
-
+#if !REGULAR_METHOD
+int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* ColoredBinaryImage, bool* CanSeeTargets, bool* ImageReturned, bool SaveImages)  
+//Processes the image, but also returns a picture for a snapshot
+{
+	//setting up template image
+		//make the image pattern
+			static Image* pattern = frcCreateImage(IMAQ_IMAGE_U8);
+		//make pattern the same image as the one in the CRIO
+			if(!imaqReadFile(pattern, TEMPLATE_FILE_NAME, NULL, NULL))
+			{
+				int errCode = GetLastVisionError();
+				DPRINTF(LOG_INFO, "Template file reading failed - errorcode %i", errCode);
+				char *errString = GetVisionErrorText(errCode);
+				DPRINTF(LOG_INFO, "errString= %s", errString);
+				*CanSeeTargets = false;
+				return 0;
+			} else {DPRINTF(LOG_INFO, "Read template.");}
+		//learning the pattern
+			ColorInformation* CI = imaqLearnColor(pattern, NULL, IMAQ_SENSITIVITY_LOW, 64);
+			int* idunno = imaqMatchColor(srcimage, CI, NULL, NULL);
+	//checking for matches
+		
+			
+	*SaveImages = false;
+	return 1;
+}
+#endif
 
 
 
