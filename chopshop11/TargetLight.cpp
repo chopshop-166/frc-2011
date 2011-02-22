@@ -28,7 +28,7 @@
 		#define ISO2_LOWER_THRESH (200) //extract blue plane, smooth, threshold
 		#define ISO3_LOWER_THRESH (50)  //extract blue plane, smooth, exp lookup, threshold
 		#define ISO4_LOWER_THRESH (50)  //extract luminance plane, smooth, exp lookup, threshold
-	#define DO_BINARY_IMAGE_CLEAN_UP (1)
+	#define DO_BINARY_IMAGE_CLEAN_UP (2)
 	#define IDENTIFY_NUM (0)
 	#define DPRINTF if(false)dprintf 		//debugging info
 	#define TPRINTF if(false)dprintf 		//testing info
@@ -227,7 +227,7 @@ off irrelevant information and to accentuate the target.
 
 This method can be turned off by changing DO_BINARY_IMAGE_CLEAN_UP to false.
 *******************************************************************************/ 
-#if DO_BINARY_IMAGE_CLEAN_UP
+#if (DO_BINARY_IMAGE_CLEAN_UP > 0)
 int CleanUpBinary(Image* ReflectingTape)
 //Change the fed image to a cleaner image
 {
@@ -260,21 +260,45 @@ int CleanUpBinary(Image* ReflectingTape)
 			//IMAQ_AUTOM: A function that uses dual combinations of opening and closing operations
 			//to smooth the boundaries of objects.
 				//if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_AUTOM, &myStructuringElement)){return 0;}
-		
+				
+#if (DO_BINARY_IMAGE_CLEAN_UP == 1)
+		//filter out small particles
+			//set up particle filter criteria for size (eliminate small particles)
+				ParticleFilterCriteria2 PFC[1];
+				PFC[0].parameter = IMAQ_MT_AREA;
+				PFC[0].lower = 75;
+				PFC[0].upper = 0xFFFFFF;
+				PFC[0].calibrated = false;
+				PFC[0].exclude = false;
+				ParticleFilterOptions PFO;
+				PFO.rejectMatches = false;
+				PFO.rejectBorder = false;
+				PFO.connectivity8 = false;
+			//Do particle filtering by above criteria
+				if(!imaqParticleFilter3(ReflectingTape, ReflectingTape, &PFC[0], 1, &PFO, NULL, NULL)) {return 0;}
+#endif
+				
+#if (DO_BINARY_IMAGE_CLEAN_UP == 2)
 	//filter out small particles
 		//set up particle filter criteria for size (eliminate small particles)
-			ParticleFilterCriteria2 PFC[1];
+			ParticleFilterCriteria2 PFC[2];
 			PFC[0].parameter = IMAQ_MT_AREA;
 			PFC[0].lower = 75;
 			PFC[0].upper = 0xFFFFFF;
 			PFC[0].calibrated = false;
 			PFC[0].exclude = false;
+			PFC[1].parameter = IMAQ_MT_CENTER_OF_MASS_X;
+			PFC[1].lower = 80;
+			PFC[1].upper = 240;
+			PFC[1].calibrated = false;
+			PFC[1].exclude = false;
 			ParticleFilterOptions PFO;
 			PFO.rejectMatches = false;
 			PFO.rejectBorder = false;
 			PFO.connectivity8 = false;
 		//Do particle filtering by above criteria
-			if(!imaqParticleFilter3(ReflectingTape, ReflectingTape, &PFC[0], 1, &PFO, NULL, NULL)) {return 0;}
+			if(!imaqParticleFilter3(ReflectingTape, ReflectingTape, &PFC[0], 2, &PFO, NULL, NULL)) {return 0;}
+#endif
 	
 	//change any non-zero pixel values to 255, which is white in Python script's returned images
 		//create a lookup table (lookup function take value of pixel and replaces the pixel's value
@@ -474,6 +498,7 @@ int FindTargets(Image* binaryImage, double* targetCenterNormalized, bool* CanSee
 	
 }
 #endif
+
 
 /*******************************************************************************
 CALLED FUNCTION: For the most part, this just calls the above functions to 
