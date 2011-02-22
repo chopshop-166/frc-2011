@@ -128,10 +128,11 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 #endif
 	proxy->add("ArmReadyPosition");
 	float currentAngle;
+	float axis;
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		currentAngle = armJag.GetPosition();
-		float axis = proxy->get(ELBOW_AXIS);
+		axis = proxy->get(ELBOW_AXIS);
 		armJag.Set(currentAngle-(0.05 * axis));
 		
 		if(proxy->get(GRIPPER_BUTTON)) {
