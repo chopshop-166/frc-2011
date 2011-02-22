@@ -197,7 +197,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			}
 		} else {
 			float axis = -proxy->get(ELEVATOR_AXIS);
-			SmartDashboard::Log(axis, "Axis Raw");
+//			SmartDashboard::Log(axis, "Axis Raw");
 			if(axis >= deadband || axis <= -deadband) {
 				new_speed = (axis/2);
 			} else {

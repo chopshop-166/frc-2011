@@ -67,6 +67,7 @@
 #define SONAR_CENTER (1)
 #define SONAR_RIGHT (2)
 #define SONAR_LEFT (3)
+#define ARM_POT (4)
 #define AUTONOMOUS_DIAL_LANE (5)
 #define AUTONOMOUS_DIAL_HEIGHT (6)
 #define PRESSURETRANSDUCER (7)

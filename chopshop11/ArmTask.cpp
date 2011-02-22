@@ -80,13 +80,13 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 // task constructor
 ArmTask::ArmTask(void) :
 	armJag(ARM_JAGUAR), speed(0.25), deadband(0.1),
-	gripper(GRIPPER_OPEN,GRIPPER_CLOSE)
+	gripper(GRIPPER_OPEN,GRIPPER_CLOSE), potentiometer(ARM_POT)
 {
 	Start((char *)"166ArmTask", ARM_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
-	armJag.ConfigSoftPositionLimits(0.55, 0.95);
+//	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
+//	armJag.ConfigSoftPositionLimits(0.55, 0.95);
 //	armJag.SetPID(PCOEFF,ICOEFF,DCOEFF);
 //	armJag.EnableControl();
 	return;
@@ -115,25 +115,41 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	
-#if 0
-	enum {hNone=-1, hFloor=0,
-		hLowSide=1, hLowCenter=2,
-		hMidSide=3, hMidCenter=4,
-		hHighSide=5, hHighCenter=6} target_type = hNone;
-	
-	// Fix these heights once we can test
-	// They currently don't take the arm height into account
-	//
-	const double angle_list[] = {0,30,37,67,74,104,111};
-#endif
 	proxy->add("ArmReadyPosition");
 	float currentAngle;
 	float axis;
+	float desiredAngle;
+	float previousAngles[ANGLE_LIST_SIZE];
+	for(unsigned i=0;i<ANGLE_LIST_SIZE;i++) {
+		previousAngles[i] = potentiometer.GetVoltage();
+	}
+	int angleSizeCounter = 0;
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		currentAngle = armJag.GetPosition();
+		angleSizeCounter = (angleSizeCounter + 1) % ANGLE_LIST_SIZE;
+		previousAngles[angleSizeCounter] = potentiometer.GetVoltage();
+		currentAngle=0;
+		for(unsigned i=0;i<ANGLE_LIST_SIZE;i++) {
+			currentAngle+=previousAngles[i];
+		}
+		currentAngle /= ANGLE_LIST_SIZE;
+		
 		axis = proxy->get(ELBOW_AXIS);
-		armJag.Set(currentAngle-(0.05 * axis));
+		if(fabs(axis) < deadband) {
+			axis=0;
+		}
+		if(axis>0) {
+			axis -= deadband;
+		} else if(axis<0) {
+			axis += deadband;
+		}
+		
+		desiredAngle = currentAngle-(0.1 * axis);
+		if(desiredAngle < currentAngle) {
+			armJag.Set(-speed);
+		} else {
+			armJag.Set(speed);
+		}
 		
 		if(proxy->get(GRIPPER_BUTTON)) {
 			if(gripper.Get() == DoubleSolenoid::kReverse) {
@@ -142,9 +158,13 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 				gripper.Set(DoubleSolenoid::kReverse);
 			}
 		}
+		
 		SmartDashboard::Log(currentAngle,"Current Angle");
 		SmartDashboard::Log(axis,"Elbow Axis");
-		SmartDashboard::Log(currentAngle-(0.05 * axis),"Target Angle");
+		SmartDashboard::Log(desiredAngle,"Target Angle");
+		SmartDashboard::Log(armJag.GetP(),"P");
+		SmartDashboard::Log(armJag.GetI(),"I");
+		SmartDashboard::Log(armJag.GetD(),"D");
 		
         // Logging any values
 		sl.PutOne();

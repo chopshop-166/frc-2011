@@ -19,9 +19,13 @@
 // of miliseconds. Max allowed time is 999 miliseconds.
 
 #define ARM_CYCLE_TIME (10) // 10ms
-#define PCOEFF (0)	//P coefficient for arm
-#define ICOEFF (0)	//I coefficient for arm
-#define DCOEFF (0) 	//D coefficient for arm
+#define ANGLE_LIST_SIZE (10) // Number of angles to average as the current
+#define P_DOWN (75)		//P coefficient for arm going down
+#define I_DOWN (.04)	//I coefficient for arm going down
+#define D_DOWN (.025) 	//D coefficient for arm going down
+#define P_UP (175)		//P coefficient for arm going up
+#define I_UP (.035)		//I coefficient for arm going up
+#define D_UP (.025)		//D coefficient for arm going up
 
 class ArmTask : public Team166Task
 {
@@ -43,6 +47,7 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;				// Local handle
 	CANJaguar armJag;			// Jaguar that controls arm's height
-	float speed, deadband;				// Speed that the arm moves at
-	DoubleSolenoid gripper;		// The solenoid that controls the gripper 
+	float speed, deadband;		// Speed that the arm moves at
+	DoubleSolenoid gripper;		// The solenoid that controls the gripper
+	AnalogChannel potentiometer;	// Potentiometer
 };
