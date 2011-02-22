@@ -118,17 +118,20 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			}
 			case kSwing:
 			{
+				//Release latch to swing arm to pole
 				MiniRelease.Set(1);
 				if (Deploy_Limit.Get()){
 					Deploy_State = kExtend;
 				}
 			}
 			case kExtend:
+				//Extend minibot + deployer to pole
 				DeployerExtender.Set(1);
 				if(SolenoidExtended.Get()) {
 					Deploy_State = kDeploy;
 				}
 			case kDeploy:
+				//Pull piston back to release minbot
 				MiniDeployer.Set(1);
 		}
         // Logging any values

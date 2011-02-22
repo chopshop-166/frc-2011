@@ -44,4 +44,5 @@ private:
 	Robot *lHandle;				// Local handle
 	CANJaguar armJag;			// Jaguar that controls arm's height
 	float speed, deadband;				// Speed that the arm moves at
+	DoubleSolenoid gripper;		// The solenoid that controls the gripper 
 };

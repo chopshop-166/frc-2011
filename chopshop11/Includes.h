@@ -9,7 +9,6 @@
 #include "ColorLights.h"
 #include "DriveTask.h"
 #include "Elevatortask.h"
-#include "GripperTask.h"
 #include "MiniDeployTask.h"
 #include "PhotoElectric.h"
 #include "PneumaticsTask.h"

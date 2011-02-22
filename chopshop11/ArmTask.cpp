@@ -79,7 +79,8 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 ArmTask::ArmTask(void) :
-	armJag(ARM_JAGUAR), speed(0.25), deadband(0.1)
+	armJag(ARM_JAGUAR), speed(0.25), deadband(0.1),
+	gripper(GRIPPER_OPEN,GRIPPER_CLOSE)
 {
 	Start((char *)"166ArmTask", ARM_CYCLE_TIME);
 	// Register the proxy
@@ -130,9 +131,16 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		currentAngle = armJag.GetPosition();
-		float axis = proxy->get(ELBOW_AXIS)
+		float axis = proxy->get(ELBOW_AXIS);
 		armJag.Set(currentAngle-(0.05 * axis));
 		
+		if(proxy->get(GRIPPER_BUTTON)) {
+			if(gripper.Get() == DoubleSolenoid::kReverse) {
+				gripper.Set(DoubleSolenoid::kForward);
+			} else {
+				gripper.Set(DoubleSolenoid::kReverse);
+			}
+		}
 		SmartDashboard::Log(currentAngle,"Current Angle");
 		SmartDashboard::Log(axis,"Elbow Axis");
 		SmartDashboard::Log(currentAngle-(0.05 * axis),"Target Angle");

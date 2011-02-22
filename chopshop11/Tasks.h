@@ -13,7 +13,6 @@ ArmTask ArmTaskObject;
 ColorLightTask ColorLightObject; // Tested, works!
 //DriveTask DriveObject; // Tested - account for joystick differences
 ElevatorTask ElevatorObject; // Needs testing
-GripperTask GripperObject;
 //MiniDeploy166 MiniDeployObject;
 //PhotoElectricTask PhotoElectricObject; // Tested - works fine
 PneumaticsTask PneumaticsTaskObject; // Test this next - connected to a spike
