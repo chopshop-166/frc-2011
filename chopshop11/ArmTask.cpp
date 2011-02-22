@@ -85,7 +85,7 @@ ArmTask::ArmTask(void) :
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	armJag.SetPositionReference(CANJaguar::kPosRef_Potentiometer);
-//	armJag.ConfigSoftPositionLimits(0.55, 0.95);
+	armJag.ConfigSoftPositionLimits(0.55, 0.95);
 //	armJag.SetPID(PCOEFF,ICOEFF,DCOEFF);
 //	armJag.EnableControl();
 	return;
@@ -129,10 +129,13 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	float currentAngle;
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		armJag.Set(0.5 * -proxy->get(ELBOW_AXIS));
 		currentAngle = armJag.GetPosition();
+		float axis = proxy->get(ELBOW_AXIS)
+		armJag.Set(currentAngle-(0.05 * axis));
 		
-		SmartDashboard::Log(currentAngle,"Potentiometer Value");
+		SmartDashboard::Log(currentAngle,"Current Angle");
+		SmartDashboard::Log(axis,"Elbow Axis");
+		SmartDashboard::Log(currentAngle-(0.05 * axis),"Target Angle");
 		
         // Logging any values
 		sl.PutOne();

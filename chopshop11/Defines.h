@@ -30,16 +30,15 @@
 // Color light buttons
 #define TURNOFF_LIGHTS_BUTTON ("Joy3B1")
 #define RED_LIGHT_BUTTON ("Joy3B2")
-#define BLUE_LIGHT_BUTTON ("Joy3B3")
-#define WHITE_LIGHT_BUTTON ("Joy3B4")
+#define WHITE_LIGHT_BUTTON ("Joy3B3")
+#define BLUE_LIGHT_BUTTON ("Joy3B4")
 #define GRIPPER_BUTTON ("Joy3B5N")
 // Preset buttons (xbox controller)
 #define LOW_PRESET_BUTTON ("Joy3B1")
 #define FLOOR_PRESET_BUTTON ("Joy3B2")
 #define MID_PRESET_BUTTON ("Joy3B3")
 #define HIGH_PRESET_BUTTON ("Joy3B4")
-#define SIDE_PRESET_BUTTON ("Joy3B5")
-#define CENTER_PRESET_BUTTON ("Joy3B6")
+#define PRESET_TYPE_AXIS ("Joy3A6")
 
 // Jaguars
 #define FRONT_RIGHT_JAGUAR (3)
@@ -72,11 +71,12 @@
 #define AUTONOMOUS_DIAL_HEIGHT (6)
 #define PRESSURETRANSDUCER (7)
 
-// Pneumatics bumper
-#define GRIPPER_OPEN (1)
-#define GRIPPER_CLOSE (2)
-#define MINIBOT_RELEASE (3)
-#define MINIBOT_DEPLOYER_EXTENDER (4)
-#define MINIBOT_DEPLOYER (5)
-#define ELEVATOR_BRAKE_RETRACT (6)
-
+/*
+ *  Pneumatics bumper
+ */
+#define MINIBOT_DEPLOYER (1)
+#define GRIPPER_OPEN (3)
+#define GRIPPER_CLOSE (4)
+#define ELEVATOR_BRAKE_RETRACT (5)
+#define MINIBOT_RELEASE (6)
+#define MINIBOT_DEPLOYER_EXTENDER (7)

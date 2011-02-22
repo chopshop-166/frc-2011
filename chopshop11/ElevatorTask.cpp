@@ -147,7 +147,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		clicks=-Height.Get();//Saves value of clicks
 		SmartDashboard::Log(clicks, "Clicks");
 
-		if(proxy->get(SIDE_PRESET_BUTTON)) {
+		if(proxy->get(PRESET_TYPE_AXIS) < 1) {
 			if(proxy->get(HIGH_PRESET_BUTTON)) {
 				// Y button of the controller
 				target_type = hHighSide;
@@ -158,12 +158,13 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				// A button of the controller
 				target_type = hLowSide;
 			} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
+				// Go to the floor
 				target_type = hFloor;
 			} else {
 				// None of the important buttons are pressed
 				target_type = hNone;
 			}
-		} else if(proxy->get(CENTER_PRESET_BUTTON)) {
+		} else if(proxy->get(PRESET_TYPE_AXIS) > 1) {
 			if(proxy->get(HIGH_PRESET_BUTTON)) {
 				// Y button of the controller
 				target_type = hHighCenter;
@@ -174,6 +175,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				// A button of the controller
 				target_type = hLowCenter;
 			} else if(proxy->get(FLOOR_PRESET_BUTTON)) {
+				// Go to the floor
 				target_type = hFloor;
 			} else {
 				// None of the important buttons are pressed
