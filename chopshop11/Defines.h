@@ -15,8 +15,8 @@
 #define DRIVE_FOWARD_BACK ("Joy1Y")
 // This is Joy1Z for Nick's joystick,
 // but Joy1R for the other one
-#define DRIVE_ROTATION ("Joy1r")
-#define DEPLOY_MINIBOT ("joy1b6")
+#define DRIVE_ROTATION ("Joy1Z")
+#define DEPLOY_MINIBOT_PILOT ("joy1b6")
 // Make sure this doesn't interfere with the logic
 // Autoassist buttons
 #define DRIVER_AUTOASSIST ("Joy1B2")
@@ -33,6 +33,7 @@
 #define WHITE_LIGHT_BUTTON ("Joy3B3")
 #define BLUE_LIGHT_BUTTON ("Joy3B4")
 #define GRIPPER_BUTTON ("Joy3B5N")
+#define DEPLOY_MINIBOT_COPILOT ("joy3b6")
 // Preset buttons (xbox controller)
 #define LOW_PRESET_BUTTON ("Joy3B1")
 #define FLOOR_PRESET_BUTTON ("Joy3B2")

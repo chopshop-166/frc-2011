@@ -16,16 +16,16 @@
 //
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
-#define AUTOASSIST_CYCLE_TIME (20) // 10ms
+#define AUTOASSIST_CYCLE_TIME (50) // 10ms
 
 // Distance to stop at from the wall
-#define AUTOASSIST_SONAR_FRONT_DISTANCE (5)
+#define AUTOASSIST_SONAR_FRONT_DISTANCE (30)
 #define AUTOASSIST_SONAR_SIDE_DISTANCE (5)
 
 // Speeds for the autonomous
-#define AUTOASSIST_SPEED_FORWARD (-0.2)
+#define AUTOASSIST_SPEED_FORWARD (-0.5)
 #define AUTOASSIST_SPEED_STRAFE (0.1)
-#define AUTOASSIST_SPEED_TURN (0.1)
+#define AUTOASSIST_SPEED_TURN (0.4)
 #define AUTOASSIST_SPEED_CAMERA_STRAFE (0.1)
 
 class AutonomousAssistTask : public Team166Task

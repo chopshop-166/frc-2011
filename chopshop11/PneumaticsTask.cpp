@@ -127,7 +127,7 @@ int PneumaticsTask::Main(int a2, int a3, int a4, int a5,
         // Logging any values
 		sl.PutOne(PSI);
 		
-		SmartDashboard::Log(PSI, "PSI");
+//		SmartDashboard::Log(PSI, "PSI");
 		
 		// Wait for our next lap
 		WaitForNextLoop();		

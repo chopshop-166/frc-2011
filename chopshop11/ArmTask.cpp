@@ -115,7 +115,6 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	proxy->add("ArmReadyPosition");
 	float currentAngle;
 	float axis;
-	float output;
 	float previousAngles[ANGLE_LIST_SIZE];
 	for(unsigned i=0;i<ANGLE_LIST_SIZE;i++) {
 		previousAngles[i] = potentiometer.GetVoltage();
@@ -142,13 +141,14 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
 		axis /= 3;
-		
-		armJag.Set(axis);
 		if (currentAngle >= MAXHEIGHT) {
 			if (axis >=0) {
 				axis = 0;
 			}
 		}
+		
+		armJag.Set(axis);
+		
 		if(proxy->get(GRIPPER_BUTTON)) {
 			if(gripper.Get() == DoubleSolenoid::kReverse) {
 				gripper.Set(DoubleSolenoid::kForward);
@@ -157,9 +157,8 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			}
 		}
 		
-		SmartDashboard::Log(currentAngle,"Current Angle");
-		SmartDashboard::Log(axis,"Elbow Axis");
-		SmartDashboard::Log(output,"Output");
+//		SmartDashboard::Log(currentAngle,"Current Angle");
+//		SmartDashboard::Log(axis,"Elbow Axis");
 		
         // Logging any values
 		sl.PutOne();

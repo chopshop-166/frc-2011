@@ -174,9 +174,9 @@ int SonarTask::Main(int a2, int a3, int a4, int a5,
 		proxy->set("FrontDistance", DistanceCenter);
 		proxy->set("LeftDistance", DistanceLeft);
 		proxy->set("RightDistance", DistanceRight);
-//		SmartDashboard::Log(DistanceCenter, "Front Distance");
-//		SmartDashboard::Log(DistanceLeft, "Left Distance");
-//		SmartDashboard::Log(DistanceRight, "Right Distance");
+		SmartDashboard::Log(DistanceCenter, "Front Distance");
+		SmartDashboard::Log(DistanceLeft, "Left Distance");
+		SmartDashboard::Log(DistanceRight, "Right Distance");
 		
 		// Increment the counter for distance slot in the array
 		i++;

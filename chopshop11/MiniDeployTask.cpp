@@ -104,35 +104,41 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	// Register main robot task
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
+	lHandle->DriverStationDisplay("MINI: Ready");
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true){
 		switch (Deploy_State) {
-			case kWait:
-			{
-				if(proxy->get(DEPLOY_MINIBOT)) {
-					if((proxy->get("MatchTimer") <= 10) || (proxy->get(DEPLOY_MINIBOT))) {
-						Deploy_State = kSwing;
-					}
+			case kWait: {
+				if((proxy->get(DEPLOY_MINIBOT_PILOT)) && (proxy->get(DEPLOY_MINIBOT_COPILOT))) {
+					Deploy_State = kSwing;
+					lHandle->DriverStationDisplay("MINI: Wait->Swing");
 				}
+				break;
 			}
-			case kSwing:
-			{
+			case kSwing: {
 				//Release latch to swing arm to pole
 				MiniRelease.Set(1);
 				if (Deploy_Limit.Get()){
 					Deploy_State = kExtend;
+					lHandle->DriverStationDisplay("MINI: Swing->Ext");
 				}
+				break;
 			}
-			case kExtend:
+			case kExtend: {
 				//Extend minibot + deployer to pole
 				DeployerExtender.Set(1);
 				if(SolenoidExtended.Get()) {
 					Deploy_State = kDeploy;
+					lHandle->DriverStationDisplay("MINI: Ext->Dep");
 				}
-			case kDeploy:
+				break;
+			}
+			case kDeploy: {
 				//Pull piston back to release minbot
 				MiniDeployer.Set(1);
+				break;
+			}
 		}
         // Logging any values
 		sl.PutOne();

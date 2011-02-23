@@ -35,32 +35,45 @@ AutonomousTask::AutonomousTask() {
 		// If it's 4 or 5, it's no good and disable
 		height_choice = 0;
 	}
-	// Turns [0 1 2 3] into [0 2 4 6]
-	// Heights are numbered 1-6 going up from the floor
-	height_choice = 2 * height_choice;
-	if(lane_choice != 3 && height_choice != 0) {
-		// We're going for the slightly lowered ones
-		height_choice = height_choice - 1;
-	}
-	
+	// Chooses a height and height axis
 	string copilot_button_name = "";
+	if(height_choice == 1) {
+		copilot_button_name = LOW_PRESET_BUTTON;
+	} else if(height_choice == 2) {
+		copilot_button_name = MID_PRESET_BUTTON;
+	} else if(height_choice == 3) {
+		copilot_button_name = HIGH_PRESET_BUTTON;
+	}
 	
 	string lane_string = "";
+	float preset_choice;
 	if(lane_choice==2 || lane_choice==1) {
+		// We want to head to the left
 		lane_string = LINE_STRAFE_LEFT_BUTTON;
+		preset_choice = -1;
 	} else if(lane_choice==4 || lane_choice==5) {
+		// We want to head to the right
 		lane_string = LINE_STRAFE_RIGHT_BUTTON;
+		preset_choice = -1;
+	} else if(lane_choice == 3) {
+		// We're going to the center
+		preset_choice = 1;
+	} else {
+		// We shouldn't be moving...
+		preset_choice = 0;
 	}
+	
 	bool gripper_state=true;
 	
 	while( lHandle->IsAutonomous() ) {
 		proxy->set(DRIVER_AUTOASSIST,true);
 		if(copilot_button_name.size()) {
-			proxy->set("HeightLocation",height_choice);
+			proxy->set(copilot_button_name,true);
 		}
 		if(lane_string.size()) {
 			proxy->set(lane_string,true);
 		}
+		proxy->set(PRESET_TYPE_AXIS,preset_choice);
 		
 		if(proxy->get("matchtimer") < 1.5) {
 			// Time's running out, so release

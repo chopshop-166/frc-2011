@@ -49,33 +49,31 @@ int ColorLightTask::Main(int a2, int a3, int a4, int a5,
     // General main loop (while in Autonomous or Tele mode)
 	while (true) 
 	{
-		if(proxy->get(PRESET_TYPE_AXIS)) {
-			WaitForNextLoop();
-			continue;
-		}
-		if(proxy->get(RED_LIGHT_BUTTON)) //red
-		{
-			Red.Set(true);
-			White.Set(false);
-			Blue.Set(false);
-		}
-		else if(proxy->get(WHITE_LIGHT_BUTTON)) //white
-		{
-			Red.Set(false);
-			White.Set(true);
-			Blue.Set(false);
-		}
-		else if(proxy->get(BLUE_LIGHT_BUTTON)) //blue
-		{
-			Red.Set(false);
-			White.Set(false);
-			Blue.Set(true);
-		}
-		else if(proxy->get(TURNOFF_LIGHTS_BUTTON)) //clear all
-		{
-			Red.Set(false);
-			White.Set(false);
-			Blue.Set(false);
+		if(proxy->get(PRESET_TYPE_AXIS) == 0) {
+			if(proxy->get(RED_LIGHT_BUTTON)) //red
+			{
+				Red.Set(true);
+				White.Set(false);
+				Blue.Set(false);
+			}
+			else if(proxy->get(WHITE_LIGHT_BUTTON)) //white
+			{
+				Red.Set(false);
+				White.Set(true);
+				Blue.Set(false);
+			}
+			else if(proxy->get(BLUE_LIGHT_BUTTON)) //blue
+			{
+				Red.Set(false);
+				White.Set(false);
+				Blue.Set(true);
+			}
+			else if(proxy->get(TURNOFF_LIGHTS_BUTTON)) //clear all
+			{
+				Red.Set(false);
+				White.Set(false);
+				Blue.Set(false);
+			}
 		}
 		
 		// Wait for our next lap

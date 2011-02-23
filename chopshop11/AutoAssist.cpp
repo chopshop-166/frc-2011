@@ -108,6 +108,10 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	x=y=r=0;
 	bool auto_enabled = false;
 	bool reverse = false; // Go backwards after releasing
+#if 0
+	int fourked_timer = 0; // Timer for the fork (The u is intentional)
+	bool fourked_hit = false; // Has it hit a fork?
+#endif
 	proxy->add("AutoassistReadyPosition");
 	proxy->DisableJoystickAxesByButton(1,DRIVER_AUTOASSIST_REAL);
 	
@@ -120,37 +124,61 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 		if(auto_enabled) {
 			if(proxy->exists("LineDirection")) {
 				curr_value = (int)proxy->get("LineDirection");
-				x=0;
-				switch(curr_value) {
-					case lRight:
-						r = AUTOASSIST_SPEED_TURN;
-						break;
-					case lCenter:
-						r = 0;
-						break;
-					case lLeft:
-						r = -AUTOASSIST_SPEED_TURN;
-						break;
-					case lNo_Line:
-						break;
-					case lFork:
-						if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
-							x = -AUTOASSIST_SPEED_STRAFE;
-						} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON)) {
-							x = AUTOASSIST_SPEED_STRAFE;
-						} else {
-							x = 0;
-						}
-						r = 0;
-						break;
-					default:
-						r=0;
-						break;
+#if 0
+				if(fourked_timer) {
+					fourked_timer--;
+					if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
+						x = -AUTOASSIST_SPEED_STRAFE;
+					} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON)) {
+						x = AUTOASSIST_SPEED_STRAFE;
+					} else {
+						x = 0;
+					}
+				} else if(fourked_hit) {
+					x=0;
+					r=0;
+				} else {
+#endif
+					x=0;
+					switch(curr_value) {
+						case lRight:
+							r = AUTOASSIST_SPEED_TURN;
+							break;
+						case lCenter:
+							r = 0;
+							break;
+						case lLeft:
+							r = -AUTOASSIST_SPEED_TURN;
+							break;
+						case lNo_Line:
+							break;
+						case lFork:
+#if 0
+							if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
+								x = -AUTOASSIST_SPEED_STRAFE;
+							} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON)) {
+								x = AUTOASSIST_SPEED_STRAFE;
+							} else {
+								x = 0;
+							}
+							fourked_timer = (2000/AUTOASSIST_CYCLE_TIME);
+#endif
+							r = 0;
+							break;
+						default:
+							r=0;
+							break;
+					}
+#if 0
 				}
+#endif
 			}
-			if(proxy->exists("FrontSonar")) {
-				if(proxy->get("FrontSonar") > AUTOASSIST_SONAR_FRONT_DISTANCE) {
+			if(proxy->exists("FrontDistance")) {
+				float dist = proxy->get("FrontDistance");
+				printf("%f\r", dist);
+				if(dist > AUTOASSIST_SONAR_FRONT_DISTANCE) {
 					y=AUTOASSIST_SPEED_FORWARD;
+					y=0;
 				} else {
 					y=0;
 				}
@@ -158,16 +186,16 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				y=0;
 			}
 			if (y==0) {
-				if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
+				if(proxy->get(LINE_STRAFE_LEFT_BUTTON) && proxy->exists("LeftDistance")) {
 					// We want it to go to the left, according to the sonar
-					if(proxy->get("LeftSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
+					if(proxy->get("LeftDistance") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
 						x = -AUTOASSIST_SPEED_STRAFE;
 					} else {
 						x = 0;
 					}
-				} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON) && proxy->exists("RightSonar")) {
+				} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON) && proxy->exists("RightDistance")) {
 					// We want it to go to the right, according to the sonar
-					if(proxy->get("RightSonar") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
+					if(proxy->get("RightDistance") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
 						x = AUTOASSIST_SPEED_STRAFE;
 					} else {
 						x = 0;
@@ -177,21 +205,17 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				}
 			}
 			
-//			proxy->set(DRIVE_STRAFE,x);
-//			proxy->set(DRIVE_FOWARD_BACK,y);
-//			proxy->set(DRIVE_ROTATION,r);
-			
 			if(proxy->exists("CanSeeCameraTargets")) {
 				if(proxy->get("CanSeeCameraTargets") && proxy->exists("NormalizedTargetCenter")) {
 					// It sees targets
 					if(proxy->get("NormalizedTargetCenter") < 0) {
 						// We need to go right
-						x += AUTOASSIST_SPEED_CAMERA_STRAFE;
+//						x += AUTOASSIST_SPEED_CAMERA_STRAFE;
 					} else if(proxy->get("NormalizedTargetCenter") > 0) {
 						// We need to go left
-						x -= AUTOASSIST_SPEED_CAMERA_STRAFE;
+//						x -= AUTOASSIST_SPEED_CAMERA_STRAFE;
 					} else {
-						x=0;
+//						x=0;
 					}
 				}
 			}
@@ -202,6 +226,12 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				y=-AUTOASSIST_SPEED_FORWARD;
 			}
 			
+			proxy->set(DRIVE_STRAFE,x);
+			proxy->set(DRIVE_FOWARD_BACK,y);
+			proxy->set(DRIVE_ROTATION,r);
+//			printf("%f\t%f\t%f\r", x, y, r);
+			
+#if 0
 			if(x==0 && y==0 && r==0) {
 				//The robot's not moving
 				proxy->set("AutoassistReadyPosition",true);
@@ -217,6 +247,7 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			} else {
 				proxy->set("AutoassistReadyPosition",false);
 			}
+#endif
 		} else {
 			reverse = false;
 		}

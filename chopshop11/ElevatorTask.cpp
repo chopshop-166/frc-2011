@@ -80,7 +80,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.3), deadband(0.1), height_deadband(50)
+ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.3), deadband(0.1), height_deadband(10)
 	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
@@ -122,7 +122,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Fix these heights once we can test
 	// They currently don't take the arm height into account
-	const double height_list[] = {0,1000,2500,4000,5000,6000,7500};
+	const double height_list[] = {0,0,0,1850,3760,5080,7650};
 	proxy->add("ElevatorReadyPosition");
 	brakeSolenoid.Set(0);
 	int clicks = 0;
@@ -132,8 +132,8 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	Height.Start();
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		SmartDashboard::Log(!elevator.GetForwardLimitOK(), "Top");
-		SmartDashboard::Log(!elevator.GetReverseLimitOK(), "Bottom");
+//		SmartDashboard::Log(!elevator.GetForwardLimitOK(), "Top");
+//		SmartDashboard::Log(!elevator.GetReverseLimitOK(), "Bottom");
 		
 		if (!elevator.GetReverseLimitOK()) {
 			bottom_press++;
@@ -145,9 +145,9 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
 		clicks=-Height.Get();//Saves value of clicks
-		SmartDashboard::Log(clicks, "Clicks");
+//		SmartDashboard::Log(clicks, "Clicks");
 
-		if(proxy->get(PRESET_TYPE_AXIS) < 1) {
+		if(proxy->get(PRESET_TYPE_AXIS) < 0) {
 			if(proxy->get(HIGH_PRESET_BUTTON)) {
 				// Y button of the controller
 				target_type = hHighSide;
@@ -164,7 +164,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				// None of the important buttons are pressed
 				target_type = hNone;
 			}
-		} else if(proxy->get(PRESET_TYPE_AXIS) > 1) {
+		} else if(proxy->get(PRESET_TYPE_AXIS) > 0) {
 			if(proxy->get(HIGH_PRESET_BUTTON)) {
 				// Y button of the controller
 				target_type = hHighCenter;
@@ -198,7 +198,9 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		} else {
 			float axis = -proxy->get(ELEVATOR_AXIS);
 //			SmartDashboard::Log(axis, "Axis Raw");
-			if(axis >= deadband || axis <= -deadband) {
+			if(axis >= deadband) {
+				new_speed = (axis*3/4);
+			} else if(axis <= -deadband) {
 				new_speed = (axis/2);
 			} else {
 				new_speed = 0;

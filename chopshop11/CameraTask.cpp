@@ -183,7 +183,7 @@ int CameraTask::Main(int a2, int a3, int a4, int a5,
  */
 bool CameraTask::FindLightTargets()  {
 	int success;
-	lHandle->DriverStationDisplay("FindLightTargets:%0.6f",GetTime());
+//	lHandle->DriverStationDisplay("FindLightTargets:%0.6f",GetTime());
 
 #if 0
 	// get the camera image
@@ -246,7 +246,9 @@ bool CameraTask::FindLightTargets()  {
 #endif
 
 	proxy->set("CanSeeCameraTargets", (float) CanSeeTargets);
+	SmartDashboard::Log(CanSeeTargets, "Targets Visible");
 	if(CanSeeTargets){proxy->set("NormalizedTargetCenter", normalizedTargetReturn);}
+	SmartDashboard::Log(normalizedTargetReturn, "Normalized Target Center");
 		
 	//delete images;
 	frcDispose(cameraImage);
