@@ -9,7 +9,7 @@
 #include "AxisCamera.h"
 #include <inetLib.h>
 #include "pcre.h"
-#include <sockLib.h> 
+#include <sockLib.h>
 #include <string.h>
 #include "Synchronized.h"
 #include "Timer.h"
@@ -24,9 +24,10 @@ static const char *const kWhiteBalanceChoices[] = { "auto", "holdwb", "fixed_out
  * AxisCamera constructor
  */
 AxisCameraParams::AxisCameraParams(const char* ipAddress)
-	: m_paramTask("paramTask", (FUNCPTR) s_ParamTaskFunction)
+	: m_paramTask("paramTask", (FUNCPTR) s_ParamTaskFunction, Task::kDefaultPriority, 64000)
 	, m_ipAddress (inet_addr((char*)ipAddress))
 	, m_paramChangedSem (NULL)
+	, m_socketPossessionSem (NULL)
 {
 	m_brightnessParam = new IntCameraParameter("ImageSource.I0.Sensor.Brightness=%i",
 			"root.ImageSource.I0.Sensor.Brightness=(.*)", false);
@@ -57,6 +58,7 @@ AxisCameraParams::AxisCameraParams(const char* ipAddress)
 	m_parameters.push_back(m_whiteBalanceParam);
 
 	m_paramChangedSem = semBCreate (SEM_Q_PRIORITY, SEM_EMPTY);
+	m_socketPossessionSem = semBCreate (SEM_Q_PRIORITY, SEM_FULL);
 
 	m_paramTask.Start((int)this);
 }
@@ -85,12 +87,17 @@ int AxisCameraParams::s_ParamTaskFunction(AxisCameraParams* thisPtr)
 // TODO: need to synchronize the actual setting of parameters (the assignment statement)
 int AxisCameraParams::ParamTaskFunction()
 {
-	while (ReadCamParams() == 0) ;
+	static bool		firstTime = true;
+
 	while (true)
 	{
+		semTake(m_socketPossessionSem, WAIT_FOREVER);
+		if (firstTime)
+		{
+			while (ReadCamParams() == 0) ;
+			firstTime = false;
+		}
 		bool restartRequired = false;
-		// wait for a parameter to be changed
-		semTake(m_paramChangedSem, WAIT_FOREVER);
 
 		ParameterVector_t::iterator it = m_parameters.begin();
 		ParameterVector_t::iterator end = m_parameters.end();
@@ -104,11 +111,11 @@ int AxisCameraParams::ParamTaskFunction()
 				UpdateCamParam(param);
 			}
 		}
-
 		if (restartRequired)
 		{
 			RestartCameraTask();
 		}
+		semGive(m_socketPossessionSem);
 	}
 	return 0;
 }
@@ -269,7 +276,7 @@ int AxisCameraParams::GetCompression()
 /**
  * Write the maximum frames per second that the camera should send
  * Write 0 to send as many as possible.
- * @param maxFPS The number of frames the camera should send in a second, exposure permitting. 
+ * @param maxFPS The number of frames the camera should send in a second, exposure permitting.
  */
 void AxisCameraParams::WriteMaxFPS(int maxFPS)
 {
@@ -304,7 +311,7 @@ Authorization: Basic RlJDOkZSQw==\n\n";
 	sprintf(completedRequest, requestString, param);
 	// Send request
 	int camSocket = CreateCameraSocket(completedRequest);
-	if (socket == 0) 
+	if (camSocket == 0)
 	{
 		printf("UpdateCamParam failed: %s\n", param);
 		return 0;
@@ -331,19 +338,23 @@ Authorization: Basic RlJDOkZSQw==\n\n";
 	{
 		return 0;
 	}
-	char readBuffer[7000];
+	char readBuffer[27000];
 	int totalRead = 0;
-	int bytesRead = recv(camSocket, &readBuffer[totalRead], 1000, 0);
-	while (bytesRead > 0)
+	while (1)
 	{
-		totalRead += bytesRead;
+		wpi_assert(totalRead < 26000);
+		int bytesRead = recv(camSocket, &readBuffer[totalRead], 1000, 0);
 		if (bytesRead == ERROR)
 		{
 			perror("AxisCameraParams: Failed to read image header");
 			close(camSocket);
 			return 0;
 		}
-		bytesRead = recv(camSocket, &readBuffer[totalRead], 1000, 0);
+		else if (bytesRead <= 0)
+		{
+			break;
+		}
+		totalRead += bytesRead;
 	}
 	readBuffer[totalRead] = '\0';
 

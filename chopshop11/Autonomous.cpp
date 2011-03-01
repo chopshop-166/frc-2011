@@ -64,6 +64,7 @@ AutonomousTask::AutonomousTask() {
 	}
 	
 	bool gripper_state=true;
+	unsigned timer=0;
 	
 	while( lHandle->IsAutonomous() ) {
 #if 0

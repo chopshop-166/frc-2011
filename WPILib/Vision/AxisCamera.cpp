@@ -9,8 +9,8 @@
 #include "AxisCamera.h"
 #include "PCVideoServer.h"
 
-/** Private NI function to decode JPEG */ 
-IMAQ_FUNC int Priv_ReadJPEGString_C(Image* _image, const unsigned char* _string, UINT32 _stringLength); 
+/** Private NI function to decode JPEG */
+IMAQ_FUNC int Priv_ReadJPEGString_C(Image* _image, const unsigned char* _string, UINT32 _stringLength);
 
 // Max packet without jumbo frames is 1500... add 36 because??
 #define kMaxPacketSize 1536
@@ -90,9 +90,9 @@ bool AxisCamera::IsFreshImage()
 
 /**
  * Get the semaphore to be used to synchronize image access with camera acquisition
- * 
+ *
  * Call semTake on the returned semaphore to block until a new image is acquired.
- * 
+ *
  * The semaphore is owned by the AxisCamera class and will be deleted when the class is destroyed.
  * @return A semaphore to notify when new image is received
  */
@@ -132,7 +132,7 @@ int AxisCamera::GetImage(ColorImage* image)
 
 /**
  * Instantiate a new image object and fill it with the latest image from the camera.
- * 
+ *
  * The returned pointer is owned by the caller and is their responsibility to delete.
  * @return a pointer to an HSLImage object
  */
@@ -200,14 +200,18 @@ User-Agent: HTTPStreamClient\n\
 Connection: Keep-Alive\n\
 Cache-Control: no-cache\n\
 Authorization: Basic RlJDOkZSQw==\n\n";
+		semTake(m_socketPossessionSem, WAIT_FOREVER);
 		m_cameraSocket = CreateCameraSocket(requestString);
 		if (m_cameraSocket == 0)
 		{
 			// Don't hammer the camera if it isn't ready.
+			semGive(m_socketPossessionSem);
 			taskDelay(1000);
-			continue;
 		}
-		ReadImagesFromCamera();
+		else
+		{
+			ReadImagesFromCamera();
+		}
 	}
 }
 
@@ -220,7 +224,7 @@ int AxisCamera::ReadImagesFromCamera()
 	int imgBufferLength = 0;
 	//Infinite loop, task deletion handled by taskDeleteHook
 	// Socket cleanup handled by destructor
-	
+
 	// TODO: these recv calls must be non-blocking. Otherwise if the camera
 	// fails during a read, the code hangs and never retries when the camera comes
 	// back up.
@@ -289,6 +293,13 @@ int AxisCamera::ReadImagesFromCamera()
 		}
 		// Update image
 		UpdatePublicImageFromCamera(imgBuffer, readLength);
+		if (semTake(m_paramChangedSem, NO_WAIT) == OK)
+		{
+			// params need to be updated: close the video stream; release the camera.
+			close(m_cameraSocket);
+			semGive(m_socketPossessionSem);
+			return(0);
+		}
 	}
 }
 
@@ -451,4 +462,3 @@ int AxisCameraFreshImage()
 {
 	return AxisCamera::GetInstance().IsFreshImage();
 }
-

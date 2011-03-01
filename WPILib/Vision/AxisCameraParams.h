@@ -68,6 +68,7 @@ protected:
 	Task m_paramTask;
 	UINT32 m_ipAddress; // IPv4
 	SEM_ID m_paramChangedSem;
+	SEM_ID m_socketPossessionSem;
 
 	//Camera Properties
 	IntCameraParameter *m_brightnessParam;
