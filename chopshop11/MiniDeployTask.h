@@ -40,5 +40,5 @@ private:
 	Solenoid MiniDeployer;		//Close the minibot on the pole
 	Solenoid MiniRelease;		//Release MiniBot Deployer
 	DigitalInput Deploy_Limit;
-	DigitalInput SolenoidExtended;	//Check if deployer is extended
+	
 };

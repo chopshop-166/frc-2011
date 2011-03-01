@@ -74,7 +74,7 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTENDER), MiniDeployer(MINIBOT_DEPLOYER),
-		MiniRelease(12), Deploy_Limit(DEPLOYLIMIT), SolenoidExtended(5)
+		MiniRelease(12), Deploy_Limit(DEPLOYLIMIT)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
@@ -105,40 +105,43 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	lHandle->DriverStationDisplay("MINI: Ready");
-	
-    // General main loop (while in Autonomous or Tele mode)
+	int loopcount =0;
+    // General main loop (while in Autonomous or Tele mode) 
 	while (true){
 		switch (Deploy_State) {
 			case kWait: {
-				if((proxy->get(DEPLOY_MINIBOT_PILOT)) && (proxy->get(DEPLOY_MINIBOT_COPILOT))) {
+				printf("Waiting NOW\n");
+				if((proxy->get("matchtimer") <= 10.0) && (proxy->get(DEPLOY_MINIBOT_COPILOT))) {
 					Deploy_State = kSwing;
-					lHandle->DriverStationDisplay("MINI: Wait->Swing");
 				}
 				break;
 			}
 			case kSwing: {
 				//Release latch to swing arm to pole
 				MiniRelease.Set(1);
-				if (Deploy_Limit.Get()){
+				//if (Deploy_Limit.Get()){
+				if (proxy->get("joy3b3")) {
 					Deploy_State = kExtend;
-					lHandle->DriverStationDisplay("MINI: Swing->Ext");
 				}
 				break;
 			}
 			case kExtend: {
 				//Extend minibot + deployer to pole
 				DeployerExtender.Set(1);
-				if(SolenoidExtended.Get()) {
-					Deploy_State = kDeploy;
-					lHandle->DriverStationDisplay("MINI: Ext->Dep");
-				}
+				Deploy_State = kDeploy;
 				break;
 			}
 			case kDeploy: {
-				//Pull piston back to release minbot
-				MiniDeployer.Set(1);
+				printf("DEPLOYING\n");
+				if (loopcount>=13) {
+					//Pull piston back to release minbot
+					MiniDeployer.Set(1);
+				}
 				break;
 			}
+		}
+		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy)) {
+			loopcount++;
 		}
         // Logging any values
 		sl.PutOne();
