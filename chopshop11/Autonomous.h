@@ -16,6 +16,7 @@
 #include <cmath>
 
 #define AUTONOMOUS_WAIT_TIME (0.050)
+#define AUTONOMOUS_SECONDS (4)
 
 class AutonomousTask
 {
