@@ -66,22 +66,8 @@ AutonomousTask::AutonomousTask() {
 	bool gripper_state=true;
 	
 	while( lHandle->IsAutonomous() ) {
+#if 0
 		proxy->set(DRIVER_AUTOASSIST,true);
-		if(copilot_button_name.size()) {
-			proxy->set(copilot_button_name,true);
-		}
-		if(lane_string.size()) {
-			proxy->set(lane_string,true);
-		}
-		proxy->set(PRESET_TYPE_AXIS,preset_choice);
-		
-		if(proxy->get("matchtimer") < 1.5) {
-			// Time's running out, so release
-			gripper_state = false;
-		} else {
-			// Keep holding it
-			gripper_state = true;
-		}
 		
 		int ready_values = 0;
 		int possible_ready_values = 0;
@@ -107,7 +93,38 @@ AutonomousTask::AutonomousTask() {
 			gripper_state = false;
 		}
 		
+		if(proxy->get("matchtimer") < 1.5) {
+			// Time's running out, so release
+			gripper_state = false;
+		} else {
+			// Keep holding it
+			gripper_state = true;
+		}
+		
 		proxy->set(GRIPPER_BUTTON,gripper_state);
+#else
+		if(++timer <= (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_SECONDS)) {
+			proxy->set(DRIVE_FOWARD_BACK, 0.25);
+		} else {
+			proxy->set(DRIVE_FOWARD_BACK, 0);
+			if(gripper_state == true) {
+				gripper_state = false;
+				proxy->set(GRIPPER_BUTTON, true);
+			} else {
+				proxy->set(GRIPPER_BUTTON, false);
+			}
+		}
+#endif
+		if(copilot_button_name.size()) {
+			proxy->set(copilot_button_name,true);
+		}
+		if(lane_string.size()) {
+			proxy->set(lane_string,true);
+		}
+		proxy->set(PRESET_TYPE_AXIS,preset_choice);
+		if(proxy->get("ArmAngle") < 2.90) {
+			proxy->set(ELBOW_AXIS, 0.2);
+		}
 		
 		// This wait is required, it makes sure no task uses too much memory
 		Wait(AUTONOMOUS_WAIT_TIME);

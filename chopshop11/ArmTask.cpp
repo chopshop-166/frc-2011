@@ -112,7 +112,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	
-	proxy->add("ArmReadyPosition");
+	proxy->add("ArmAngle");
 	float currentAngle;
 	float axis;
 	float previousAngles[ANGLE_LIST_SIZE];
@@ -148,6 +148,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
 		armJag.Set(axis);
+		proxy->set("ArmAngle",currentAngle);
 		
 		if(proxy->get(GRIPPER_BUTTON)) {
 			if(gripper.Get() == DoubleSolenoid::kReverse) {
