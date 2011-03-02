@@ -35,6 +35,7 @@ AutonomousTask::AutonomousTask() {
 		// If it's 4 or 5, it's no good and disable
 		height_choice = 0;
 	}
+	
 	// Chooses a height and height axis
 	string copilot_button_name = "";
 	if(height_choice == 1) {
@@ -63,68 +64,57 @@ AutonomousTask::AutonomousTask() {
 		preset_choice = 0;
 	}
 	
-	bool gripper_state=true;
 	unsigned timer=0;
 	
+	enum {sDriving, sHanging, sReverse, sWait} state = sDriving;
+	
 	while( lHandle->IsAutonomous() ) {
-#if 0
-		proxy->set(DRIVER_AUTOASSIST,true);
-		
-		int ready_values = 0;
-		int possible_ready_values = 0;
-		if(proxy->exists("AutoassistReadyPosition")) {
-			possible_ready_values++;
-			if(proxy->get("AutoassistReadyPosition")) {
-				ready_values++;
-			}
-		}
-		if(proxy->exists("ArmReadyPosition")) {
-			possible_ready_values++;
-			if(proxy->get("ArmReadyPosition")) {
-				ready_values++;
-			}
-		}
-		if(proxy->exists("ElevatorReadyPosition")) {
-			possible_ready_values++;
-			if(proxy->get("ElevatorReadyPosition")) {
-				ready_values++;
-			}
-		} 
-		if(possible_ready_values == ready_values) {
-			gripper_state = false;
-		}
-		
-		if(proxy->get("matchtimer") < 1.5) {
-			// Time's running out, so release
-			gripper_state = false;
-		} else {
-			// Keep holding it
-			gripper_state = true;
-		}
-		
-		proxy->set(GRIPPER_BUTTON,gripper_state);
-#else
-		if(++timer <= (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_SECONDS)) {
-			proxy->set(DRIVE_FOWARD_BACK, 0.25);
-		} else {
-			proxy->set(DRIVE_FOWARD_BACK, 0);
-			if(gripper_state == true) {
-				gripper_state = false;
-				proxy->set(GRIPPER_BUTTON, true);
-			} else {
+		switch (state) {
+			case sDriving:
+				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_FORWARD_SPEED);
+				++timer;
+				if(timer > (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_SECONDS)) {
+					timer = 0;
+					state = sHanging;
+				}
+				break;
+			case sHanging:
+				proxy->set(DRIVE_FOWARD_BACK, 0);
+				if(proxy->exists("ArmAngle")) {
+					if(proxy->get("ArmAngle") > 2.90) {
+						proxy->set(ELBOW_AXIS, -0.2);
+					} else if(proxy->get("ArmAngle") < 2.80) {
+						proxy->set(ELBOW_AXIS, 0.2);
+					}
+				}
+				if(copilot_button_name.size()) {
+					proxy->set(copilot_button_name,true);
+				}
+				if(lane_string.size()) {
+					proxy->set(lane_string,true);
+				}
+				proxy->set(PRESET_TYPE_AXIS,preset_choice);
+				++timer;
+				if(timer > (1000*AUTONOMOUS_WAIT_TIME*RELEASE_SECONDS)) {
+					proxy->set(GRIPPER_BUTTON, true);
+					timer = 0;
+					state = sReverse;
+				}
+				break;
+			case sReverse:
 				proxy->set(GRIPPER_BUTTON, false);
-			}
-		}
-#endif
-		if(copilot_button_name.size()) {
-			proxy->set(copilot_button_name,true);
-		}
-		if(lane_string.size()) {
-			proxy->set(lane_string,true);
-		}
-		proxy->set(PRESET_TYPE_AXIS,preset_choice);
-		if(proxy->get("ArmAngle") < 2.90) {
-			proxy->set(ELBOW_AXIS, 0.2);
+				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_BACKWARD_SPEED);
+				++timer;
+				if(timer > (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_SECONDS)) {
+					state = sWait;
+				}
+				break;
+			case sWait:
+			default:
+				proxy->set(DRIVE_STRAFE,0);
+				proxy->set(DRIVE_FOWARD_BACK,0);
+				proxy->set(DRIVE_ROTATION,0);
+				break;
 		}
 		
 		// This wait is required, it makes sure no task uses too much memory

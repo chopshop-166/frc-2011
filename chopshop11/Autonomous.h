@@ -17,6 +17,10 @@
 
 #define AUTONOMOUS_WAIT_TIME (0.050)
 #define AUTONOMOUS_SECONDS (4)
+#define RELEASE_SECONDS (1)
+
+#define AUTONOMOUS_FORWARD_SPEED (0.3)
+#define AUTONOMOUS_BACKWARD_SPEED (0.2)
 
 class AutonomousTask
 {
