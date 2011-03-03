@@ -29,7 +29,7 @@ class DriveLog : public MemoryLog
 public:
 	DriveLog() : MemoryLog(
 			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "DriveTask",
-			"Seconds,Nanoseconds,Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS, LF Faults, RF Faults, LB Faults, RB Faults\n" // Put the names of the values in here, comma-seperated
+			"Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS, LF Faults, RF Faults, LB Faults, RB Faults\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
@@ -80,8 +80,7 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf166 *ab = (struct abuf166 *)nptr;
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%d,%d,%d,%d\n",
-			ab->tp.tv_sec, ab->tp.tv_nsec,
+	fprintf(ofile, "%4.5f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%d,%d,%d,%d\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->LF_Speed,
 			ab->LB_Speed,

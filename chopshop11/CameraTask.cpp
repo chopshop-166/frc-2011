@@ -41,7 +41,7 @@ class CameraLog : public MemoryLog
 public:
 	CameraLog() : MemoryLog(
 			sizeof(struct abuf), CAMERA_CYCLE_TIME, "camera",
-			"Seconds,Nanoseconds,Elapsed Time,H-Angle, V-Angle, Size,\n" 
+			"Elapsed Time,H-Angle, V-Angle, Size,\n" 
 			) {
 		return;
 	};
@@ -81,8 +81,7 @@ unsigned int CameraLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f, %3.3f, %3.3f, %4.4f\n",
-			ab->tp.tv_sec, ab->tp.tv_nsec,
+	fprintf(ofile, "%4.5f, %3.3f, %3.3f, %4.4f\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			// Values to log
 			ab-> targetHAngle, ab-> targetVAngle, ab-> targetSize		

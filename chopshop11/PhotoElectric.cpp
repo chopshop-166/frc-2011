@@ -30,7 +30,7 @@ class PhotoElectricLog : public MemoryLog
 public:
 	PhotoElectricLog() : MemoryLog(
 			sizeof(struct abuf166), PHOTOELECTRIC_CYCLE_TIME, "photoelectric",
-			"Seconds,Nanoseconds,Elapsed Time,Left Result,Right Result,Center Result,Result\n" // Put the names of the values in here, comma-seperated
+			"Elapsed Time,Left Result,Right Result,Center Result,Result\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
@@ -68,8 +68,7 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf166 *ab = (struct abuf166 *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f\n",
-			ab->tp.tv_sec, ab->tp.tv_nsec,
+	fprintf(ofile, "%4.5f\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)), 
 			ab->left_result,
 			ab->right_result,

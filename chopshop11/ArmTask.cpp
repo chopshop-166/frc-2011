@@ -36,7 +36,7 @@ class ArmLog : public MemoryLog
 public:
 	ArmLog() : MemoryLog(
 			sizeof(struct abuf), ARM_CYCLE_TIME, "arm",
-			"Seconds,Nanoseconds,Elapsed Time,Arm Angle,Gripper,Faults\n"
+			"Elapsed Time,Arm Angle,Gripper,Faults\n"
 			) {
 		return;
 	};
@@ -73,8 +73,7 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f,%1.5f,%d,%d\n",
-			ab->tp.tv_sec, ab->tp.tv_nsec,
+	fprintf(ofile, "%4.5f,%1.5f,%d,%d\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->angle, ab->gripper, ab->faults
 	);

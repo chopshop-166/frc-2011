@@ -20,7 +20,7 @@ struct abuf
 	struct timespec tp;               // Time of snapshot
 	int target_type;
 	float motor_speed;
-	int faults;
+	unsigned faults;
 };
 
 //  Memory Log
@@ -30,7 +30,7 @@ class ElevatorLog : public MemoryLog
 public:
 	ElevatorLog() : MemoryLog(
 			sizeof(struct abuf), ELEVATOR_CYCLE_TIME, "Elevator",
-			"Seconds,Nanoseconds,Elapsed Time,Target Height, Elevator Speed, Faults\n"
+			"Elapsed Time,Target Height, Elevator Speed, Faults\n"
 			) {
 		return;
 	};
@@ -68,8 +68,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f, %d, %1.6f, %d\n",
-			ab->tp.tv_sec, ab->tp.tv_nsec,
+	fprintf(ofile, "%4.5f, %d, %1.6f, %d\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->target_type,
 			ab->motor_speed,
@@ -223,7 +222,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			SmartDashboard::Log(height_list[(int)target_type], "Target Height");
 		}
         // Logging any values
-		sl.PutOne(target_type, elevator.Get(), (int)elevator.GetFaults());
+		sl.PutOne(target_type, elevator.Get(), elevator.GetFaults());
 		
 		// Wait for our next lap
 		WaitForNextLoop();		

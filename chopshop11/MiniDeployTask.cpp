@@ -31,7 +31,7 @@ class MiniDeployLog : public MemoryLog
 public:
 	MiniDeployLog() : MemoryLog(
 			sizeof(struct abuf), MINIDEPLOY_CYCLE_TIME, "MiniDeploy",
-			"Seconds,Nanoseconds,Elapsed Time,Axis,Enum,Limit\n"
+			"Elapsed Time,Axis,Enum,Limit\n"
 			) {
 		return;
 	};
@@ -68,8 +68,7 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f,%0.5f,%d,%d\n",
-			ab->tp.tv_sec, ab->tp.tv_nsec,
+	fprintf(ofile, "%4.5f,%0.5f,%d,%d\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->axis, ab->limit, ab->state
 	);

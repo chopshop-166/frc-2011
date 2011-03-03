@@ -28,7 +28,7 @@ class PneumaticsTaskLog : public MemoryLog
 public:
 	PneumaticsTaskLog() : MemoryLog(
 			sizeof(struct abuf), PNEUMATICS_CYCLE_TIME, "PneumaticsTask",
-			"Seconds,Nanoseconds,Elapsed Time, Pressure\n"
+			"Elapsed Time, Pressure\n"
 			) {
 		return;
 	};
@@ -64,8 +64,7 @@ unsigned int PneumaticsTaskLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f,%f\n",
-			ab->tp.tv_sec, ab->tp.tv_nsec,
+	fprintf(ofile, "%4.5f,%f\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->pressure
 	);

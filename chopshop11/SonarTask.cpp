@@ -27,7 +27,7 @@ class SonarLog : public MemoryLog
 public:
 	SonarLog() : MemoryLog(
 			sizeof(struct abuf), SONAR_CYCLE_TIME, "Sonar",
-			"Seconds,Nanoseconds,Elapsed Time,Front,Left,Right\n"
+			"Elapsed Time,Front,Left,Right\n"
 			) {
 		return;
 	};
@@ -64,8 +64,7 @@ unsigned int SonarLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f,%3.3f,%3.3f,%3.3f\n",
-			ab->tp.tv_sec, ab->tp.tv_nsec,
+	fprintf(ofile, "%4.5f,%3.3f,%3.3f,%3.3f\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->f,
 			ab->l,
