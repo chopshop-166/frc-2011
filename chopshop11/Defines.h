@@ -79,8 +79,8 @@
  *  Pneumatics bumper
  */
 #define MINIBOT_DEPLOYER (1)
+#define MINIBOT_DEPLOYER_EXTENDER (2)
 #define GRIPPER_OPEN (3)
 #define GRIPPER_CLOSE (4)
 #define ELEVATOR_BRAKE_RETRACT (5)
 #define MINIBOT_RELEASE (6)
-#define MINIBOT_DEPLOYER_EXTENDER (7)

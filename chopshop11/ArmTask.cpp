@@ -25,6 +25,7 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
+	float angle;
 };
 
 //  Memory Log
@@ -33,7 +34,7 @@ class ArmLog : public MemoryLog
 public:
 	ArmLog() : MemoryLog(
 			sizeof(struct abuf), ARM_CYCLE_TIME, "arm",
-			"Seconds,Nanoseconds,Elapsed Time\n"
+			"Seconds,Nanoseconds,Elapsed Time,Arm Angle\n"
 			) {
 		return;
 	};
@@ -41,11 +42,11 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+	unsigned int PutOne(float);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-unsigned int ArmLog::PutOne(void)
+unsigned int ArmLog::PutOne(float a)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -54,6 +55,7 @@ unsigned int ArmLog::PutOne(void)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
+		ob->angle = a;
 		return (sizeof(struct abuf));
 	}
 	
@@ -67,9 +69,10 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f\n",
+	fprintf(ofile, "%u,%u,%4.5f,%1.5f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+			ab->angle
 	);
 	
 	// Done
@@ -158,11 +161,11 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			}
 		}
 		
-//		SmartDashboard::Log(currentAngle,"Current Angle");
+		SmartDashboard::Log(currentAngle,"Current Angle");
 //		SmartDashboard::Log(axis,"Elbow Axis");
 		
         // Logging any values
-		sl.PutOne();
+		sl.PutOne(currentAngle);
 		
 		// Wait for our next lap
 		WaitForNextLoop();

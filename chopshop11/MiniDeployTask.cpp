@@ -120,7 +120,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			case kSwing: {
 				//Release latch to swing arm to pole
 				MiniRelease.Set(1);
-				if (Deploy_Limit.Get()){
+				if (!Deploy_Limit.Get()){
 					Deploy_State = kExtend;
 					lHandle->DriverStationDisplay("MINI: Extending");
 				}
@@ -149,7 +149,9 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy)) {
 			loopcount++;
 		}
-		SmartDashboard::Log(proxy->get("Joy3A3"), "Deploy Axis");
+		SmartDashboard::Log(proxy->get(DEPLOY_MINIBOT_COPILOT), "Deploy Axis");
+		SmartDashboard::Log((bool)Deploy_Limit.Get(), "Limit Switch");
+		printf("%d\n", !Deploy_Limit.Get());
         // Logging any values
 		sl.PutOne();
 		

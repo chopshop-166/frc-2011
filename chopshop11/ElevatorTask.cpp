@@ -67,7 +67,7 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f, %d, %f1.6\n",
+	fprintf(ofile, "%u,%u,%4.5f, %d, %1.6f\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->target_type,

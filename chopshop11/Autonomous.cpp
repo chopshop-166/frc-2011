@@ -69,6 +69,7 @@ AutonomousTask::AutonomousTask() {
 	enum {sDriving, sHanging, sReverse, sWait} state = sDriving;
 	
 	while( lHandle->IsAutonomous() ) {
+#if 0
 		switch (state) {
 			case sDriving:
 				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_FORWARD_SPEED);
@@ -80,13 +81,8 @@ AutonomousTask::AutonomousTask() {
 				break;
 			case sHanging:
 				proxy->set(DRIVE_FOWARD_BACK, 0);
-				if(proxy->exists("ArmAngle")) {
-					if(proxy->get("ArmAngle") > 2.90) {
-						proxy->set(ELBOW_AXIS, -0.2);
-					} else if(proxy->get("ArmAngle") < 2.80) {
-						proxy->set(ELBOW_AXIS, 0.2);
-					}
-				}
+				proxy->set(ELBOW_AXIS, -0.4);
+				
 				if(copilot_button_name.size()) {
 					proxy->set(copilot_button_name,true);
 				}
@@ -116,7 +112,7 @@ AutonomousTask::AutonomousTask() {
 				proxy->set(DRIVE_ROTATION,0);
 				break;
 		}
-		
+#endif
 		// This wait is required, it makes sure no task uses too much memory
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
