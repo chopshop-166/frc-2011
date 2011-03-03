@@ -16,7 +16,7 @@
 AutonomousTask::AutonomousTask() {
 	// Create handles for proxy and robot
 	Robot *lHandle;
-	Proxy *proxy = Proxy::getInstance();
+//	Proxy *proxy = Proxy::getInstance();
 	
 	// Register robot handle
 	while( !(lHandle = Robot::getInstance()) && !( lHandle->IsAutonomous() ) ) {
@@ -64,15 +64,15 @@ AutonomousTask::AutonomousTask() {
 		preset_choice = 0;
 	}
 	
-	unsigned timer=0;
+//	unsigned timer=0;
 	
-	enum {sDriving, sHanging, sReverse, sWait} state = sDriving;
+//	enum {sDriving, sHanging, sReverse, sWait} state = sDriving;
 	
 	while( lHandle->IsAutonomous() ) {
 #if 0
 		switch (state) {
 			case sDriving:
-				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_FORWARD_SPEED);
+				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_FORWARD_SPEED*(lane_choice != 0));
 				++timer;
 				if(timer > (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_SECONDS)) {
 					timer = 0;
@@ -99,7 +99,7 @@ AutonomousTask::AutonomousTask() {
 				break;
 			case sReverse:
 				proxy->set(GRIPPER_BUTTON, false);
-				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_BACKWARD_SPEED);
+				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_BACKWARD_SPEED*(lane_choice != 0));
 				++timer;
 				if(timer > (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_SECONDS)) {
 					state = sWait;

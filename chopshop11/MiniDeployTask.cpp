@@ -20,6 +20,9 @@
 struct abuf
 {
 	struct timespec tp;               // Time of snapshot
+	float axis;
+	int state;
+	int limit;
 };
 
 //  Memory Log
@@ -28,7 +31,7 @@ class MiniDeployLog : public MemoryLog
 public:
 	MiniDeployLog() : MemoryLog(
 			sizeof(struct abuf), MINIDEPLOY_CYCLE_TIME, "MiniDeploy",
-			"Seconds,Nanoseconds,Elapsed Time\n"
+			"Seconds,Nanoseconds,Elapsed Time,Axis,Enum,Limit\n"
 			) {
 		return;
 	};
@@ -36,11 +39,11 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	unsigned int PutOne(void);     // Log the values needed-add in arguments
+	unsigned int PutOne(float, int, int);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-unsigned int MiniDeployLog::PutOne(void)
+unsigned int MiniDeployLog::PutOne(float a, int s, int l)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -49,6 +52,9 @@ unsigned int MiniDeployLog::PutOne(void)
 		
 		// Fill it in.
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
+		ob->axis = a;
+		ob->state = s;
+		ob->limit = l;
 		return (sizeof(struct abuf));
 	}
 	
@@ -62,9 +68,10 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%u,%u,%4.5f\n",
+	fprintf(ofile, "%u,%u,%4.5f,%0.5f,%d,%d\n",
 			ab->tp.tv_sec, ab->tp.tv_nsec,
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.))
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+			ab->axis, ab->limit, ab->state
 	);
 	
 	// Done
@@ -149,11 +156,8 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy)) {
 			loopcount++;
 		}
-		SmartDashboard::Log(proxy->get(DEPLOY_MINIBOT_COPILOT), "Deploy Axis");
-		SmartDashboard::Log((bool)Deploy_Limit.Get(), "Limit Switch");
-		printf("%d\n", !Deploy_Limit.Get());
         // Logging any values
-		sl.PutOne();
+		sl.PutOne(proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State, !Deploy_Limit.Get());
 		
 		// Wait for our next loop
 		WaitForNextLoop();		

@@ -29,7 +29,7 @@ class DriveLog : public MemoryLog
 public:
 	DriveLog() : MemoryLog(
 			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "DriveTask",
-			"Seconds,Nanoseconds,Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS, LF_Faults, RF_Faults, LB_Faults, RB_Faults\n" // Put the names of the values in here, comma-seperated
+			"Seconds,Nanoseconds,Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS, LF Faults, RF Faults, LB Faults, RB Faults\n" // Put the names of the values in here, comma-seperated
 			) {
 		return;
 	};
