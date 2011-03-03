@@ -252,20 +252,39 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		wheelSpeeds[2] = -x - y + r;
 		wheelSpeeds[3] = x - y - r;
 		
-		if ((++valuethrottle) % 50 ==0)
-		{
-			LostComms(fl, 0);
-			LostComms(fr, 1);
-			LostComms(bl, 2);
-			LostComms(br, 3);
-			
+		if (proxy->get(DRIVER_SWITCH_JOYSTICKS)) {
+			CountTimePressed++;
+		}
+		if (CountTimePressed >= 10) {
+			CountTimePressed = 0;
+			fl.ChangeControlMode(CANJaguar::kPercentVbus);
+			fr.ChangeControlMode(CANJaguar::kPercentVbus);
+			bl.ChangeControlMode(CANJaguar::kPercentVbus);
+			br.ChangeControlMode(CANJaguar::kPercentVbus);
+			for (int i=0; i<4; i++) {
+				encoderBad[i] = 1;
+			}
+		}
+		
+//		if ((++valuethrottle) % 50 ==0)
+//		{
+//			LostComms(fl, 0);
+//			LostComms(fr, 1);
+//			LostComms(bl, 2);
+//			LostComms(br, 3);
+//			
 //			SmartDashboard::Log(encoderBad[0], "FL Mode");
 //			SmartDashboard::Log(encoderBad[1], "FR Mode");
 //			SmartDashboard::Log(encoderBad[2], "BL Mode");
 //			SmartDashboard::Log(encoderBad[3], "BR Mode");
-		}
+//		}
 			
 		Normalize(wheelSpeeds);
+		if (proxy->get(DRIVER_SLOW_DRIVE)) {
+			for(int jag_id=0; jag_id<4; jag_id++) {
+				wheelSpeeds[jag_id] = wheelSpeeds[jag_id] /2;
+			}
+		}
 		if(encoderBad[0]==1){
 			fl.Set(wheelSpeeds[0], syncGroup);
 		} else {

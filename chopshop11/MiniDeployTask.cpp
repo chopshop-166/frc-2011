@@ -106,12 +106,12 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	lHandle->RegisterLogger(&sl);
 	lHandle->DriverStationDisplay("MINI: Ready");
 	int loopcount =0;
+	bool currval=false,lastval=false;
     // General main loop (while in Autonomous or Tele mode) 
 	while (true){
 		switch (Deploy_State) {
 			case kWait: {
-				printf("Waiting NOW\n");
-				if((proxy->get("matchtimer") <= 10.0) && (proxy->get(DEPLOY_MINIBOT_COPILOT))) {
+				if((proxy->get("matchtimer") <= 10.0) && (proxy->get(DEPLOY_MINIBOT_COPILOT)) <= -0.5) {
 					Deploy_State = kSwing;
 				}
 				break;
@@ -119,8 +119,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			case kSwing: {
 				//Release latch to swing arm to pole
 				MiniRelease.Set(1);
-				//if (Deploy_Limit.Get()){
-				if (proxy->get("joy3b3")) {
+				if (Deploy_Limit.Get()){
 					Deploy_State = kExtend;
 				}
 				break;
@@ -132,11 +131,15 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 				break;
 			}
 			case kDeploy: {
-				printf("DEPLOYING\n");
 				if (loopcount>=13) {
 					//Pull piston back to release minbot
 					MiniDeployer.Set(1);
 				}
+				currval = (proxy->get(DEPLOY_MINIBOT_COPILOT) >=0.5);
+				if(currval != lastval) {
+					MiniDeployer.Set(!MiniDeployer.Get());
+				}
+				lastval = currval;
 				break;
 			}
 		}

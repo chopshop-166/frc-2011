@@ -50,4 +50,5 @@ private:
 	float wheelSpeeds[4];
 	float actualSpeed[4];
 	int encoderBad[4];
+	int CountTimePressed;
 };

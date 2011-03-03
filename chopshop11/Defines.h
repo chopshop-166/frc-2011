@@ -24,6 +24,8 @@
 #define LINE_STRAFE_LEFT_BUTTON ("Joy1B3")
 #define LINE_STRAFE_RIGHT_BUTTON ("Joy1B4")
 
+#define DRIVER_SWITCH_JOYSTICKS ("Joy1B5")
+#define DRIVER_SLOW_DRIVE ("Joy1B1")
 // Copilot axes
 #define ELEVATOR_AXIS ("Joy3Y")
 #define ELBOW_AXIS ("Joy3A5")
@@ -33,7 +35,7 @@
 #define WHITE_LIGHT_BUTTON ("Joy3B3")
 #define BLUE_LIGHT_BUTTON ("Joy3B4")
 #define GRIPPER_BUTTON ("Joy3B5N")
-#define DEPLOY_MINIBOT_COPILOT ("joy3b6")
+#define DEPLOY_MINIBOT_COPILOT ("joy3A3")
 // Preset buttons (xbox controller)
 #define LOW_PRESET_BUTTON ("Joy3B1")
 #define FLOOR_PRESET_BUTTON ("Joy3B2")
