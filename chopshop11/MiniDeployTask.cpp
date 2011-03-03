@@ -74,7 +74,7 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTENDER), MiniDeployer(MINIBOT_DEPLOYER),
-		MiniRelease(12), Deploy_Limit(DEPLOYLIMIT)
+		MiniRelease(MINIBOT_RELEASE), Deploy_Limit(DEPLOYLIMIT)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
@@ -112,6 +112,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		switch (Deploy_State) {
 			case kWait: {
 				if((proxy->get("matchtimer") <= 10.0) && (proxy->get(DEPLOY_MINIBOT_COPILOT)) <= -0.5) {
+					lHandle->DriverStationDisplay("MINI: Swinging");
 					Deploy_State = kSwing;
 				}
 				break;
@@ -121,6 +122,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 				MiniRelease.Set(1);
 				if (Deploy_Limit.Get()){
 					Deploy_State = kExtend;
+					lHandle->DriverStationDisplay("MINI: Extending");
 				}
 				break;
 			}
@@ -128,6 +130,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 				//Extend minibot + deployer to pole
 				DeployerExtender.Set(1);
 				Deploy_State = kDeploy;
+				lHandle->DriverStationDisplay("MINI: Deploying");
 				break;
 			}
 			case kDeploy: {
@@ -146,6 +149,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy)) {
 			loopcount++;
 		}
+		SmartDashboard::Log(proxy->get("Joy3A3"), "Deploy Axis");
         // Logging any values
 		sl.PutOne();
 		
