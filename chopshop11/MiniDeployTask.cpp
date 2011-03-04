@@ -113,11 +113,16 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	lHandle->DriverStationDisplay("MINI: Ready");
 	int loopcount =0;
 	bool currval=false,lastval=false;
+	
+	MiniRelease.Set(0);
+	
     // General main loop (while in Autonomous or Tele mode) 
 	while (true){
 		switch (Deploy_State) {
 			case kWait: {
-				if((proxy->get("matchtimer") <= 10.0) && (proxy->get(DEPLOY_MINIBOT_COPILOT)) <= -0.5) {
+				if(
+//						(proxy->get("matchtimer") <= 10.0) &&
+						(proxy->get(DEPLOY_MINIBOT_COPILOT)) <= -0.5) {
 					lHandle->DriverStationDisplay("MINI: Swinging");
 					Deploy_State = kSwing;
 				}
@@ -140,16 +145,20 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 				break;
 			}
 			case kDeploy: {
-				if (loopcount>=13) {
+				if (loopcount>=25) {
 					//Pull piston back to release minbot
 					MiniDeployer.Set(1);
+					Deploy_State =kResting;
 				}
+				
+				break;
+			}
+			case kResting: {
 				currval = (proxy->get(DEPLOY_MINIBOT_COPILOT) >=0.5);
 				if(currval != lastval) {
 					MiniDeployer.Set(!MiniDeployer.Get());
 				}
 				lastval = currval;
-				break;
 			}
 		}
 		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy)) {
@@ -157,6 +166,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		}
         // Logging any values
 		sl.PutOne(proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State, !Deploy_Limit.Get());
+		printf("%1.6f\t%d\t%d\n", proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State, !Deploy_Limit.Get());
 		
 		// Wait for our next loop
 		WaitForNextLoop();		

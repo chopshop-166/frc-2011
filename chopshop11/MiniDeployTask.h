@@ -33,7 +33,7 @@ public:
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	enum DeployState {kWait=0, kSwing = 1, kExtend = 2, kDeploy=3} Deploy_State;
+	enum DeployState {kWait=0, kSwing = 1, kExtend = 2, kDeploy=3, kResting=4} Deploy_State;
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	Solenoid DeployerExtender;	// Extend the minibot deployment mechanism

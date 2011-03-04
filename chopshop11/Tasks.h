@@ -8,12 +8,12 @@
 //TimerTask TimerTaskObject;
 
 // tasks that cannot run on suitcase
-ArmTask ArmTaskObject;
-//AutonomousAssistTask AutoAssistObject; // Test when all other sensors verified 
-ColorLightTask ColorLightObject; // Tested, works!
-DriveTask DriveObject; // Tested - account for joystick differences
-ElevatorTask ElevatorObject; // Needs testing
-//MiniDeploy166 MiniDeployObject;
-//PhotoElectricTask PhotoElectricObject; // Tested - works fine
-PneumaticsTask PneumaticsTaskObject; // Test this next - connected to a spike
-//SonarTask SonarTaskObject; // Tested - small noise
+//ArmTask ArmTaskObject; // Works, but not logging faults
+//AutonomousAssistTask AutoAssistObject; // On vacation...do not disturb 
+//ColorLightTask ColorLightObject; // Works
+//DriveTask DriveObject; // Works
+//ElevatorTask ElevatorObject; // Works, but not logging faults
+MiniDeploy166 MiniDeployObject; // In progress
+//PhotoElectricTask PhotoElectricObject; // Works
+PneumaticsTask PneumaticsTaskObject; // Works
+//SonarTask SonarTaskObject; // Works
