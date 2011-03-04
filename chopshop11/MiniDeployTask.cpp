@@ -79,8 +79,8 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTENDER), MiniDeployer(MINIBOT_DEPLOYER),
-		MiniRelease(MINIBOT_RELEASE), Deploy_Limit(DEPLOYLIMIT)
+MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTENDER),
+		MiniDeployer(MINIBOT_DEPLOYER, MINIBOT_DEPLOYER_RETRACT), MiniRelease(MINIBOT_ARM_RELEASE), Deploy_Limit(DEPLOYLIMIT)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
@@ -111,8 +111,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	lHandle->DriverStationDisplay("MINI: Ready");
-	int loopcount =0;
-	bool currval=false,lastval=false;
+	int loopcount = 0;
 	
 	MiniRelease.Set(0);
 	
@@ -147,21 +146,32 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 			case kDeploy: {
 				if (loopcount>=25) {
 					//Pull piston back to release minbot
-					MiniDeployer.Set(1);
-					Deploy_State =kResting;
+					MiniDeployer.Set(DoubleSolenoid::kForward);
+					loopcount = 0;
+					Deploy_State = kRepunch;
 				}
 				
 				break;
 			}
-			case kResting: {
-				currval = (proxy->get(DEPLOY_MINIBOT_COPILOT) >=0.5);
-				if(currval != lastval) {
-					MiniDeployer.Set(!MiniDeployer.Get());
+			case kRepunch: {
+				if(loopcount>=125) {
+					MiniDeployer.Set(DoubleSolenoid::kReverse);
+					loopcount = 0;
+					Deploy_State = kReRetract;
 				}
-				lastval = currval;
+			}
+			case kReRetract: {
+				if(loopcount >= 25) {
+					MiniDeployer.Set(DoubleSolenoid::kForward);
+					loopcount = 0;
+					Deploy_State = kFinished;
+				}
+			}
+			case kFinished: {
+				
 			}
 		}
-		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy)) {
+		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy) || (Deploy_State == kRepunch) || (Deploy_State == kReRetract)) {
 			loopcount++;
 		}
         // Logging any values
