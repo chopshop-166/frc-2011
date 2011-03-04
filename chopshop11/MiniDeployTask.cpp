@@ -121,7 +121,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		switch (Deploy_State) {
 			case kWait: {
 				if(
-//						(proxy->get("matchtimer") <= 10.0) &&
+						(proxy->get("matchtimer") <= 10.0) &&
 						(proxy->get(DEPLOY_MINIBOT_COPILOT)) <= -0.5) {
 					lHandle->DriverStationDisplay("MINI: Swinging");
 					Deploy_State = kSwing;
