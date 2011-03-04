@@ -79,8 +79,8 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTENDER),
-		MiniDeployer(MINIBOT_DEPLOYER, MINIBOT_DEPLOYER_RETRACT), MiniRelease(MINIBOT_ARM_RELEASE), Deploy_Limit(DEPLOYLIMIT)
+MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTEND),
+		MiniDeployer(MINIBOT_DEPLOYER_PUSH, MINIBOT_DEPLOYER_RETRACT), MiniRelease(MINIBOT_ARM_RELEASE), Deploy_Limit(DEPLOYLIMIT)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
