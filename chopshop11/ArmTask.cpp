@@ -126,6 +126,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		previousAngles[i] = potentiometer.GetVoltage();
 	}
 	int angleSizeCounter = 0;
+	bool grip = false;
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		angleSizeCounter = (angleSizeCounter + 1) % ANGLE_LIST_SIZE;
@@ -157,7 +158,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		proxy->set("ArmAngle",currentAngle);
 		
 		if(proxy->get(GRIPPER_BUTTON)) {
-			if(gripper.Get() == DoubleSolenoid::kReverse) {
+			if(grip = !grip) {
 				gripper.Set(DoubleSolenoid::kForward);
 			} else {
 				gripper.Set(DoubleSolenoid::kReverse);
@@ -168,7 +169,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 //		SmartDashboard::Log(axis,"Elbow Axis");
 		
         // Logging any values
-		sl.PutOne(currentAngle, gripper.Get()==DoubleSolenoid::kForward, armJag.GetFaults());
+		sl.PutOne(currentAngle, grip, armJag.GetFaults());
 		
 		// Wait for our next lap
 		WaitForNextLoop();
