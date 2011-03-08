@@ -18,7 +18,7 @@
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
 
-#define ARM_CYCLE_TIME (20) // 20ms
+#define ARM_CYCLE_TIME (25) // 25ms
 #define ANGLE_LIST_SIZE (10) // Number of angles to average as the current
 #define MAXHEIGHT (4.15)	//Maximum angle of arm
 

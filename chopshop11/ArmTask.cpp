@@ -158,6 +158,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		proxy->set("ArmAngle",currentAngle);
 		
 		if(proxy->get(GRIPPER_BUTTON)) {
+			printf("Switched to: %s\n", (!grip)?"open":"closed");
 			if(grip = !grip) {
 				gripper.Set(DoubleSolenoid::kForward);
 			} else {
