@@ -170,11 +170,11 @@ double DriveTask::SignPreservingSquare(double raw)
 		return (raw * raw);
 	}
 }
+
 double DriveTask::TruncateDouble(double input)
 {
-	char buffer[6];
-	sprintf(buffer,"%1.2f", input);
-	return atof(buffer);
+	input = int(input*100);
+	return input/100.0;
 }
 int DriveTask::LostComms(CANJaguar& CheckJag, int location)
 {
@@ -224,13 +224,8 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 //	int valuethrottle=0;
 	int Throttle=0;
 	// General main loop (while in Autonomous or Tele mode)
+	actualSpeed[0]=actualSpeed[1]=actualSpeed[2]=actualSpeed[3]=0;
 	while (true) {
-
-		actualSpeed[0] = fl.GetSpeed();
-		actualSpeed[1] = fr.GetSpeed();
-		actualSpeed[2] = bl.GetSpeed();
-		actualSpeed[3] = br.GetSpeed();
-		
 		x=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_STRAFE)));
 		y=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_FOWARD_BACK)));
 		r=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_ROTATION)));
@@ -307,6 +302,10 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		
 		CANJaguar::UpdateSyncGroup(syncGroup);
 		if((++Throttle % (500/DRIVE_TASK_CYCLE_TIME)) == 0) {
+			actualSpeed[0] = fl.GetSpeed();
+			actualSpeed[1] = fr.GetSpeed();
+			actualSpeed[2] = bl.GetSpeed();
+			actualSpeed[3] = br.GetSpeed();
 			sl.PutOne(actualSpeed[0],actualSpeed[1],actualSpeed[2],actualSpeed[3],
 					wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3],
 					fl.GetFaults(), fr.GetFaults(), bl.GetFaults(), br.GetFaults()

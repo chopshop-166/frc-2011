@@ -166,7 +166,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			}
 		}
 		
-		SmartDashboard::Log(currentAngle,"Current Angle");
+//		SmartDashboard::Log(currentAngle,"Current Angle");
 //		SmartDashboard::Log(axis,"Elbow Axis");
 		
         // Logging any values
