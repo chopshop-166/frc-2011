@@ -103,10 +103,7 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 		
 	this->MyTaskIsEssential=0;
 	
-	SetDebugFlag ( DEBUG_SCREEN_ONLY  ) ;
-	camera.WriteResolution(AxisCamera::kResolution_320x240);
-	camera.WriteCompression(20);
-	camera.WriteBrightness(0);
+	SetDebugFlag ( DEBUG_SCREEN_ONLY  );
 
 	int fps = camera.GetMaxFPS();
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
