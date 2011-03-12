@@ -21,9 +21,9 @@
 #include "nivision.h"
 
 // To locally enable debug printing: set true, to disable false
-#define DPRINTF if(false)dprintf
+#define DPRINTF if(true)dprintf
 #define TPRINTF if(false)dprintf
-#define SAVE_IMAGES (1)
+#define SAVE_IMAGES (0)
 
 // Sample in memory buffer
 struct abuf
@@ -209,8 +209,10 @@ bool CameraTask::FindLightTargets()  {
 		  	frcDispose(cameraImage);
 		  	return false;
 		} else { 	
+#if SAVE_IMAGES
 			DPRINTF (LOG_INFO,"\nGetImage WORKED, calling SaveImage");
 			SaveImage("cameraImage.jpg", cameraImage);
+#endif
 		} 
 	} else {
 		DPRINTF (LOG_INFO,"\nStale image - didn't get a good image\n");
