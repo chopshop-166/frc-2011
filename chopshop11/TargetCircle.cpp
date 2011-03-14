@@ -131,10 +131,13 @@ vector<TargetCircle> TargetCircle::FindCircularTargets(HSLImage *image)
 	
 	// save a file with the the luminance plane
 	// cannot convert MonoImage* to Image*
-	//SaveImage("luminance.jpg", luminancePlane);
+#if SAVE_IMAGES
+	SaveImage("luminance.jpg", luminancePlane);
+#endif
 	DPRINTF(LOG_INFO,"saving luminance.jpg");
-	SaveImage("luminance.jpg", tmpImage);
-	
+#if SAVE_IMAGES
+	//SaveImage("luminance.jpg", tmpImage);
+#endif
 	delete luminancePlane;
 	DPRINTF(LOG_INFO,"found %i possible ellipses", results->size() );
 	if (results->size() == 0)

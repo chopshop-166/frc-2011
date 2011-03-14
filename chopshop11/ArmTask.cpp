@@ -85,7 +85,8 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 ArmTask::ArmTask(void) :
-	armJag(ARM_JAGUAR), speed(0.25), deadband(0.1),
+	armJag(ARM_JAGUAR),
+	speed(0.25), deadband(0.1),
 	gripper(GRIPPER_OPEN,GRIPPER_CLOSE), potentiometer(ARM_POT),
 	high_limit(3.6), low_limit(1.58)
 {
@@ -127,8 +128,9 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	}
 	int angleSizeCounter = 0;
 	bool grip = false;
-    // General main loop (while in Autonomous or Tele mode)
+    //General main loop (while in Autonomous or Tele mode)
 	while (true) {
+
 		angleSizeCounter = (angleSizeCounter + 1) % ANGLE_LIST_SIZE;
 		previousAngles[angleSizeCounter] = potentiometer.GetVoltage();
 		currentAngle=0;
@@ -158,14 +160,13 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		proxy->set("ArmAngle",currentAngle);
 		
 		if(proxy->get(GRIPPER_BUTTON)) {
-			printf("Switched to: %s\n", (!grip)?"open":"closed");
+			//printf("Switched to: %s\n", (!grip)?"open":"closed");
 			if(grip = !grip) {
 				gripper.Set(DoubleSolenoid::kForward);
 			} else {
 				gripper.Set(DoubleSolenoid::kReverse);
 			}
 		}
-		
 //		SmartDashboard::Log(currentAngle,"Current Angle");
 //		SmartDashboard::Log(axis,"Elbow Axis");
 		

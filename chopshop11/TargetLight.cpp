@@ -21,7 +21,7 @@
 	#include "stdlib.h"
 #define CAMERA_OFFSET (0.00625)			//how offset the camera is when normalized
 #define REGULAR_METHOD (1)
-	#define CHECK_IMAGE (1) 
+	#define CHECK_IMAGE (0) 
 		#define HISTOGRAM_MAX_LUM (75.0)
 	#define ISOLATE_NUM (3)	
 		#define ISO1_LOWER_THRESH (200) //extract luminance plane, exp lookup, threshold
@@ -31,7 +31,7 @@
 	#define DO_BINARY_IMAGE_CLEAN_UP (2)
 	#define IDENTIFY_NUM (0)
 	#define DPRINTF if(false)dprintf 		//debugging info
-	#define TPRINTF if(false)dprintf 		//testing info
+	#define TPRINTF if(true)dprintf 		//testing info
 #if REGULAR_METHOD
  /*******************************************************************************
 PRECURSORY SETUP: ProcessTheImage() can do the following things:

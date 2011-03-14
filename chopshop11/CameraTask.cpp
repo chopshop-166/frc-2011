@@ -23,7 +23,7 @@
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
 #define TPRINTF if(false)dprintf
-#define SAVE_IMAGES (1)
+#define SAVE_IMAGES (0)
 
 // Sample in memory buffer
 struct abuf
