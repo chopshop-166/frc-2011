@@ -104,7 +104,8 @@ CameraTask::CameraTask(void):camera(AxisCamera::GetInstance())
 	this->MyTaskIsEssential=0;
 	
 	SetDebugFlag ( DEBUG_SCREEN_ONLY  );
-
+	camera.WriteResolution(AxisCamera::kResolution_320x240);
+	camera.WriteBrightness(15);
 	int fps = camera.GetMaxFPS();
 	Start((char *)"CameraTask", CAMERA_CYCLE_TIME);
 
@@ -210,7 +211,9 @@ bool CameraTask::FindLightTargets()  {
 		  	return false;
 		} else { 	
 			DPRINTF (LOG_INFO,"\nGetImage WORKED, calling SaveImage");
+#if SAVE_IMAGES
 			SaveImage("cameraImage.jpg", cameraImage);
+#endif
 		} 
 	} else {
 		DPRINTF (LOG_INFO,"\nStale image - didn't get a good image\n");

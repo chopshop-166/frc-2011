@@ -23,11 +23,11 @@
 #define REGULAR_METHOD (1)
 	#define CHECK_IMAGE (0) 
 		#define HISTOGRAM_MAX_LUM (75.0)
-	#define ISOLATE_NUM (3)	
+	#define ISOLATE_NUM (4)	
 		#define ISO1_LOWER_THRESH (200) //extract luminance plane, exp lookup, threshold
 		#define ISO2_LOWER_THRESH (200) //extract blue plane, smooth, threshold
 		#define ISO3_LOWER_THRESH (50)  //extract blue plane, smooth, exp lookup, threshold
-		#define ISO4_LOWER_THRESH (50)  //extract luminance plane, smooth, exp lookup, threshold
+		#define ISO4_LOWER_THRESH (75)  //extract luminance plane, smooth, exp lookup, threshold
 	#define DO_BINARY_IMAGE_CLEAN_UP (2)
 	#define IDENTIFY_NUM (0)
 	#define DPRINTF if(false)dprintf 		//debugging info
@@ -210,7 +210,7 @@ int IsolateLightTarget(Image* ReflectingTape, Image* srcimage)
 			if(!imaqGrayMorphology(ReflectingTape, ReflectingTape, IMAQ_OPEN, &SE)){return 0;}
 				
 	//exaggerate the dark/light contrast
-		if(!imaqMathTransform(ReflectingTape, ReflectingTape, IMAQ_TRANSFORM_EXP, 0, 1000, 2, NULL)){return 0;}
+		if(!imaqMathTransform(ReflectingTape, ReflectingTape, IMAQ_TRANSFORM_POW1X, 0, 1000, 2, NULL)){return 0;}
 			
 	//threshold light/dark to return binary image
 		if(!frcSimpleThreshold(ReflectingTape, ReflectingTape, ISO4_LOWER_THRESH, 255)){return 0;}
@@ -382,6 +382,7 @@ int FindTargets(Image* binaryImage, double* targetCenterNormalized, bool* CanSee
 		//return the target's location (normalized) to caller
 			*targetCenterNormalized = Target.center_mass_x_normalized - CAMERA_OFFSET;
 			*CanSeeTargets = true;
+			TPRINTF (LOG_INFO,"\nNC = %f \nCanSee = %d", *targetCenterNormalized, *CanSeeTargets);
 		
 		return success;
 	};
@@ -516,7 +517,7 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* Colo
 	//Defining the needed variables
 		Image* ReflectingTape = frcCreateImage(IMAQ_IMAGE_U8);
 
-#if (CHECK_IMAGE == 1)
+
 	//Test image to make sure it has targets: histogram mean is lower when there are very bright points in image/the image is dark		
 	/*//get blue plane histogram
 		if(!imaqExtractColorPlanes(srcimage, IMAQ_RGB, NULL, NULL, ReflectingTape)) {return 0;}
@@ -526,8 +527,8 @@ int ProcessTheImage(Image* srcimage, double* targetCenterNormalized, Image* Colo
 	//get luminance plane 
 		if(!imaqExtractColorPlanes(srcimage, IMAQ_HSL, NULL, NULL, ReflectingTape)) {return 0;}
 		HistogramReport* HR2 = imaqHistogram(ReflectingTape, 1, 0, 999999, NULL);
-		TPRINTF(LOG_INFO, "Lum stdDev=%f", HR2->stdDev);
-		TPRINTF(LOG_INFO, "Lum mean=%f", HR2->mean);
+		TPRINTF(LOG_INFO, "\nLum stdDev=%f \nLum mean=%f", HR2->stdDev, HR2->mean);
+#if (CHECK_IMAGE == 1)
 	//logic based on image clarity
 		if(HR2->mean > HISTOGRAM_MAX_LUM)
 		{
