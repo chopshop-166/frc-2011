@@ -74,6 +74,7 @@
 #define AUTONOMOUS_DIAL_LANE (5)
 #define AUTONOMOUS_DIAL_HEIGHT (6)
 #define PRESSURETRANSDUCER (7)
+#define ARM_JAGUAR_PWM (8)
 
 /*
  *  Pneumatics bumper

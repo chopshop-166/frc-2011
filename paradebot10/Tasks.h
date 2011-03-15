@@ -5,6 +5,6 @@
 // DriveClass DriveObject;
 // No need for pointers, or anything else, if it's derived from Team166Task
 Pneumatics166 Pneumatics166Object;
-Drive Team166CANDriveObject;
+Team166CANDrive Team166CANDriveObject;
 CameraServo CameraServoObject;
 AxesSensors166 AxesSensors166Object;

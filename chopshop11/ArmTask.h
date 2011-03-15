@@ -21,6 +21,7 @@
 #define ARM_CYCLE_TIME (25) // 25ms
 #define ANGLE_LIST_SIZE (10) // Number of angles to average as the current
 #define MAXHEIGHT (4.15)	//Maximum angle of arm
+#define ARM_USES_CAN (0)
 
 class ArmTask : public Team166Task
 {
@@ -41,7 +42,11 @@ private:
 	//Declare Proxy and Robot handles
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;				// Local handle
+#if ARM_USES_CAN
 	CANJaguar armJag;			// Jaguar that controls arm's height
+#else
+	Jaguar armJag;				// Jaguar that controls arm's height
+#endif
 	float speed, deadband;		// Speed that the arm moves at
 	DoubleSolenoid gripper;		// The solenoid that controls the gripper
 	AnalogChannel potentiometer;	// Potentiometer

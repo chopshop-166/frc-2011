@@ -27,7 +27,9 @@ struct abuf
 	struct timespec tp;               // Time of snapshot
 	float angle;
 	int gripper;
+#if ARM_USES_CAN
 	int faults;
+#endif
 };
 
 //  Memory Log
@@ -44,11 +46,19 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
+#if ARM_USES_CAN
 	unsigned int PutOne(float, int, unsigned);     // Log the values needed-add in arguments
+#else
+	unsigned int PutOne(float, int);     // Log the values needed-add in arguments
+#endif
 };
 
 // Write one buffer into memory
-unsigned int ArmLog::PutOne(float a, int direction, unsigned faults)
+unsigned int ArmLog::PutOne(float a, int direction
+#if ARM_USES_CAN
+		, unsigned faults
+#endif
+		)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -59,7 +69,9 @@ unsigned int ArmLog::PutOne(float a, int direction, unsigned faults)
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		ob->angle = a;
 		ob->gripper = direction;
+#if ARM_USES_CAN
 		ob->faults = faults;
+#endif
 		return (sizeof(struct abuf));
 	}
 	
@@ -73,10 +85,17 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
+#if ARM_USES_CAN
 	fprintf(ofile, "%4.5f,%1.5f,%d,%d\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->angle, ab->gripper, ab->faults
 	);
+#else
+	fprintf(ofile, "%4.5f,%1.5f,%d\n",
+			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+			ab->angle, ab->gripper
+	);
+#endif
 	
 	// Done
 	return (sizeof(struct abuf));
@@ -85,7 +104,11 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 ArmTask::ArmTask(void) :
+#if ARM_USES_CAN
 	armJag(ARM_JAGUAR),
+#else
+	armJag(ARM_JAGUAR_PWM),
+#endif
 	speed(0.25), deadband(0.1),
 	gripper(GRIPPER_OPEN,GRIPPER_CLOSE), potentiometer(ARM_POT),
 	high_limit(3.6), low_limit(1.58)
@@ -171,7 +194,11 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 //		SmartDashboard::Log(axis,"Elbow Axis");
 		
         // Logging any values
-		sl.PutOne(currentAngle, grip, armJag.GetFaults());
+		sl.PutOne(currentAngle, grip
+#if ARM_USES_CAN
+				, armJag.GetFaults()
+#endif
+				);
 		
 		// Wait for our next lap
 		WaitForNextLoop();
