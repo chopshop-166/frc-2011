@@ -24,9 +24,8 @@
 
 // Speeds for the autonomous
 #define AUTOASSIST_SPEED_FORWARD (-0.5)
-#define AUTOASSIST_SPEED_STRAFE (0.1)
 #define AUTOASSIST_SPEED_TURN (0.4)
-#define AUTOASSIST_SPEED_CAMERA_STRAFE (0.1)
+#define AUTOASSIST_SPEED_STRAFE (0.2)
 
 class AutonomousAssistTask : public Team166Task
 {

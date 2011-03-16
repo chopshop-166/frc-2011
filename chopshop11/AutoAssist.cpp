@@ -118,7 +118,6 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	while (true) {
 		auto_enabled = ((lHandle->IsOperatorControl() && proxy->JoystickAxesDisabled(1))
 				|| lHandle->IsAutonomous());
-		SmartDashboard::Log(auto_enabled, "Autoassist Enabled");
 
 		if(auto_enabled) {
 			if(proxy->exists("LineDirection")) {
@@ -172,49 +171,18 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				}
 #endif
 			}
-			if(proxy->exists("FrontDistance")) {
-				float dist = proxy->get("FrontDistance");
-				printf("%f\r", dist);
-				if(dist > AUTOASSIST_SONAR_FRONT_DISTANCE) {
-					y=AUTOASSIST_SPEED_FORWARD;
-					y=0;
-				} else {
-					y=0;
-				}
-			} else {
-				y=0;
-			}
-			if (y==0) {
-				if(proxy->get(LINE_STRAFE_LEFT_BUTTON) && proxy->exists("LeftDistance")) {
-					// We want it to go to the left, according to the sonar
-					if(proxy->get("LeftDistance") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
-						x = -AUTOASSIST_SPEED_STRAFE;
-					} else {
-						x = 0;
-					}
-				} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON) && proxy->exists("RightDistance")) {
-					// We want it to go to the right, according to the sonar
-					if(proxy->get("RightDistance") > AUTOASSIST_SONAR_SIDE_DISTANCE) {
-						x = AUTOASSIST_SPEED_STRAFE;
-					} else {
-						x = 0;
-					}
-				} else {
-					x = 0;
-				}
-			}
 			
 			if(proxy->exists("CanSeeCameraTargets")) {
 				if(proxy->get("CanSeeCameraTargets") && proxy->exists("NormalizedTargetCenter")) {
 					// It sees targets
 					if(proxy->get("NormalizedTargetCenter") < 0) {
 						// We need to go right
-//						x += AUTOASSIST_SPEED_CAMERA_STRAFE;
+						x = AUTOASSIST_SPEED_STRAFE;
 					} else if(proxy->get("NormalizedTargetCenter") > 0) {
 						// We need to go left
-//						x -= AUTOASSIST_SPEED_CAMERA_STRAFE;
+						x = AUTOASSIST_SPEED_STRAFE;
 					} else {
-//						x=0;
+						x=0;
 					}
 				}
 			}
