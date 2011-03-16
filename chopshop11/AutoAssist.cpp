@@ -106,11 +106,6 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 	int curr_value;
 	x=y=r=0;
 	bool auto_enabled = false;
-	bool reverse = false; // Go backwards after releasing
-#if 0
-	int fourked_timer = 0; // Timer for the fork (The u is intentional)
-	bool fourked_hit = false; // Has it hit a fork?
-#endif
 	proxy->add("AutoassistReadyPosition");
 	proxy->DisableJoystickAxesByButton(1,DRIVER_AUTOASSIST_REAL);
 	
@@ -120,56 +115,29 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				|| lHandle->IsAutonomous());
 
 		if(auto_enabled) {
+			y = AUTOASSIST_SPEED_FORWARD;
 			if(proxy->exists("LineDirection")) {
 				curr_value = (int)proxy->get("LineDirection");
-#if 0
-				if(fourked_timer) {
-					fourked_timer--;
-					if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
-						x = -AUTOASSIST_SPEED_STRAFE;
-					} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON)) {
-						x = AUTOASSIST_SPEED_STRAFE;
-					} else {
-						x = 0;
-					}
-				} else if(fourked_hit) {
-					x=0;
-					r=0;
-				} else {
-#endif
-					x=0;
-					switch(curr_value) {
-						case lRight:
-							r = AUTOASSIST_SPEED_TURN;
-							break;
-						case lCenter:
-							r = 0;
-							break;
-						case lLeft:
-							r = -AUTOASSIST_SPEED_TURN;
-							break;
-						case lNo_Line:
-							break;
-						case lFork:
-#if 0
-							if(proxy->get(LINE_STRAFE_LEFT_BUTTON)) {
-								x = -AUTOASSIST_SPEED_STRAFE;
-							} else if(proxy->get(LINE_STRAFE_RIGHT_BUTTON)) {
-								x = AUTOASSIST_SPEED_STRAFE;
-							} else {
-								x = 0;
-							}
-							fourked_timer = (2000/AUTOASSIST_CYCLE_TIME);
-#endif
-							r = 0;
-							break;
-						default:
-							r=0;
-							break;
-					}
-#if 0
+				x=0;
+				switch(curr_value) {
+					case lRight:
+						r = AUTOASSIST_SPEED_TURN;
+						break;
+					case lCenter:
+						r = 0;
+						break;
+					case lLeft:
+						r = -AUTOASSIST_SPEED_TURN;
+						break;
+					case lNo_Line:
+						break;
+					case lFork:
+						r = 0;
+						break;
+					default:
+						r=0;
+						break;
 				}
-#endif
 			}
 			
 			if(proxy->exists("CanSeeCameraTargets")) {
@@ -185,12 +153,6 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 						x=0;
 					}
 				}
-			}
-			
-			if(reverse) {
-				// It's let go, so back away.
-				x=r=0;
-				y=-AUTOASSIST_SPEED_FORWARD;
 			}
 			
 			proxy->set(DRIVE_STRAFE,x);
@@ -215,8 +177,6 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 				proxy->set("AutoassistReadyPosition",false);
 			}
 #endif
-		} else {
-			reverse = false;
 		}
 		
 		sl.PutOne();
