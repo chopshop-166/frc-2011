@@ -151,6 +151,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	}
 	int angleSizeCounter = 0;
 	bool grip = false;
+	proxy->TrackNewpress("Joy3B5");
     //General main loop (while in Autonomous or Tele mode)
 	while (true) {
 
