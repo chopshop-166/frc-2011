@@ -193,7 +193,6 @@ bool CameraTask::FindLightTargets()  {
 	// write the hsl image to cRIO
 	SaveImage("imaqImage.jpg", imaqImage);
 #endif
-#if 1
 	// get the camera image
 	Image* cameraImage = frcCreateImage(IMAQ_IMAGE_HSL);
 	if (!cameraImage) {
@@ -212,14 +211,12 @@ bool CameraTask::FindLightTargets()  {
 		} else { 	
 #if SAVE_IMAGES
 			DPRINTF (LOG_INFO,"\nGetImage WORKED, calling SaveImage");
-#if SAVE_IMAGES
 			SaveImage("cameraImage.jpg", cameraImage);
-#endif
-		} 
+#endif 
+		}
 	} else {
 		DPRINTF (LOG_INFO,"\nStale image - didn't get a good image\n");
 	}
-#endif	
 	
 	// do processing
 	double normalizedTargetReturn;
@@ -264,7 +261,7 @@ bool CameraTask::FindLightTargets()  {
  * Call the targeting code that looks for elliptical objects.
  * @return bool success code
  */
-bool CameraTask::FindCircleTargets()  {
+bool CameraTask::FindCircleTargets() {
 	lHandle->DriverStationDisplay("ProcessImage:%0.6f",GetTime());
 
 	// get the camera image
@@ -304,7 +301,7 @@ bool CameraTask::FindCircleTargets()  {
 //			targets[0].Print();
 		}
 		return true;
-};
+}
 
 /**
  * Take a picture and store it to the cRIO in the specified path
