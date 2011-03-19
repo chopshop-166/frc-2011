@@ -13,3 +13,16 @@ CameraTask CameraObject;
 //PhotoElectricTask PhotoElectricObject; // Works
 //PneumaticsTask PneumaticsTaskObject; // Works
 //SonarTask SonarTaskObject; // Works
+
+int BatteryLogTask(Proxy *proxy, Robot * lHandle) {
+	static bool started = false;
+	static SimpleLog battery_log("Battery");
+	if(!started) {
+		started = true;
+		lHandle->RegisterLogger(&battery_log);
+	}
+	battery_log.PutOne(lHandle->dsHandle->GetBatteryVoltage());
+	return 0;
+}
+
+SimpleTask BatteryLogTaskObject("166BatteryLogTask",BatteryLogTask,100);
