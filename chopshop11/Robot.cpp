@@ -57,6 +57,10 @@ Robot::Robot(void)
 	// Setup expiration for task watchdog.
 	//GetWatchdog().SetExpiration(5.0); // 5 seconds
 
+	//Disable Joysticks we aren't using
+	Proxy::getInstance()->UseUserJoystick(2,0); //Disable the Second Joystick
+	Proxy::getInstance()->UseUserJoystick(4,0); //Disable the Fourth Joystick
+	
 	// Wait for all of our tasks to come up
 	printf("Getting ready to check if tasks are up.\n");
 	while (!Team166Task::IfUp()) {
@@ -74,7 +78,6 @@ Robot::Robot(void)
 void Robot::Autonomous(void)
 {
 	//GetWatchdog().SetEnabled(false);
-	Proxy::getInstance()->ToggleSettingJoysticks(false);
 	AutonomousTask();
 }
 
@@ -94,8 +97,7 @@ void Robot::OperatorControl(void)
 {
 	Timer debugTimer;
 	debugTimer.Start();
-	Proxy::getInstance()->ToggleSettingJoysticks(true);
-	
+
 	printf("Operator control\n");
 	//GetWatchdog().SetEnabled(true);
 	DriverStationDisplay("Teleoperated Enabled.");
