@@ -6,7 +6,6 @@
 #include "ArmTask.h"
 #include "AutoAssist.h"
 #include "CameraTask.h"
-#include "ColorLights.h"
 #include "DriveTask.h"
 #include "Elevatortask.h"
 #include "MiniDeployTask.h"
