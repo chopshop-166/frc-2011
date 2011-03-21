@@ -111,7 +111,8 @@ ArmTask::ArmTask(void) :
 #endif
 	speed(0.25), deadband(0.1),
 	gripper(GRIPPER_OPEN,GRIPPER_CLOSE), potentiometer(ARM_POT),
-	high_limit(3.6), low_limit(1.58)
+	high_limit(3.6), low_limit(1.58),
+	ArmLock(ARM_LOCK_PWM)
 {
 	Start((char *)"166ArmTask", ARM_CYCLE_TIME);
 	// Register the proxy
@@ -179,7 +180,11 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 				axis = 0;
 			}
 		}
-		
+		if(axis != 0) {
+			ArmLock.SetAngle(DISENGAGED);
+		} else {
+			ArmLock.SetAngle(ENGAGED);
+		}
 		armJag.Set(axis);
 		proxy->set("ArmAngle",currentAngle);
 		

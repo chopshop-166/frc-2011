@@ -86,3 +86,8 @@
 #define ELEVATOR_BRAKE_RETRACT (5)
 #define MINIBOT_ARM_RELEASE (6)
 #define MINIBOT_DEPLOYER_RETRACT (7)
+
+/*
+ *  PWM Outputs
+ */
+#define ARM_LOCK_PWM (1)
