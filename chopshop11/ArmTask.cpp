@@ -181,9 +181,9 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			}
 		}
 		if(axis != 0) {
-			ArmLock.SetAngle(DISENGAGED);
+			ArmLock.Set(DISENGAGED);
 		} else {
-			ArmLock.SetAngle(ENGAGED);
+			ArmLock.Set(ENGAGED);
 		}
 		armJag.Set(axis);
 		proxy->set("ArmAngle",currentAngle);

@@ -22,8 +22,8 @@
 #define ANGLE_LIST_SIZE (10) // Number of angles to average as the current
 #define MAXHEIGHT (4.15)	//Maximum angle of arm
 #define ARM_USES_CAN (0)
-#define ENGAGED (90)
-#define DISENGAGED (90)
+#define ENGAGED (0.25)
+#define DISENGAGED (.5)
 class ArmTask : public Team166Task
 {
 	
