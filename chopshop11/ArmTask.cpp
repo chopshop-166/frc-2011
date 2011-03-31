@@ -194,7 +194,6 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		armJag.Set(axis);
 		proxy->set("ArmAngle",currentAngle);
 		if(proxy->get(GRIPPER_BUTTON)) {			
-//			printf("Switched to: %s\n", (!grip)?"open":"closed");
 			grip=!grip;
 		}
 		if(grip==1) {
@@ -202,8 +201,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		} else {
 			gripper.Set(DoubleSolenoid::kReverse);
 		}
-		printf("Grip: %d\r", grip);
-//		SmartDashboard::Log(currentAngle,"Current Angle");
+		SmartDashboard::Log(currentAngle,"Current Angle");
 //		SmartDashboard::Log(axis,"Elbow Axis");
 		
         // Logging any values

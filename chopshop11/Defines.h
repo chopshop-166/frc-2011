@@ -59,9 +59,7 @@
 #define HEIGHT_INPUT_A (5)
 #define HEIGHT_INPUT_B (6)
 #define PRESSURESWITCH (7)
-#define COLOR_PIN_RED (8)
-#define COLOR_PIN_WHITE (9)
-#define COLOR_PIN_BLUE (10)
+#define ELEVATOR_BOTTOM_LIMIT_SWITCH (8)
 
 // Analog input
 #define SONAR_CENTER (1)

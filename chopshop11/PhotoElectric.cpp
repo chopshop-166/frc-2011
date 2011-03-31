@@ -68,7 +68,7 @@ unsigned int PhotoElectricLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf166 *ab = (struct abuf166 *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%4.5f\n",
+	fprintf(ofile, "%4.5f,%d,%d,%d,%d\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)), 
 			ab->left_result,
 			ab->right_result,
@@ -148,10 +148,12 @@ int PhotoElectricTask::Main(int a2, int a3, int a4, int a5,
 		// Figure out whether the robot is to the left of a line, to the right of a line, on the line, or off the line
 		// Store that result in proxy
 		proxy->set("LineDirection",(float) LineState);
+#if 0
 		SmartDashboard::Log((int) LineState, "Line Result");
 		SmartDashboard::Log((bool) left_result, "Left Photo Sensor");
 		SmartDashboard::Log((bool) center_result, "Center Photo Sensor");
 		SmartDashboard::Log((bool) right_result, "Right Photo Sensor");
+#endif
 		
         // Logging any values
 		// <<CHANGEME>>

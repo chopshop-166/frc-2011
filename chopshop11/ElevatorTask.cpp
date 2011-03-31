@@ -168,7 +168,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 #if ELEVATOR_USES_CAN
 		if (!elevator.GetReverseLimitOK()) {
 #else
-		if(0) {
+		if(DigitalInput(ELEVATOR_BOTTOM_LIMIT_SWITCH).Get()) {
 #endif
 			bottom_press++;
 			if(bottom_press >= 5) {
@@ -254,6 +254,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		if(target_type != hNone) {
 			SmartDashboard::Log(height_list[(int)target_type], "Target Height");
 		}
+		SmartDashboard::Log(clicks, "Clicks");
         // Logging any values
 #if ELEVATOR_USES_CAN
 		sl.PutOne(target_type, elevator.Get(), elevator.GetFaults());

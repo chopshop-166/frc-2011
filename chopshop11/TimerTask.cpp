@@ -45,7 +45,7 @@ int TimerTask::Main(int a2, int a3, int a4, int a5,
 	
     // General main loop (while in Autonomous or Tele mode)
 	while (true) {
-		SmartDashboard::Log(proxy->get("matchtimer"), "Remaining Time");
+//		SmartDashboard::Log(proxy->get("matchtimer"), "Remaining Time");
 
 		// Wait for our next lap
 		WaitForNextLoop();		
