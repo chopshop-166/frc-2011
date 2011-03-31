@@ -78,13 +78,10 @@
 /*
  *  Pneumatics bumper
  */
-#define MINIBOT_DEPLOYER_PUSH (1)
-#define MINIBOT_DEPLOYER_EXTEND (2)
 #define GRIPPER_OPEN (3)
 #define GRIPPER_CLOSE (4)
 #define ELEVATOR_BRAKE_RETRACT (5)
 #define MINIBOT_ARM_RELEASE (6)
-#define MINIBOT_DEPLOYER_RETRACT (7)
 
 /*
  *  PWM Outputs

@@ -22,7 +22,6 @@ struct abuf
 	struct timespec tp;               // Time of snapshot
 	float axis;
 	int state;
-	int limit;
 };
 
 //  Memory Log
@@ -31,7 +30,7 @@ class MiniDeployLog : public MemoryLog
 public:
 	MiniDeployLog() : MemoryLog(
 			sizeof(struct abuf), MINIDEPLOY_CYCLE_TIME, "MiniDeploy",
-			"Elapsed Time,Axis,Enum,Limit\n"
+			"Elapsed Time,Axis,State\n"
 			) {
 		return;
 	};
@@ -39,11 +38,11 @@ public:
 	unsigned int DumpBuffer(          // Dump the next buffer into the file
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
-	unsigned int PutOne(float, int, int);     // Log the values needed-add in arguments
+	unsigned int PutOne(float, int);     // Log the values needed-add in arguments
 };
 
 // Write one buffer into memory
-unsigned int MiniDeployLog::PutOne(float a, int s, int l)
+unsigned int MiniDeployLog::PutOne(float a, int s)
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -54,7 +53,6 @@ unsigned int MiniDeployLog::PutOne(float a, int s, int l)
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		ob->axis = a;
 		ob->state = s;
-		ob->limit = l;
 		return (sizeof(struct abuf));
 	}
 	
@@ -68,9 +66,9 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
-	fprintf(ofile, "%4.5f,%0.5f,%d,%d\n",
+	fprintf(ofile, "%4.5f,%0.5f,%d\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
-			ab->axis, ab->limit, ab->state
+			ab->axis, ab->state
 	);
 	
 	// Done
@@ -79,13 +77,12 @@ unsigned int MiniDeployLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-MiniDeploy166::MiniDeploy166(void): DeployerExtender(MINIBOT_DEPLOYER_EXTEND),
-		MiniDeployer(MINIBOT_DEPLOYER_PUSH, MINIBOT_DEPLOYER_RETRACT), MiniRelease(MINIBOT_ARM_RELEASE), Deploy_Limit(DEPLOYLIMIT)
+MiniDeploy166::MiniDeploy166(void): MiniRelease(MINIBOT_ARM_RELEASE)
 {
 	Start((char *)"166MiniDeployTask", MINIDEPLOY_CYCLE_TIME);
 	// Register the proxy
 	proxy = Proxy::getInstance();
-	Deploy_State = kWait;
+	Deploy_State = false;
 	return;
 };
 	
@@ -112,69 +109,15 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
 	
-	int loopcount = 0;
 	MiniRelease.Set(0);
 	
     // General main loop (while in Autonomous or Tele mode) 
 	while (true){
-		switch (Deploy_State) {
-			case kWait: {
-				if((proxy->get("matchtimer") <= 10.0) &&
-						(proxy->get(DEPLOY_MINIBOT_COPILOT)) <= -0.5) {
-					Deploy_State = kSwing;
-				}
-				break;
-			}
-			case kSwing: {
-				//Release latch to swing arm to pole
-				MiniRelease.Set(1);
-				if (!Deploy_Limit.Get()){
-					Deploy_State = kExtend;
-				}
-				break;
-			}
-			case kExtend: {
-				//Extend minibot + deployer to pole
-				DeployerExtender.Set(1);
-				Deploy_State = kDeploy;
-				break;
-			}
-			case kDeploy: {
-				if (loopcount>=25) {
-					//Pull piston back to release minbot
-					MiniDeployer.Set(DoubleSolenoid::kForward);
-					loopcount = 0;
-					Deploy_State = kRepunch;
-				}
-				break;
-			}
-			case kRepunch: {
-				if(loopcount>=125) {
-					MiniDeployer.Set(DoubleSolenoid::kReverse);
-					loopcount = 0;
-					Deploy_State = kReRetract;
-				}
-				break;
-			}
-			case kReRetract: {
-				if(loopcount >= 25) {
-					MiniDeployer.Set(DoubleSolenoid::kForward);
-					loopcount = 0;
-					Deploy_State = kFinished;
-				}
-				break;
-			}
-			default:
-			case kFinished: {
-				break;
-			}
-		}
-		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy) || (Deploy_State == kRepunch) || (Deploy_State == kReRetract)) {
-			loopcount++;
-		}
+		Deploy_State = ((proxy->get("matchtimer") <= 10.0) && (proxy->get(DEPLOY_MINIBOT_COPILOT) <= -0.5));
+		MiniRelease.Set(Deploy_State);
         // Logging any values
-		sl.PutOne(proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State, !Deploy_Limit.Get());
-		printf("%1.6f\t%d\t%d\n", proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State, !Deploy_Limit.Get());
+		sl.PutOne(proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State);
+//		printf("%1.6f\t%d\n", proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State);
 		
 		// Wait for our next loop
 		WaitForNextLoop();		
