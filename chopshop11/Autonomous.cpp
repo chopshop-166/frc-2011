@@ -12,11 +12,14 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
+#define USING_AUTONOMOUS (0)
 
 AutonomousTask::AutonomousTask() {
 	// Create handles for proxy and robot
 	Robot *lHandle;
+#if USING_AUTONOMOUS
 	Proxy *proxy = Proxy::getInstance();
+#endif
 	
 	// Register robot handle
 	while( !(lHandle = Robot::getInstance()) && !( lHandle->IsAutonomous() ) ) {
@@ -64,12 +67,13 @@ AutonomousTask::AutonomousTask() {
 		preset_choice = 0;
 	}
 	
+#if USING_AUTONOMOUS
 	unsigned timer=0;
-	
 	enum {sDriving, sHanging, sReverse, sWait} state = sDriving;
+#endif
 	
 	while( lHandle->IsAutonomous() ) {
-#if 1
+#if USING_AUTONOMOUS
 		switch (state) {
 			case sDriving:
 				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_FORWARD_SPEED*(lane_choice != 0));

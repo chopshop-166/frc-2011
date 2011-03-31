@@ -151,6 +151,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		previousAngles[i] = potentiometer.GetVoltage();
 	}
 	int angleSizeCounter = 0;
+	int throttle = 0;
 	bool grip = false;
 	proxy->TrackNewpress("Joy3B5");
     //General main loop (while in Autonomous or Tele mode)
@@ -180,10 +181,14 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 				axis = 0;
 			}
 		}
+		
 		if(axis != 0) {
 			ArmLock.Set(DISENGAGED);
+			throttle = 1;
 		} else {
-			ArmLock.Set(ENGAGED);
+			if(!(++throttle%(250/ARM_CYCLE_TIME))) {
+				ArmLock.Set(ENGAGED);
+			}
 		}
 		armJag.Set(axis);
 		proxy->set("ArmAngle",currentAngle);
