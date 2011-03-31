@@ -110,6 +110,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	lHandle->RegisterLogger(&sl);
 	
 	MiniRelease.Set(0);
+	Solenoid(MINIBOT_ARM_LOCK).Set(1);
 	
     // General main loop (while in Autonomous or Tele mode) 
 	while (true){

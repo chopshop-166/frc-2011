@@ -156,7 +156,6 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	proxy->TrackNewpress("Joy3B5");
     //General main loop (while in Autonomous or Tele mode)
 	while (true) {
-
 		angleSizeCounter = (angleSizeCounter + 1) % ANGLE_LIST_SIZE;
 		previousAngles[angleSizeCounter] = potentiometer.GetVoltage();
 		currentAngle=0;
@@ -186,21 +185,20 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			ArmLock.Set(DISENGAGED);
 			throttle = 1;
 		} else {
-			if(!(++throttle%(250/ARM_CYCLE_TIME))) {
 				ArmLock.Set(ENGAGED);
-			}
 		}
 		armJag.Set(axis);
 		proxy->set("ArmAngle",currentAngle);
-		
-		if(proxy->get(GRIPPER_BUTTON)) {
-			//printf("Switched to: %s\n", (!grip)?"open":"closed");
-			if(grip = !grip) {
-				gripper.Set(DoubleSolenoid::kForward);
-			} else {
-				gripper.Set(DoubleSolenoid::kReverse);
-			}
+		if(proxy->get(GRIPPER_BUTTON)) {			
+//			printf("Switched to: %s\n", (!grip)?"open":"closed");
+			grip=!grip;
 		}
+		if(grip==1) {
+			gripper.Set(DoubleSolenoid::kForward);
+		} else {
+			gripper.Set(DoubleSolenoid::kReverse);
+		}
+		printf("Grip: %d\r", grip);
 //		SmartDashboard::Log(currentAngle,"Current Angle");
 //		SmartDashboard::Log(axis,"Elbow Axis");
 		

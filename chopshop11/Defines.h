@@ -21,9 +21,7 @@
 // Autoassist buttons
 #define DRIVER_AUTOASSIST ("Joy1B2")
 #define DRIVER_AUTOASSIST_REAL (2)
-#define LINE_STRAFE_LEFT_BUTTON ("Joy1B3")
-#define LINE_STRAFE_RIGHT_BUTTON ("Joy1B4")
-
+// Buttons for drive maintenence
 #define DRIVER_SWITCH_JOYSTICKS ("Joy1B5")
 #define DRIVER_SLOW_DRIVE ("Joy1B1")
 // Copilot axes
@@ -49,7 +47,6 @@
 #define BACK_RIGHT_JAGUAR (5)
 #define BACK_LEFT_JAGUAR (6)
 #define ELEVATOR_JAGUAR (13)
-#define ARM_JAGUAR (16)
 
 // Relays
 #define COMPRESSORRELAY (1)
@@ -82,6 +79,7 @@
 #define GRIPPER_CLOSE (4)
 #define ELEVATOR_BRAKE_RETRACT (5)
 #define MINIBOT_ARM_RELEASE (6)
+#define MINIBOT_ARM_LOCK (8)
 
 /*
  *  PWM Outputs

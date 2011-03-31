@@ -53,11 +53,9 @@ AutonomousTask::AutonomousTask() {
 	float preset_choice;
 	if(lane_choice==2 || lane_choice==1) {
 		// We want to head to the left
-		lane_string = LINE_STRAFE_LEFT_BUTTON;
 		preset_choice = -1;
 	} else if(lane_choice==4 || lane_choice==5) {
 		// We want to head to the right
-		lane_string = LINE_STRAFE_RIGHT_BUTTON;
 		preset_choice = -1;
 	} else if(lane_choice == 3) {
 		// We're going to the center
@@ -85,13 +83,11 @@ AutonomousTask::AutonomousTask() {
 				break;
 			case sHanging:
 				proxy->set(DRIVE_FOWARD_BACK, 0);
-				proxy->set(ELBOW_AXIS, -0.4);
+				proxy->set(ELBOW_AXIS, -0.2);
 				
 				if(copilot_button_name.size()) {
+					// Press a preset button
 					proxy->set(copilot_button_name,true);
-				}
-				if(lane_string.size()) {
-					proxy->set(lane_string,true);
 				}
 				proxy->set(PRESET_TYPE_AXIS,preset_choice);
 				++timer;
@@ -103,6 +99,7 @@ AutonomousTask::AutonomousTask() {
 				break;
 			case sReverse:
 				proxy->set(GRIPPER_BUTTON, false);
+				proxy->set(ELBOW_AXIS, 0);
 				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_BACKWARD_SPEED*(lane_choice != 0));
 				++timer;
 				if(timer > (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_MOVE_SECONDS)) {
