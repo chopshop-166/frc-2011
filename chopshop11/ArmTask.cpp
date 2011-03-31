@@ -38,7 +38,11 @@ class ArmLog : public MemoryLog
 public:
 	ArmLog() : MemoryLog(
 			sizeof(struct abuf), ARM_CYCLE_TIME, "arm",
+#if ARM_USES_CAN
 			"Elapsed Time,Arm Angle,Gripper,Faults\n"
+#else
+			"Elapsed Time,Arm Angle,Gripper\n"
+#endif
 			) {
 		return;
 	};

@@ -86,3 +86,8 @@
  */
 #define ARM_JAGUAR_PWM (1)
 #define ARM_LOCK_PWM (2)
+#define DRIVE_FL_PWM (3)
+#define DRIVE_FR_PWM (4)
+#define DRIVE_BL_PWM (5)
+#define DRIVE_BR_PWM (6)
+#define ELEVATOR_PWM (7)

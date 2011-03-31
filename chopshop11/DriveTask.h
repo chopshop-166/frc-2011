@@ -18,6 +18,7 @@
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
 #define DRIVE_TASK_CYCLE_TIME (50) // 50ms
+#define DRIVE_USES_CAN (1)
 
 class DriveTask : public Team166Task
 {
@@ -45,7 +46,11 @@ private:
 	string ControlModeString(CANJaguar::ControlMode);
 	float m_maxOutput;
 	int syncGroup;
+#if DRIVE_USES_CAN
 	CANJaguar fl, fr, bl, br;
+#else
+	Jaguar fl, fr, bl, br;
+#endif
 	float x,y,r;
 	float wheelSpeeds[4];
 	float actualSpeed[4];

@@ -111,6 +111,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	
 	MiniRelease.Set(0);
 	Solenoid(MINIBOT_ARM_LOCK).Set(1);
+	Solenoid(MINIBOT_ARM_LOCK).Set(0);
 	
     // General main loop (while in Autonomous or Tele mode) 
 	while (true){
@@ -118,7 +119,6 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		MiniRelease.Set(Deploy_State);
         // Logging any values
 		sl.PutOne(proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State);
-//		printf("%1.6f\t%d\n", proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State);
 		
 		// Wait for our next loop
 		WaitForNextLoop();		

@@ -17,6 +17,7 @@
 // This constant defines how often we want this task to run in the form
 // of miliseconds. Max allowed time is 999 miliseconds.
 #define ELEVATOR_CYCLE_TIME (25) // 25ms
+#define ELEVATOR_USES_CAN (1)
 
 #define ClicksPerInch 162.977  //1024/circumference of drum
 
@@ -40,7 +41,11 @@ private:
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
 	
+#if ELEVATOR_USES_CAN
 	CANJaguar elevator;
+#else
+	Jaguar elevator;
+#endif
 	const float speed, deadband, height_deadband;
 	Solenoid brakeSolenoid;
 	Encoder Height;

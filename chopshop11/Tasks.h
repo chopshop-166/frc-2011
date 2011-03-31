@@ -16,11 +16,14 @@ PneumaticsTask PneumaticsTaskObject; // Works
 int BatteryLogTask(Proxy *proxy, Robot * lHandle) {
 	static bool started = false;
 	static SimpleLog battery_log("Battery");
+	static SimpleLog comm_log("Communication");
 	if(!started) {
 		started = true;
 		lHandle->RegisterLogger(&battery_log);
+		lHandle->RegisterLogger(&comm_log);
 	}
 	battery_log.PutOne(lHandle->dsHandle->GetBatteryVoltage());
+	comm_log.PutOne(lHandle->IsNewDataAvailable());
 	return 0;
 }
 

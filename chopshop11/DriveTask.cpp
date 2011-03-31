@@ -19,8 +19,10 @@ struct abuf166
 {
 	struct timespec tp;             // Time of snapshot
 	double LF_Speed, RF_Speed, LB_Speed, RB_Speed;
-	float WS1, WS2, WS3, WS4; 
+	float WS1, WS2, WS3, WS4;
+#if DRIVE_USES_CAN
 	int LF_Fault, RF_Fault, LB_Fault, RB_Fault;
+#endif
 };
 
 //  Memory Log
@@ -29,7 +31,11 @@ class DriveLog : public MemoryLog
 public:
 	DriveLog() : MemoryLog(
 			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "DriveTask",
-			"Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS, LF Faults, RF Faults, LB Faults, RB Faults\n" // Put the names of the values in here, comma-seperated
+#if DRIVE_USES_CAN
+			"Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS, LF Faults, RF Faults, LB Faults, RB Faults\n"
+#else
+			"Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS\n"
+#endif
 			) {
 		return;
 	};
@@ -38,14 +44,21 @@ public:
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
 	
-	unsigned int PutOne(double,double,double, double, float, float, float, float, int, int, int, int);     // Log the values needed-add in arguments
+#if DRIVE_USES_CAN
+	unsigned int PutOne(double,double,double, double, float, float, float, float, int, int, int, int);
+#else
+	unsigned int PutOne(double,double,double, double, float, float, float, float);
+#endif
 };
 
 // Write one buffer into memory
 
 unsigned int DriveLog::PutOne(double LF, double RF, double LB, double RB,
-		float FrontLeftWS, float FrontRightWS, float BackLeftWS, float BackRightWS,
-		int LF_Faults, int RF_Faults, int LB_Faults, int RB_Faults)
+		float FrontLeftWS, float FrontRightWS, float BackLeftWS, float BackRightWS
+#if DRIVE_USES_CAN
+		,int LF_Faults, int RF_Faults, int LB_Faults, int RB_Faults
+#endif
+		)
 {
 	struct abuf166 *ob;               // Output buffer
 	// Get output buffer
@@ -61,10 +74,12 @@ unsigned int DriveLog::PutOne(double LF, double RF, double LB, double RB,
 		ob->WS2 = FrontRightWS;
 		ob->WS3 = BackLeftWS;
 		ob->WS4 = BackRightWS;
+#if DRIVE_USES_CAN
 		ob->LF_Fault = LF_Faults;
 		ob->RF_Fault = RF_Faults;
 		ob->LB_Fault = LB_Faults;
 		ob->RB_Fault = RB_Faults;
+#endif
 		
 		// Add any values to be logged here
 		
@@ -80,7 +95,11 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 {
 	struct abuf166 *ab = (struct abuf166 *)nptr;
 	// Output the data into the file
+#if DRIVE_USES_CAN
 	fprintf(ofile, "%4.5f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%d,%d,%d,%d\n",
+#else
+	fprintf(ofile, "%4.5f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f,%1.6f\n",
+#endif
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
 			ab->LF_Speed,
 			ab->LB_Speed,
@@ -89,11 +108,13 @@ unsigned int DriveLog::DumpBuffer(char *nptr, FILE *ofile)
 			ab->WS1,
 			ab->WS2,
 			ab->WS3,
-			ab->WS4,
-			ab->LF_Fault,
+			ab->WS4
+#if DRIVE_USES_CAN
+			,ab->LF_Fault,
 			ab->RF_Fault,
 			ab->LB_Fault,
 			ab->RB_Fault
+#endif
 	);
 	
 	// Done
@@ -123,14 +144,19 @@ void DriveTask::Normalize(float *wheelSpeeds)
 }
 
 // task constructor
-#if 1
-DriveTask::DriveTask(void): m_maxOutput(500), syncGroup(0x80), fl(4, CANJaguar::kSpeed), fr(3, CANJaguar::kSpeed), bl(6, CANJaguar::kSpeed), br(5, CANJaguar::kSpeed)
-#else 
-DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(4), fr(3), bl(6), br(5)
-#endif 
+#if DRIVE_USES_CAN
+	#if 1
+	DriveTask::DriveTask(void): m_maxOutput(500), syncGroup(0x80), fl(4, CANJaguar::kSpeed), fr(3, CANJaguar::kSpeed), bl(6, CANJaguar::kSpeed), br(5, CANJaguar::kSpeed)
+	#else 
+	DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(4), fr(3), bl(6), br(5)
+	#endif 
+#else
+	DriveTask::DriveTask(void): m_maxOutput(500), syncGroup(0x80), fl(DRIVE_FL_PWM), fr(DRIVE_FR_PWM), bl(DRIVE_BL_PWM), br(DRIVE_BR_PWM)
+#endif
 {
 	Start((char *)"166DriveTask", DRIVE_TASK_CYCLE_TIME);
 	wheelSpeeds[0] = wheelSpeeds[1] = wheelSpeeds[2] = wheelSpeeds[3] = 0;
+#if DRIVE_USES_CAN
 	//Front Left
 	fl.ConfigEncoderCodesPerRev(1024);
 	fl.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
@@ -151,6 +177,7 @@ DriveTask::DriveTask(void): m_maxOutput(1), syncGroup(0x80), fl(4), fr(3), bl(6)
 	br.SetSpeedReference(CANJaguar::kSpeedRef_Encoder);
 	br.SetPID(0.150, 0.005, 0.00);
 	br.EnableControl(0);
+#endif
 	// Register the proxy
 	proxy = Proxy::getInstance();
 	return;
@@ -221,7 +248,6 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
-//	int valuethrottle=0;
 	int Throttle=0;
 	// General main loop (while in Autonomous or Tele mode)
 	actualSpeed[0]=actualSpeed[1]=actualSpeed[2]=actualSpeed[3]=0;
@@ -251,10 +277,12 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		}
 		if (CountTimePressed >= 10) {
 			CountTimePressed = 0;
+#if DRIVE_USES_CAN
 			fl.ChangeControlMode(CANJaguar::kPercentVbus);
 			fr.ChangeControlMode(CANJaguar::kPercentVbus);
 			bl.ChangeControlMode(CANJaguar::kPercentVbus);
 			br.ChangeControlMode(CANJaguar::kPercentVbus);
+#endif
 			for (int i=0; i<4; i++) {
 				encoderBad[i] = 1;
 			}
@@ -301,6 +329,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 		}
 		
 		CANJaguar::UpdateSyncGroup(syncGroup);
+#if DRIVE_USES_CAN
 		if((++Throttle % (500/DRIVE_TASK_CYCLE_TIME)) == 0) {
 			actualSpeed[0] = fl.GetSpeed();
 			actualSpeed[1] = fr.GetSpeed();
@@ -311,6 +340,17 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 					fl.GetFaults(), fr.GetFaults(), bl.GetFaults(), br.GetFaults()
 					);
 		}
+#else
+		if((++Throttle % (500/DRIVE_TASK_CYCLE_TIME)) == 0) {
+			actualSpeed[0] = fl.Get();
+			actualSpeed[1] = fr.Get();
+			actualSpeed[2] = bl.Get();
+			actualSpeed[3] = br.Get();
+			sl.PutOne(actualSpeed[0],actualSpeed[1],actualSpeed[2],actualSpeed[3],
+					wheelSpeeds[0], wheelSpeeds[1], wheelSpeeds[2], wheelSpeeds[3]
+					);
+		}
+#endif
 		// Wait for our next lap
 		WaitForNextLoop();
 	}

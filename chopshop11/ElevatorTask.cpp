@@ -20,7 +20,9 @@ struct abuf
 	struct timespec tp;               // Time of snapshot
 	int target_type;
 	float motor_speed;
+#if ELEVATOR_USES_CAN
 	unsigned faults;
+#endif
 };
 
 //  Memory Log
@@ -30,7 +32,11 @@ class ElevatorLog : public MemoryLog
 public:
 	ElevatorLog() : MemoryLog(
 			sizeof(struct abuf), ELEVATOR_CYCLE_TIME, "Elevator",
+#if ELEVATOR_USES_CAN
 			"Elapsed Time,Target Height, Elevator Speed, Faults\n"
+#else
+			"Elapsed Time,Target Height, Elevator Speed\n"
+#endif
 			) {
 		return;
 	};
@@ -39,12 +45,19 @@ public:
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
 	
+#if ELEVATOR_USES_CAN
 	unsigned int PutOne(int, float, int);     // Log the values needed-add in arguments
+#else
+	unsigned int PutOne(int, float);     // Log the values needed-add in arguments
+#endif
 };
 
 // Write one buffer into memory
-
+#if ELEVATOR_USES_CAN
 unsigned int ElevatorLog::PutOne(int height, float motor_speed, int faults)
+#else
+unsigned int ElevatorLog::PutOne(int height, float motor_speed)
+#endif
 {
 	struct abuf *ob;               // Output buffer
 	
@@ -54,6 +67,9 @@ unsigned int ElevatorLog::PutOne(int height, float motor_speed, int faults)
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		ob->target_type = height;
 		ob->motor_speed = motor_speed;
+#if ELEVATOR_USES_CAN
+		ob->faults = faults;
+#endif
 		
 		return (sizeof(struct abuf));
 	}
@@ -68,11 +84,18 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 	struct abuf *ab = (struct abuf *)nptr;
 	
 	// Output the data into the file
+#if ELEVATOR_USES_CAN
 	fprintf(ofile, "%4.5f, %d, %1.6f, %d\n",
-			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
-			ab->target_type,
-			ab->motor_speed,
-			ab->faults
+		((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+		ab->target_type,
+		ab->motor_speed,
+		ab->faults
+#else
+	fprintf(ofile, "%4.5f, %d, %1.6f\n",
+		((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
+		ab->target_type,
+		ab->motor_speed
+#endif
 	);
 	
 	// Done
@@ -81,7 +104,13 @@ unsigned int ElevatorLog::DumpBuffer(char *nptr, FILE *ofile)
 
 
 // task constructor
-ElevatorTask::ElevatorTask(void): elevator(ELEVATOR_JAGUAR), speed(0.3), deadband(0.1), height_deadband(10)
+ElevatorTask::ElevatorTask(void):
+#if ELEVATOR_USES_CAN
+	elevator(ELEVATOR_JAGUAR)
+#else
+	elevator(ELEVATOR_PWM)
+#endif
+, speed(0.3), deadband(0.1), height_deadband(10)
 	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
@@ -136,7 +165,11 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 //		SmartDashboard::Log(!elevator.GetForwardLimitOK(), "Top");
 //		SmartDashboard::Log(!elevator.GetReverseLimitOK(), "Bottom");
 		
+#if ELEVATOR_USES_CAN
 		if (!elevator.GetReverseLimitOK()) {
+#else
+		if(0) {
+#endif
 			bottom_press++;
 			if(bottom_press >= 5) {
 				Height.Reset();
@@ -222,7 +255,11 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			SmartDashboard::Log(height_list[(int)target_type], "Target Height");
 		}
         // Logging any values
+#if ELEVATOR_USES_CAN
 		sl.PutOne(target_type, elevator.Get(), elevator.GetFaults());
+#else
+		sl.PutOne(target_type, elevator.Get());
+#endif
 		
 		// Wait for our next lap
 		WaitForNextLoop();		
