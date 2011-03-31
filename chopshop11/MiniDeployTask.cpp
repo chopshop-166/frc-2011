@@ -107,22 +107,20 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 	
 	// Wait for Robot go-ahead (e.g. entering Autonomous or Tele-operated mode)
 	WaitForGoAhead();
+	
 	// Register main robot task
 	lHandle = Robot::getInstance();
 	lHandle->RegisterLogger(&sl);
-	lHandle->DriverStationDisplay("MINI: Ready");
-	int loopcount = 0;
 	
+	int loopcount = 0;
 	MiniRelease.Set(0);
 	
     // General main loop (while in Autonomous or Tele mode) 
 	while (true){
 		switch (Deploy_State) {
 			case kWait: {
-				if(
-						(proxy->get("matchtimer") <= 10.0) &&
+				if((proxy->get("matchtimer") <= 10.0) &&
 						(proxy->get(DEPLOY_MINIBOT_COPILOT)) <= -0.5) {
-					lHandle->DriverStationDisplay("MINI: Swinging");
 					Deploy_State = kSwing;
 				}
 				break;
@@ -132,7 +130,6 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 				MiniRelease.Set(1);
 				if (!Deploy_Limit.Get()){
 					Deploy_State = kExtend;
-					lHandle->DriverStationDisplay("MINI: Extending");
 				}
 				break;
 			}
@@ -140,7 +137,6 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 				//Extend minibot + deployer to pole
 				DeployerExtender.Set(1);
 				Deploy_State = kDeploy;
-				lHandle->DriverStationDisplay("MINI: Deploying");
 				break;
 			}
 			case kDeploy: {
@@ -150,7 +146,6 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 					loopcount = 0;
 					Deploy_State = kRepunch;
 				}
-				
 				break;
 			}
 			case kRepunch: {
@@ -159,6 +154,7 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 					loopcount = 0;
 					Deploy_State = kReRetract;
 				}
+				break;
 			}
 			case kReRetract: {
 				if(loopcount >= 25) {
@@ -166,9 +162,11 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 					loopcount = 0;
 					Deploy_State = kFinished;
 				}
+				break;
 			}
+			default:
 			case kFinished: {
-				
+				break;
 			}
 		}
 		if ((Deploy_State == kExtend) || (Deploy_State == kDeploy) || (Deploy_State == kRepunch) || (Deploy_State == kReRetract)) {
