@@ -46,7 +46,7 @@ public:
 	void Disabled(void);						// Method called by WPI when we're disabled
 	static Robot *getInstance(void);			// Get pointer to our Robot166 instance
 	void RegisterLogger(FrameworkLogger *ml);			// Register memory logger
-	void DumpLoggers(int dnum);					// Dump all logs
+	void DumpLoggers();					// Dump all logs
 	int DriverStationDisplay (const char*, ...);			// Display text on DS
 	DriverStation *dsHandle;					// Driver Station handle
 };

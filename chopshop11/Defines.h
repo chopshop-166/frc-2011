@@ -39,6 +39,7 @@
 #define FLOOR_PRESET_BUTTON ("Joy3B2")
 #define MID_PRESET_BUTTON ("Joy3B3")
 #define HIGH_PRESET_BUTTON ("Joy3B4")
+#define DUMP_LOGS_BUTTON ("Joy3B7")
 #define PRESET_TYPE_AXIS ("Joy3A6")
 
 // Jaguars

@@ -113,7 +113,7 @@ void Robot::OperatorControl(void)
 		if(IsDisabled()) {
 			DriverStationDisplay("Dumping Memory Log...");
 			printf("Dumping log files...\n");
-			DumpLoggers(maxLogId);
+			DumpLoggers();
 			printf("Logfiles dumped!\n");
 			maxLogId++;
 			break;
@@ -152,7 +152,7 @@ void Robot::RegisterLogger(FrameworkLogger *ml)
 /**
  * Dump log objects
  */
-void Robot::DumpLoggers(int dnum)
+void Robot::DumpLoggers()
 {
 	FrameworkLogger *ml;
 	

@@ -118,7 +118,9 @@ int MiniDeploy166::Main(int a2, int a3, int a4, int a5,
 		Deploy_State = ((proxy->get("matchtimer") <= 10.0) && (proxy->get(DEPLOY_MINIBOT_COPILOT) <= -0.5));
 		MiniRelease.Set(Deploy_State);
         // Logging any values
-		sl.PutOne(proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State);
+		if(lHandle->IsEnabled()) {
+			sl.PutOne(proxy->get(DEPLOY_MINIBOT_COPILOT), Deploy_State);
+		}
 		
 		// Wait for our next loop
 		WaitForNextLoop();		

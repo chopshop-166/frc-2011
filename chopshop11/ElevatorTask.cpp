@@ -261,11 +261,13 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		}
 		SmartDashboard::Log(clicks, "Clicks");
         // Logging any values
+		if(lHandle->IsEnabled()) {
 #if ELEVATOR_USES_CAN
-		sl.PutOne(target_type, elevator.Get(), elevator.GetFaults());
+			sl.PutOne(target_type, elevator.Get(), elevator.GetFaults());
 #else
-		sl.PutOne(target_type, elevator.Get());
+			sl.PutOne(target_type, elevator.Get());
 #endif
+		}
 		
 		// Wait for our next lap
 		WaitForNextLoop();		

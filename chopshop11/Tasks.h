@@ -9,7 +9,7 @@ ArmTask ArmTaskObject; // Works, but not logging faults
 DriveTask DriveObject; // Works
 ElevatorTask ElevatorObject; // Works, but not logging faults
 MiniDeploy166 MiniDeployObject; // In progress
-PhotoElectricTask PhotoElectricObject; // Works
+//PhotoElectricTask PhotoElectricObject; // Works
 PneumaticsTask PneumaticsTaskObject; // Works
 //SonarTask SonarTaskObject; // Works
 
@@ -24,6 +24,9 @@ int BatteryLogTask(Proxy *proxy, Robot * lHandle) {
 	}
 	battery_log.PutOne(lHandle->dsHandle->GetBatteryVoltage());
 	comm_log.PutOne(lHandle->IsNewDataAvailable());
+	if(proxy->get(DUMP_LOGS_BUTTON)) {
+		lHandle->DumpLoggers();
+	}
 	return 0;
 }
 
