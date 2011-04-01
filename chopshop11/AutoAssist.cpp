@@ -157,9 +157,8 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 			}
 #endif		
 			proxy->set(DRIVE_STRAFE,x);
-			proxy->set(DRIVE_FOWARD_BACK,y);
+			proxy->set(DRIVE_FORWARD_BACK,y);
 			proxy->set(DRIVE_ROTATION,r);
-//			printf("%f\t%f\t%f\r", x, y, r);
 			
 #if 0
 			if(x==0 && y==0 && r==0) {

@@ -154,6 +154,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	// They currently don't take the arm height into account
 	const double height_list[] = {0,0,0,1850,3760,5080,8310};
 	proxy->add("ElevatorReadyPosition");
+	proxy->add("ElevatorHeight");
 	proxy->add("ElevatorZeroed");
 	brakeSolenoid.Set(0);
 	int clicks = 0;
@@ -259,6 +260,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 		if(target_type != hNone) {
 			SmartDashboard::Log(height_list[(int)target_type], "Target Height");
 		}
+		proxy->set("ElevatorHeight", clicks);
 		SmartDashboard::Log(clicks, "Clicks");
         // Logging any values
 		if(lHandle->IsEnabled()) {

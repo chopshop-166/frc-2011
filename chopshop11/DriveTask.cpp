@@ -253,7 +253,7 @@ int DriveTask::Main(int a2, int a3, int a4, int a5,
 	actualSpeed[0]=actualSpeed[1]=actualSpeed[2]=actualSpeed[3]=0;
 	while (true) {
 		x=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_STRAFE)));
-		y=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_FOWARD_BACK)));
+		y=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_FORWARD_BACK)));
 		r=TruncateDouble(SignPreservingSquare(proxy->get(DRIVE_ROTATION)));
 		
 #if 0
