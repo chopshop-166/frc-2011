@@ -110,7 +110,7 @@ ElevatorTask::ElevatorTask(void):
 #else
 	elevator(ELEVATOR_PWM)
 #endif
-	, speed(0.4), deadband(0.1), height_deadband(40)
+	, speed(1.0), deadband(0.1), height_deadband(40)
 	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
@@ -226,7 +226,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			} else if (clicks > (height_list[(int)target_type] + height_deadband)) {
 //				new_speed = -speed;
 				new_speed = 0;
-				proxy->set("ElevatorReadyPosition", false);
+				proxy->set("ElevatorReadyPosition", true);
 			} else {
 				target_type = hNone;
 				new_speed = 0;
@@ -237,8 +237,10 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 //			SmartDashboard::Log(axis, "Axis Raw");
 			if(axis >= deadband) {
 				new_speed = axis;
+				proxy->set("ElevatorReadyPosition", false);
 			} else if(axis <= -deadband) {
 				new_speed = (axis/2);
+				proxy->set("ElevatorReadyPosition", false);
 			} else {
 				new_speed = 0;
 			}

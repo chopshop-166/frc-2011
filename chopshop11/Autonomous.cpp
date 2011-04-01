@@ -12,7 +12,7 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
-#define USING_AUTONOMOUS (1)
+#define USING_AUTONOMOUS (0)
 
 AutonomousTask::AutonomousTask() {
 	// Create handles for proxy and robot
@@ -35,18 +35,22 @@ AutonomousTask::AutonomousTask() {
 	int height_choice;
 	height_choice = (int)height_switch.GetVoltage();
 	
-	if(lane_choice==height_choice && lane_choice==5) return;
+	if(lane_choice!=4) return;
 	
 #if USING_AUTONOMOUS
 	unsigned timer=0;
 	enum {sDriving, sRising, sHanging, sDelay, sReverse, sWait} state = sDriving;
 	lHandle->DriverStationDisplay("State: Forward");
-#endif
 	
 	float angle;
+#endif
 	
 	while( lHandle->IsAutonomous() ) {
 #if USING_AUTONOMOUS
+		if(proxy->get("matchtimer") < 0.1) {
+			proxy->set(GRIPPER_BUTTON, true);
+			state = sWait;
+		}
 		switch (state) {
 			case sDriving:
 				proxy->set(DRIVE_FOWARD_BACK, AUTONOMOUS_FORWARD_SPEED);
@@ -124,15 +128,26 @@ AutonomousTask::AutonomousTask() {
 				break;
 			case sWait:
 			default:
+				// Stop EVERYTHING
 				proxy->set(DRIVE_STRAFE,0);
 				proxy->set(DRIVE_FOWARD_BACK,0);
 				proxy->set(DRIVE_ROTATION,0);
 				proxy->set(PRESET_TYPE_AXIS, 0);
 				proxy->set(HIGH_PRESET_BUTTON, 0);
+				proxy->set(GRIPPER_BUTTON, false);
 				break;
 		}
 #endif
 		// This wait is required, it makes sure no task uses too much memory
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
+#if USING_AUTONOMOUS
+	// Stop EVERYTHING
+	proxy->set(DRIVE_STRAFE,0);
+	proxy->set(DRIVE_FOWARD_BACK,0);
+	proxy->set(DRIVE_ROTATION,0);
+	proxy->set(PRESET_TYPE_AXIS, 0);
+	proxy->set(HIGH_PRESET_BUTTON, 0);
+	proxy->set(GRIPPER_BUTTON, false);
+#endif
 }

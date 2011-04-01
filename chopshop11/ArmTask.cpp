@@ -27,6 +27,7 @@ struct abuf
 	struct timespec tp;               // Time of snapshot
 	float angle;
 	int gripper;
+	float brake;
 #if ARM_USES_CAN
 	int faults;
 #endif
@@ -39,9 +40,9 @@ public:
 	ArmLog() : MemoryLog(
 			sizeof(struct abuf), ARM_CYCLE_TIME, "arm",
 #if ARM_USES_CAN
-			"Elapsed Time,Arm Angle,Gripper,Faults\n"
+			"Elapsed Time,Arm Angle,Gripper,Brake,Faults\n"
 #else
-			"Elapsed Time,Arm Angle,Gripper\n"
+			"Elapsed Time,Arm Angle,Gripper,Brake\n"
 #endif
 			) {
 		return;
@@ -51,14 +52,14 @@ public:
 			char *nptr,               // Buffer that needs to be formatted
 			FILE *outputFile);        // and then stored in this file
 #if ARM_USES_CAN
-	unsigned int PutOne(float, int, unsigned);     // Log the values needed-add in arguments
+	unsigned int PutOne(float, int, float, unsigned);     // Log the values needed-add in arguments
 #else
-	unsigned int PutOne(float, int);     // Log the values needed-add in arguments
+	unsigned int PutOne(float, int, float);     // Log the values needed-add in arguments
 #endif
 };
 
 // Write one buffer into memory
-unsigned int ArmLog::PutOne(float a, int direction
+unsigned int ArmLog::PutOne(float a, int direction, float brake
 #if ARM_USES_CAN
 		, unsigned faults
 #endif
@@ -73,6 +74,7 @@ unsigned int ArmLog::PutOne(float a, int direction
 		clock_gettime(CLOCK_REALTIME, &ob->tp);
 		ob->angle = a;
 		ob->gripper = direction;
+		ob->brake = brake;
 #if ARM_USES_CAN
 		ob->faults = faults;
 #endif
@@ -90,14 +92,14 @@ unsigned int ArmLog::DumpBuffer(char *nptr, FILE *ofile)
 	
 	// Output the data into the file
 #if ARM_USES_CAN
-	fprintf(ofile, "%4.5f,%1.5f,%d,%d\n",
+	fprintf(ofile, "%4.5f,%1.5f,%d,%f,%d\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
-			ab->angle, ab->gripper, ab->faults
+			ab->angle, ab->gripper, ab->brake, ab->faults
 	);
 #else
-	fprintf(ofile, "%4.5f,%1.5f,%d\n",
+	fprintf(ofile, "%4.5f,%1.5f,%d,%f\n",
 			((ab->tp.tv_sec - starttime.tv_sec) + ((ab->tp.tv_nsec-starttime.tv_nsec)/1000000000.)),
-			ab->angle, ab->gripper
+			ab->angle, ab->gripper, ab->brake
 	);
 #endif
 	
@@ -158,6 +160,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	int throttle = 0;
 	bool grip = false;
 	proxy->TrackNewpress("Joy3B5");
+	
     //General main loop (while in Autonomous or Tele mode)
 	while (true) {
 		angleSizeCounter = (angleSizeCounter + 1) % ANGLE_LIST_SIZE;
@@ -203,12 +206,14 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		}
 		SmartDashboard::Log(currentAngle,"Current Angle");
 		
-        // Logging any values
-		sl.PutOne(currentAngle, grip
+		if(lHandle->IsEnabled()) {
+			// Logging any values
+			sl.PutOne(currentAngle, grip, ArmLock.Get()
 #if ARM_USES_CAN
-				, armJag.GetFaults()
+					, armJag.GetFaults()
 #endif
-				);
+					);
+        }
 		
 		// Wait for our next lap
 		WaitForNextLoop();
