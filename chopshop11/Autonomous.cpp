@@ -12,7 +12,7 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
-#define USING_AUTONOMOUS (0)
+#define USING_AUTONOMOUS (1)
 
 AutonomousTask::AutonomousTask() {
 	// Create handles for proxy and robot
@@ -34,76 +34,93 @@ AutonomousTask::AutonomousTask() {
 	AnalogChannel height_switch(AUTONOMOUS_DIAL_HEIGHT);
 	int height_choice;
 	height_choice = (int)height_switch.GetVoltage();
-	if(height_choice & 4) {
-		// If it's 4 or 5, it's no good and disable
-		height_choice = 0;
-	}
 	
-	// Chooses a height and height axis
-	string copilot_button_name = "";
-	if(height_choice == 1) {
-		copilot_button_name = LOW_PRESET_BUTTON;
-	} else if(height_choice == 2) {
-		copilot_button_name = MID_PRESET_BUTTON;
-	} else if(height_choice == 3) {
-		copilot_button_name = HIGH_PRESET_BUTTON;
-	}
-	
-	string lane_string = "";
-	float preset_choice;
-	if(lane_choice==2 || lane_choice==1) {
-		// We want to head to the left
-		preset_choice = -1;
-	} else if(lane_choice==4 || lane_choice==5) {
-		// We want to head to the right
-		preset_choice = -1;
-	} else if(lane_choice == 3) {
-		// We're going to the center
-		preset_choice = 1;
-	} else {
-		// We shouldn't be moving...
-		preset_choice = 0;
-	}
+	if(lane_choice==height_choice && lane_choice==5) return;
 	
 #if USING_AUTONOMOUS
 	unsigned timer=0;
-	enum {sDriving, sHanging, sReverse, sWait} state = sDriving;
+	enum {sDriving, sRising, sHanging, sDelay, sReverse, sWait} state = sDriving;
+	lHandle->DriverStationDisplay("State: Forward");
 #endif
+	
+	float angle;
 	
 	while( lHandle->IsAutonomous() ) {
 #if USING_AUTONOMOUS
 		switch (state) {
 			case sDriving:
-				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_FORWARD_SPEED*(lane_choice != 0));
+				proxy->set(DRIVE_FOWARD_BACK, AUTONOMOUS_FORWARD_SPEED);
+				
+				angle = proxy->get("ArmAngle");
+				if(angle < AUTONOMOUS_ANGLE) {
+					proxy->set(ELBOW_AXIS, AUTONOMOUS_ARM_SPEED);
+				} else {
+					proxy->set(ELBOW_AXIS, 0);
+				}
+				
+				if(!proxy->get("ElevatorZeroed")) {
+					proxy->set(ELEVATOR_AXIS,0.5);
+				}
+				
 				++timer;
-				if(timer > (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_MOVE_SECONDS)) {
+				if(timer > (500*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_MOVE_SECONDS)) {
+					timer = 0;
+					state = sRising;
+					lHandle->DriverStationDisplay("State: Rising");
+				}
+				break;
+			case sRising:
+				proxy->set(DRIVE_FOWARD_BACK, 0);
+				proxy->set(PRESET_TYPE_AXIS, 1);
+				proxy->set(HIGH_PRESET_BUTTON, 1);
+				
+				angle = proxy->get("ArmAngle");
+				if(angle < AUTONOMOUS_ANGLE) {
+					proxy->set(ELBOW_AXIS, AUTONOMOUS_ARM_SPEED);
+				} else {
+					proxy->set(ELBOW_AXIS, 0);
+				}
+				
+				++timer;
+				if(timer > (500*AUTONOMOUS_WAIT_TIME*RELEASE_SECONDS)) {
 					timer = 0;
 					state = sHanging;
+					lHandle->DriverStationDisplay("State: Hanging");
 				}
 				break;
 			case sHanging:
-				proxy->set(DRIVE_FOWARD_BACK, 0);
-				proxy->set(ELBOW_AXIS, -0.2);
+				proxy->set(DRIVE_FOWARD_BACK, AUTONOMOUS_FORWARD_SPEED*(3/4));
 				
-				if(copilot_button_name.size()) {
-					// Press a preset button
-					proxy->set(copilot_button_name,true);
-				}
-				proxy->set(PRESET_TYPE_AXIS,preset_choice);
 				++timer;
-				if(timer > (1000*AUTONOMOUS_WAIT_TIME*RELEASE_SECONDS)) {
+				if(timer > (500*AUTONOMOUS_WAIT_TIME*RELEASE_SECONDS)) {
 					proxy->set(GRIPPER_BUTTON, true);
 					timer = 0;
+					state = sDelay;
+					lHandle->DriverStationDisplay("State: Delay");
+				}
+				break;
+			case sDelay:
+				proxy->set(PRESET_TYPE_AXIS, 0);
+				proxy->set(HIGH_PRESET_BUTTON, 0);
+				
+				++timer;
+				if(timer > (50*AUTONOMOUS_WAIT_TIME*RELEASE_SECONDS)) {
+					timer = 0;
 					state = sReverse;
+					lHandle->DriverStationDisplay("State: Reverse");
 				}
 				break;
 			case sReverse:
 				proxy->set(GRIPPER_BUTTON, false);
 				proxy->set(ELBOW_AXIS, 0);
-				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_BACKWARD_SPEED*(lane_choice != 0));
+				proxy->set(PRESET_TYPE_AXIS, 0);
+				proxy->set(HIGH_PRESET_BUTTON, 0);
+				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_BACKWARD_SPEED);
+				
 				++timer;
-				if(timer > (1000*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_MOVE_SECONDS)) {
+				if(timer > (500*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_MOVE_SECONDS)) {
 					state = sWait;
+					lHandle->DriverStationDisplay("State: Wait");
 				}
 				break;
 			case sWait:
@@ -111,6 +128,8 @@ AutonomousTask::AutonomousTask() {
 				proxy->set(DRIVE_STRAFE,0);
 				proxy->set(DRIVE_FOWARD_BACK,0);
 				proxy->set(DRIVE_ROTATION,0);
+				proxy->set(PRESET_TYPE_AXIS, 0);
+				proxy->set(HIGH_PRESET_BUTTON, 0);
 				break;
 		}
 #endif

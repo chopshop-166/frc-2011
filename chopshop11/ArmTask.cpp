@@ -202,7 +202,6 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			gripper.Set(DoubleSolenoid::kReverse);
 		}
 		SmartDashboard::Log(currentAngle,"Current Angle");
-//		SmartDashboard::Log(axis,"Elbow Axis");
 		
         // Logging any values
 		sl.PutOne(currentAngle, grip

@@ -110,7 +110,7 @@ ElevatorTask::ElevatorTask(void):
 #else
 	elevator(ELEVATOR_PWM)
 #endif
-, speed(0.3), deadband(0.1), height_deadband(10)
+	, speed(0.4), deadband(0.1), height_deadband(20)
 	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
@@ -152,8 +152,9 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 	
 	// Fix these heights once we can test
 	// They currently don't take the arm height into account
-	const double height_list[] = {0,0,0,1850,3760,5080,7650};
+	const double height_list[] = {0,0,0,1850,3760,5080,8310};
 	proxy->add("ElevatorReadyPosition");
+	proxy->add("ElevatorZeroed");
 	brakeSolenoid.Set(0);
 	int clicks = 0;
 	int bottom_press=0; // Counts the amount of loops a limit has been help down
@@ -174,6 +175,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			if(bottom_press >= 5) {
 				Height.Reset();
 			}
+			proxy->set("ElevatorZeroed", true);
 		} else {
 			bottom_press = 0;
 		}
@@ -222,7 +224,8 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				new_speed = speed;
 				proxy->set("ElevatorReadyPosition", false);
 			} else if (clicks > (height_list[(int)target_type] + height_deadband)) {
-				new_speed = -speed;
+//				new_speed = -speed;
+				new_speed = 0;
 				proxy->set("ElevatorReadyPosition", false);
 			} else {
 				target_type = hNone;
