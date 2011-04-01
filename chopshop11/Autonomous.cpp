@@ -80,12 +80,11 @@ AutonomousTask::AutonomousTask() {
 				} else {
 					proxy->set(ELBOW_AXIS, 0);
 				}
-				
-				++timer;
-				if(timer > (500*AUTONOMOUS_WAIT_TIME*RELEASE_SECONDS)) {
-					timer = 0;
-					state = sHanging;
-					lHandle->DriverStationDisplay("State: Hanging");
+				if (proxy->exists("ElevatorReadyPosition")) {
+					if(proxy->get("ElevatorReadyPosition")) {	
+						state = sHanging;
+						lHandle->DriverStationDisplay("State: Hanging");
+					}
 				}
 				break;
 			case sHanging:

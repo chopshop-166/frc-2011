@@ -124,12 +124,13 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 						r = AUTOASSIST_SPEED_TURN;
 						break;
 					case lCenter:
-						r = 0;
+						r = AUTOASSIST_SPEED_TURN_SLOW;
 						break;
 					case lLeft:
 						r = -AUTOASSIST_SPEED_TURN;
 						break;
 					case lNo_Line:
+						r = 0;
 						break;
 					case lFork:
 						r = 0;
@@ -139,7 +140,7 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 						break;
 				}
 			}
-			
+#if 0
 			if(proxy->exists("CanSeeCameraTargets")) {
 				if(proxy->get("CanSeeCameraTargets") && proxy->exists("NormalizedTargetCenter")) {
 					// It sees targets
@@ -154,7 +155,7 @@ int AutonomousAssistTask::Main(int a2, int a3, int a4, int a5,
 					}
 				}
 			}
-			
+#endif		
 			proxy->set(DRIVE_STRAFE,x);
 			proxy->set(DRIVE_FOWARD_BACK,y);
 			proxy->set(DRIVE_ROTATION,r);

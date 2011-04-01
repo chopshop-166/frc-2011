@@ -110,7 +110,7 @@ ElevatorTask::ElevatorTask(void):
 #else
 	elevator(ELEVATOR_PWM)
 #endif
-	, speed(0.4), deadband(0.1), height_deadband(20)
+	, speed(0.4), deadband(0.1), height_deadband(40)
 	, brakeSolenoid(ELEVATOR_BRAKE_RETRACT)
 	, Height(HEIGHT_INPUT_A,HEIGHT_INPUT_B) 
 {
