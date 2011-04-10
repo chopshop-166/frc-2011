@@ -78,9 +78,8 @@ unsigned int CANDriveLog::DumpBuffer(char *nptr, FILE *ofile)
 
 // task constructor
 Team166CANDrive::Team166CANDrive(void):
-	leftmotor(1),
-	rightmotor(2),
-	robotdrive(leftmotor, rightmotor)
+	leftmotor(6),
+	rightmotor(7)
 {
 	Start((char *)"166CANDriveTask", CAN_CYCLE_TIME);
 	return;
@@ -94,6 +93,35 @@ Team166CANDrive::~Team166CANDrive(void)
 };
 
 
+float Team166CANDrive::Limit(float num)
+{
+	if (num > 1.0)
+	{
+		return 1.0;
+	}
+	if (num < -1.0)
+	{
+		return -1.0;
+	}
+	return num;
+}
+
+void Team166CANDrive::SquareInputs(float &leftValue,float &rightValue)
+{
+	// square the inputs (while preserving the sign) to increase fine control while permitting full power
+	leftValue = Limit(leftValue);
+	rightValue = Limit(rightValue);
+	if (leftValue >= 0.0) {
+		leftValue = (leftValue * leftValue);
+	} else {
+		leftValue = -(leftValue * leftValue);
+	}
+	if (rightValue >= 0.0) {
+		rightValue = (rightValue * rightValue);
+	} else {
+		rightValue = -(rightValue * rightValue);
+	}
+}
 
 // Main function of the task
 int Team166CANDrive::Main(int a2, int a3, int a4, int a5,
@@ -117,14 +145,40 @@ int Team166CANDrive::Main(int a2, int a3, int a4, int a5,
 	lHandle->RegisterLogger(&sl);
 	
 	printf("CANDrive is ready.\n");
-	
+	float leftMotorSpeed = 0;
+	float rightMotorSpeed = 0;
     // General main loop (while in Autonomous or Tele mode)
 	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
 			(lHandle->RobotMode == T166_OPERATOR)) {
-		robotdrive.ArcadeDrive (proxy->get("Joy1y"),proxy->get("Joy1x") );
+		//Arcade Drive
+						
+		float moveValue = -proxy->get("Joy1X");
+		float rotateValue = -proxy->get("Joy1Y");
+		if (moveValue > 0.0) {
+			if (rotateValue > 0.0) {
+				leftMotorSpeed = moveValue - rotateValue;
+				rightMotorSpeed = max(moveValue, rotateValue);
+			} else {
+				leftMotorSpeed = max(moveValue, -rotateValue);
+				rightMotorSpeed = moveValue + rotateValue;
+			}
+		} else {
+			if (rotateValue > 0.0) {
+				leftMotorSpeed = - max(-moveValue, rotateValue);
+				rightMotorSpeed = moveValue + rotateValue;
+			} else {
+				leftMotorSpeed = moveValue - rotateValue;
+				rightMotorSpeed = - max(-moveValue, -rotateValue);
+			}
+		}
+		//Make sure values aren't out of bounds
+		SquareInputs(leftMotorSpeed, rightMotorSpeed);		
+		//Set Speed of motor to correct value depending on drive mode
+		leftmotor.Set(leftMotorSpeed);
+		rightmotor.Set(rightMotorSpeed);
 		
 		//sl.PutOne(leftCurrent, rightCurrent);
-		
+	
 		// Wait for our next lap
 		WaitForNextLoop();
 	}
