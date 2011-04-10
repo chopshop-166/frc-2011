@@ -12,7 +12,7 @@
 
 // Driver axes and buttons
 #define DRIVE_STRAFE ("Joy1X")
-#define DRIVE_FOWARD_BACK ("Joy1Y")
+#define DRIVE_FORWARD_BACK ("Joy1Y")
 // This is Joy1Z for Nick's joystick,
 // but Joy1R for the other one
 #define DRIVE_ROTATION ("Joy1Z")
