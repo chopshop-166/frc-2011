@@ -13,9 +13,33 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
-#define USING_AUTONOMOUS (0)
+#define USING_AUTONOMOUS (1)
+
+// Here are some speeds
+const double Autonomous_Drive_Backward_Speed = sqrt(0.25); // Actual speed 0.25 after calculations
+const double Autonomous_Arm_Down_Speed = 0.6;
+const double Autonomous_Arm_Up_Speed = 0.75;
+const double Autonomous_Drive_Forward_Speed = -sqrt(0.5);
 
 AutonomousTask::AutonomousTask() {
+	proxy = Proxy::getInstance();
+	// We know lHandle really exists because it's the only thing that calls Autonomous
+	lHandle = Robot::getInstance();
+	main();
+	// Stop EVERYTHING
+	proxy->reset();
+}
+
+#define WaitUntil(t) { \
+	while(proxy->get("matchtimer") > t) { \
+		Wait(AUTONOMOUS_WAIT_TIME); \
+		if(!lHandle->IsAutonomous()) { \
+			return; \
+		} \
+	} \
+}
+
+void AutonomousTask::main() {
 	// Create handles for proxy and robot
 	Robot *lHandle;
 #if USING_AUTONOMOUS
@@ -32,123 +56,47 @@ AutonomousTask::AutonomousTask() {
 	// Each Volt is the right number, +- a couple millivolts
 	lane_choice = (int)lane_switch.GetVoltage();
 	
-	AnalogChannel height_switch(AUTONOMOUS_DIAL_HEIGHT);
-	int height_choice;
-	height_choice = (int)height_switch.GetVoltage();
-	
 	if(lane_choice!=4) return;
 	
 #if USING_AUTONOMOUS
-	unsigned timer=0;
-	enum {sDriving, sRising, sHanging, sDelay, sReverse, sWait} state = sDriving;
-	lHandle->DriverStationDisplay("State: Forward");
+	lHandle->DriverStationDisplay("Find Sarah Connor");
 	
-	float angle;
-#endif
+	// Backing up...
+	proxy->set(DRIVE_FORWARD_BACK, Autonomous_Drive_Backward_Speed); // Should move about 2 ft
+	WaitUntil(14.5);
 	
-	while( lHandle->IsAutonomous() ) {
-#if USING_AUTONOMOUS
-		if(proxy->get("matchtimer") < 0.1) {
-			proxy->set(GRIPPER_BUTTON, true);
-			state = sWait;
+	// Stop moving back
+	proxy->set(DRIVE_FORWARD_BACK,0);
+	// Drop the arm
+	proxy->set(ELBOW_AXIS, Autonomous_Arm_Down_Speed);
+	WaitUntil(14.25);
+	
+	// Stop moving the arm
+	proxy->set(ELBOW_AXIS, 0);
+	// Open the gripper
+	proxy->set(GRIPPER_BUTTON, true);
+	Wait(AUTONOMOUS_WAIT_TIME);
+	proxy->set(GRIPPER_BUTTON, false);
+	// Drive Forward, same speed as the backwards one
+	proxy->set(DRIVE_FORWARD_BACK, -Autonomous_Drive_Backward_Speed);
+	WaitUntil(13.25);
+	
+	// Grab the tube
+	proxy->set(GRIPPER_BUTTON, true);
+	Wait(AUTONOMOUS_WAIT_TIME);
+	proxy->set(GRIPPER_BUTTON, false);
+	// Drive Forward, 6 ft/s
+	proxy->set(DRIVE_FORWARD_BACK, Autonomous_Drive_Forward_Speed);
+	// Go to the highest preset
+	proxy->set(HIGH_PRESET_BUTTON, true);
+	proxy->set(PRESET_TYPE_AXIS, 1);
+	while((proxy->get("matchtimer") > 11.75) && lHandle->IsAutonomous()) {
+		if(proxy->get("ArmAngle") < 1.9) {
+			proxy->set(ELBOW_AXIS, 0);
+		} else {
+			proxy->set(ELBOW_AXIS, Autonomous_Arm_Down_Speed);
 		}
-		switch (state) {
-			case sDriving:
-				proxy->set(DRIVE_FOWARD_BACK, AUTONOMOUS_FORWARD_SPEED);
-				
-				angle = proxy->get("ArmAngle");
-				if(angle < AUTONOMOUS_ANGLE) {
-					proxy->set(ELBOW_AXIS, AUTONOMOUS_ARM_SPEED);
-				} else {
-					proxy->set(ELBOW_AXIS, 0);
-				}
-				
-				if(!proxy->get("ElevatorZeroed")) {
-					proxy->set(ELEVATOR_AXIS,0.5);
-				}
-				
-				++timer;
-				if(timer > (500*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_MOVE_SECONDS)) {
-					timer = 0;
-					state = sRising;
-					lHandle->DriverStationDisplay("State: Rising");
-				}
-				break;
-			case sRising:
-				proxy->set(DRIVE_FOWARD_BACK, 0);
-				proxy->set(PRESET_TYPE_AXIS, 1);
-				proxy->set(HIGH_PRESET_BUTTON, 1);
-				
-				angle = proxy->get("ArmAngle");
-				if(angle < AUTONOMOUS_ANGLE) {
-					proxy->set(ELBOW_AXIS, AUTONOMOUS_ARM_SPEED);
-				} else {
-					proxy->set(ELBOW_AXIS, 0);
-				}
-				if (proxy->exists("ElevatorReadyPosition")) {
-					if(proxy->get("ElevatorReadyPosition")) {	
-						state = sHanging;
-						lHandle->DriverStationDisplay("State: Hanging");
-					}
-				}
-				break;
-			case sHanging:
-				proxy->set(DRIVE_FOWARD_BACK, AUTONOMOUS_FORWARD_SPEED*(3/4));
-				
-				++timer;
-				if(timer > (500*AUTONOMOUS_WAIT_TIME*RELEASE_SECONDS)) {
-					proxy->set(GRIPPER_BUTTON, true);
-					timer = 0;
-					state = sDelay;
-					lHandle->DriverStationDisplay("State: Delay");
-				}
-				break;
-			case sDelay:
-				proxy->set(PRESET_TYPE_AXIS, 0);
-				proxy->set(HIGH_PRESET_BUTTON, 0);
-				
-				++timer;
-				if(timer > (50*AUTONOMOUS_WAIT_TIME*RELEASE_SECONDS)) {
-					timer = 0;
-					state = sReverse;
-					lHandle->DriverStationDisplay("State: Reverse");
-				}
-				break;
-			case sReverse:
-				proxy->set(GRIPPER_BUTTON, false);
-				proxy->set(ELBOW_AXIS, 0);
-				proxy->set(PRESET_TYPE_AXIS, 0);
-				proxy->set(HIGH_PRESET_BUTTON, 0);
-				proxy->set(DRIVE_FOWARD_BACK,AUTONOMOUS_BACKWARD_SPEED);
-				
-				++timer;
-				if(timer > (500*AUTONOMOUS_WAIT_TIME*AUTONOMOUS_MOVE_SECONDS)) {
-					state = sWait;
-					lHandle->DriverStationDisplay("State: Wait");
-				}
-				break;
-			case sWait:
-			default:
-				// Stop EVERYTHING
-				proxy->set(DRIVE_STRAFE,0);
-				proxy->set(DRIVE_FOWARD_BACK,0);
-				proxy->set(DRIVE_ROTATION,0);
-				proxy->set(PRESET_TYPE_AXIS, 0);
-				proxy->set(HIGH_PRESET_BUTTON, 0);
-				proxy->set(GRIPPER_BUTTON, false);
-				break;
-		}
-#endif
-		// This wait is required, it makes sure no task uses too much memory
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
-#if USING_AUTONOMOUS
-	// Stop EVERYTHING
-	proxy->set(DRIVE_STRAFE,0);
-	proxy->set(DRIVE_FOWARD_BACK,0);
-	proxy->set(DRIVE_ROTATION,0);
-	proxy->set(PRESET_TYPE_AXIS, 0);
-	proxy->set(HIGH_PRESET_BUTTON, 0);
-	proxy->set(GRIPPER_BUTTON, false);
 #endif
 }

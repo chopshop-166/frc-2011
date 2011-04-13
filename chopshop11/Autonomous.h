@@ -15,19 +15,15 @@
 #include "BaeUtilities.h"
 #include <cmath>
 
+// 13 ft/second at 500 RPM
 #define AUTONOMOUS_WAIT_TIME (0.050)
-#define AUTONOMOUS_MOVE_SECONDS (4)
-#define RELEASE_SECONDS (5)
-
-#define AUTONOMOUS_FORWARD_SPEED (-0.4)
-#define AUTONOMOUS_BACKWARD_SPEED (0.3)
-#define AUTONOMOUS_ARM_SPEED (-0.7)
-#define AUTONOMOUS_ANGLE (2.4)
 
 class AutonomousTask
 {
+	Proxy *proxy;
+	Robot *lHandle;
 public:
 	AutonomousTask(void);
-	// <<CHANGEME>>
-	// Add any extra functions your autonomous needs
+//	void WaitUntil(double t); // t is the number of seconds left in Autonomous
+	void main(void); // the main autonomous loop
 };
