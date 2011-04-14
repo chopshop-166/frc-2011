@@ -98,5 +98,15 @@ void AutonomousTask::main() {
 		}
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
+	
+	// Release the tube
+	proxy->set(GRIPPER_BUTTON, true);
+	Wait(AUTONOMOUS_WAIT_TIME);
+	proxy->set(GRIPPER_BUTTON, false);
+	proxy->set(HIGH_PRESET_BUTTON, false);
+	proxy->set(MID_PRESET_BUTTON, true);
+	WaitUntil(10);
+	proxy->reset();
+	return;
 #endif
 }
