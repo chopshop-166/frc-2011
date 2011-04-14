@@ -55,7 +55,7 @@ void AutonomousTask::main() {
 	int lane_choice;
 	// Each Volt is the right number, +- a couple millivolts
 	lane_choice = (int)lane_switch.GetVoltage();
-	
+	float timeleft;
 	if(lane_choice!=4) return;
 	
 #if USING_AUTONOMOUS
@@ -98,14 +98,16 @@ void AutonomousTask::main() {
 		}
 		Wait(AUTONOMOUS_WAIT_TIME);
 	}
-	
+	timeleft = proxy->get("matchtimer");
+	proxy->set(DRIVE_FORWARD_BACK, Autonomous_Drive_Forward_Speed);
+	WaitUntil(timeleft-0.5);
 	// Release the tube
 	proxy->set(GRIPPER_BUTTON, true);
 	Wait(AUTONOMOUS_WAIT_TIME);
 	proxy->set(GRIPPER_BUTTON, false);
 	proxy->set(HIGH_PRESET_BUTTON, false);
 	proxy->set(MID_PRESET_BUTTON, true);
-	WaitUntil(10);
+	WaitUntil(timeleft-1);
 	proxy->reset();
 	return;
 #endif
