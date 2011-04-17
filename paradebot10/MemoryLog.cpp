@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <stat.h>
-#include "MemoryLog166.h"
+#include "MemoryLog.h"
 
 
 // To locally enable debug printing: set true, to disable false
@@ -24,7 +24,7 @@
 #define Match_Time (135)
 #define Padding (5)
 // Memory log constructor
-MemoryLog166::MemoryLog166(unsigned int msize, unsigned int ltime, char *filename_, char *titles_)
+MemoryLog::MemoryLog(unsigned int msize, unsigned int ltime, char *filename_, char *titles_)
 {
 	unsigned int ms;  // Size of memory that we need
 	
@@ -52,21 +52,22 @@ MemoryLog166::MemoryLog166(unsigned int msize, unsigned int ltime, char *filenam
 	
 	// Not yet registered
 	Registered = 0;
-	mlNext = 0;
+	nextLog = 0;
+	clock_gettime(CLOCK_REALTIME, &starttime);
 	
 	// Done
 	return;
 }
 
 // Destructor
-MemoryLog166::~MemoryLog166(void)
+MemoryLog::~MemoryLog(void)
 {
 	// Done
 	return;
 }
 
 // Get next buffer
-char *MemoryLog166::GetNextBuffer(unsigned int bsize)
+char *MemoryLog::GetNextBuffer(unsigned int bsize)
 {
     char *mptr = MemoryNext;
     
@@ -84,7 +85,7 @@ char *MemoryLog166::GetNextBuffer(unsigned int bsize)
 }
 
 // Dump the buffers into a file
-int MemoryLog166::DumpToFile(void)
+int MemoryLog::DumpToFile(void)
 {
 	char *nptr = MemoryBase;
 	char Factual[128];
@@ -122,6 +123,7 @@ int MemoryLog166::DumpToFile(void)
 			BuffersRequested, BuffersObtained);
 	BuffersRequested = 0;
 	BuffersObtained = 0;
+	clock_gettime(CLOCK_REALTIME, &starttime);
 	
 	// Back to caller
 	return (0);

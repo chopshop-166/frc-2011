@@ -24,10 +24,10 @@ struct abuf166
 };
 
 //  Memory Log
-class PneumaticsLog : public MemoryLog166
+class PneumaticsLog : public MemoryLog
 {
 public:
-	PneumaticsLog() : MemoryLog166(
+	PneumaticsLog() : MemoryLog(
 			sizeof(struct abuf166), PNEUMATICS_CYCLE_TIME, "Pneumatics",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
@@ -115,8 +115,7 @@ int Pneumatics166::Main(int a2, int a3, int a4, int a5,
 	bool trigger = false;
 	
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) {
+	while (true) {
 		if(proxy->get("Joy1T") > 0) {
 			trigger = proxy->get("Joy1BT");
 		} else {

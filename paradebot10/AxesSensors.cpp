@@ -29,10 +29,10 @@ struct abuf166
 };
 
 //  Memory Log
-class AxesSensorsLog : public MemoryLog166
+class AxesSensorsLog : public MemoryLog
 {
 public:
-	AxesSensorsLog() : MemoryLog166(
+	AxesSensorsLog() : MemoryLog(
 			sizeof(struct abuf166), AXESSENSORS_CYCLE_TIME, "AxesSensors",
 			"Seconds,Nanoseconds,Elapsed Time,Temperature, Angle, Voltage, X Accel, Y Accel\n"  // Put the names of the values in here, comma-seperated
 			) {
@@ -159,8 +159,7 @@ int AxesSensors166::Main(int a2, int a3, int a4, int a5,
 	float X_Axis_Old = 0;
 	float Y_Axis_Old = 0;
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) {
+	while (true) {
 		orig_voltage_temp = GetTemperature(Temp_Sensor, 'F');
 		//lHandle->DriverStationDisplay("Temp: %f", orig_voltage_temp);
 		Gyro_Angle = Gyro_gyro.GetAngle();

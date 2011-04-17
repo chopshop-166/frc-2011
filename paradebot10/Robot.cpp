@@ -17,6 +17,7 @@
 #include "WPILib.h"
 #include "Autonomous.h"
 #include "Robot.h"
+#include "SimpleTask.h"
 #include "Includes.h"
 #include <stdarg.h>
 
@@ -29,8 +30,6 @@ Team166Task *Team166Task::ActiveTasks[T166_MAXTASK + 1] = {0};
 // Create the robot handle that's used by all the other classes
 Robot *Robot::RobotHandle = NULL;
 
-// This task has to always be started first or the system will crash
-Proxy Team166ProxyObject;
 // Declare external tasks inside Tasks.h
 #include "Tasks.h"
 
@@ -45,7 +44,6 @@ Robot::Robot(void)
 
 	DPRINTF(LOG_DEBUG, "Constructor\n");
 	
-	RobotMode = T166_CONSTRUCTOR;
 	dsHandle = DriverStation::GetInstance();
 	dsHandleLCD = DriverStationLCD::GetInstance();
 	if(RobotHandle == NULL) {
@@ -93,13 +91,10 @@ void Robot::Disabled(void)
  */
 void Robot::OperatorControl(void)
 {
-	int has_been_disabled = 0;
-	
 	Timer debugTimer;
 	debugTimer.Start();
-	
+
 	printf("Operator control\n");
-	RobotMode = T166_OPERATOR;
 	GetWatchdog().SetEnabled(true);
 	DriverStationDisplay("Teleoperated Enabled.");
 	while (IsOperatorControl())
@@ -107,25 +102,17 @@ void Robot::OperatorControl(void)
 		if(debugTimer.HasPeriodPassed(ROBOT_WAIT_TIME))
 			Team166Task::PrintStats();
 		
-		// Are we being disabled?
-		if (IsDisabled()) {
-			if (!has_been_disabled) {
-				has_been_disabled = true;
-				DriverStationDisplay("Dumping Memory Log...");
-			    printf("Dumping log files...\n");
-			    DumpLoggers(maxLogId);
-			    printf("Logfiles dumped!\n");
-			    maxLogId++;
-			}
-			Wait (ROBOT_WAIT_TIME);
-			continue;
-		} else {
-			has_been_disabled = false;
-		}
-		
 		// Each task needs to update for us to feed the watch dog.
 		if (Team166Task::FeedWatchDog()) {
 		    GetWatchdog().Feed();
+		}
+		if(IsDisabled()) {
+			DriverStationDisplay("Dumping Memory Log...");
+			printf("Dumping log files...\n");
+			DumpLoggers(maxLogId);
+			printf("Logfiles dumped!\n");
+			maxLogId++;
+			break;
 		}
 		
 		Wait (ROBOT_WAIT_TIME);
@@ -144,14 +131,14 @@ Robot *Robot::getInstance(void)
 /**
  * Register a log object
  */
-void Robot::RegisterLogger(MemoryLog166 *ml)
+void Robot::RegisterLogger(FrameworkLogger *ml)
 {
 	
 	// Has this handler been registered already?
 	if (!ml->Registered) {
 		
 		// No. Insert it at the head
-		ml->mlNext = mlHead;
+		ml->nextLog = mlHead;
 		mlHead = ml;
 		ml->Registered = 1;
 		clock_gettime(CLOCK_REALTIME, &(ml->starttime));
@@ -163,7 +150,7 @@ void Robot::RegisterLogger(MemoryLog166 *ml)
  */
 void Robot::DumpLoggers(int dnum)
 {
-	MemoryLog166 *ml;
+	FrameworkLogger *ml;
 	
 	// Iterate through the list of loggers
 	ml = mlHead;
@@ -173,7 +160,7 @@ void Robot::DumpLoggers(int dnum)
 		ml->DumpToFile();
 		
 		// Advance to the next log
-		ml = ml->mlNext;
+		ml = ml->nextLog;
 	}
 }
 

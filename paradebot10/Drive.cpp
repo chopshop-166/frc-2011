@@ -25,10 +25,10 @@ struct abuf166
 };
 
 //  Memory Log
-class CANDriveLog : public MemoryLog166
+class CANDriveLog : public MemoryLog
 {
 public:
-	CANDriveLog() : MemoryLog166(
+	CANDriveLog() : MemoryLog(
 			sizeof(struct abuf166), CAN_CYCLE_TIME, "candrive",
 			"Seconds,Nanoseconds,Elapsed Time,Left Current,Right Current\n"
 			) {
@@ -148,8 +148,7 @@ int Team166CANDrive::Main(int a2, int a3, int a4, int a5,
 	float leftMotorSpeed = 0;
 	float rightMotorSpeed = 0;
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) {
+	while (true) {
 		//Arcade Drive
 						
 		float moveValue = -proxy->get("Joy1X");

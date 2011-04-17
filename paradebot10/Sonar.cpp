@@ -24,10 +24,10 @@ struct abuf166
 };
 
 //  Memory Log
-class SonarLog : public MemoryLog166
+class SonarLog : public MemoryLog
 {
 public:
-	SonarLog() : MemoryLog166(
+	SonarLog() : MemoryLog(
 			sizeof(struct abuf166), SONAR_CYCLE_TIME, "sonar",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
@@ -122,8 +122,7 @@ int Sonar166::Main(int a2, int a3, int a4, int a5,
 	// Distance Multiplier for US sensor
 	#define T166_MV_TO_IN (9.8)
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-			(lHandle->RobotMode == T166_OPERATOR)) {
+	while (true) {
 		//Get Voltage from US sensor
 		orig_voltage_us = US.GetVoltage();
 		orig_voltage_ir = IR.GetVoltage();

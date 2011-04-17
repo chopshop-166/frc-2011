@@ -14,35 +14,24 @@
 #include "WPILib.h"
 #include "Robot.h"
 
-//
-// This constant defines how often we want this task to run in the form
-// of miliseconds. Max allowed time is 999 miliseconds.
-// You should rename this when you copy it into a new file
-// <<CHANGEME>>
-#define TEMPLATE_CYCLE_TIME (10) // 10ms
-
-// Rename this, too, or you'll run into collisions
-// <<CHANGEME>>
-class Template166 : public Team166Task
+class SimpleTask : public Team166Task
 {
-	
 public:
+	typedef int(*MainPtr)(Proxy *proxy, Robot *lHandle);
 	
 	// task constructor
-	Template166(void);
+	SimpleTask(string,MainPtr,unsigned=50);
 
 	// task destructor
-	virtual ~Template166(void);
+	virtual ~SimpleTask(void);
 
 	// Main function of the task
 	virtual int Main(int a2, int a3, int a4, int a5,
 			int a6, int a7, int a8, int a9, int a10);
 	
 private:
-	//Declare Proxy and Robot handles
 	Proxy *proxy;				// Handle to proxy
 	Robot *lHandle;            // Local handle
-	
-	// Any variables that the task has as members go here
-	// <<CHANGEME>>
+	string taskName;
+	MainPtr taskMain;
 };

@@ -23,10 +23,10 @@ struct abuf166
 };
 
 //  Memory Log
-class CameraServoLog : public MemoryLog166
+class CameraServoLog : public MemoryLog
 {
 public:
-	CameraServoLog() : MemoryLog166(
+	CameraServoLog() : MemoryLog(
 			sizeof(struct abuf166), CAMERA_SERVO_CYCLE_TIME, "cameraServo",
 			"Seconds,Nanoseconds,Elapsed Time\n" // Put the names of the values in here, comma-seperated
 			) {
@@ -129,8 +129,7 @@ int CameraServo::Main(int a2, int a3, int a4, int a5,
 	#define DEADBAND (0.2)
 	#define CAMMOVE (.5 / (1000/CAMERA_SERVO_CYCLE_TIME))
     // General main loop (while in Autonomous or Tele mode)
-	while ((lHandle->RobotMode == T166_AUTONOMOUS) || 
-	(lHandle->RobotMode == T166_OPERATOR)) {
+	while (true) {
 		if(!proxy->get("Joy3BT")) {
 			CamJoystickX = proxy->get("Joy3X");
 			CamJoystickY = proxy->get("Joy3Y");

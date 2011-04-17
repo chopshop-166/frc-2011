@@ -17,7 +17,7 @@
 #include "Defines.h"
 
 // Framework version number
-#define FRAMEWORK_VERSION ("2010-Dec-07")
+#define FRAMEWORK_VERSION ("2010-Dec-09")
 
 //
 // task (as in kernel task)
@@ -86,6 +86,7 @@ public:
 	static int FeedWatchDog(void);
 	
 	static void PrintInactive(void);
+	static void PrintAllTasks(void);
 	
 	
 
