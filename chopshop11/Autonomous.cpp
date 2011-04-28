@@ -80,9 +80,9 @@ void AutonomousTask::main() {
 	// Stop moving the arm
 	proxy->set(ELBOW_AXIS, 0);
 	// Open the gripper
-	proxy->set("JOY3B5", true);
+	proxy->set(GRIPPER_BUTTON_RAW, true);
 	Wait(AUTONOMOUS_WAIT_TIME); 
-	proxy->set("JOY3B5", false);
+	proxy->set(GRIPPER_BUTTON_RAW, false);
 	WaitUntil(13);
 	
 	
@@ -94,9 +94,9 @@ void AutonomousTask::main() {
 	lHandle->DriverStationDisplay("Gripping Tube");
 	proxy->set(DRIVE_FORWARD_BACK, 0);
 	// Grab the tube
-	proxy->set("JOY3B5", true);
+	proxy->set(GRIPPER_BUTTON_RAW, true);
 	Wait(AUTONOMOUS_WAIT_TIME); 
-	proxy->set("JOY3B5", false);
+	proxy->set(GRIPPER_BUTTON_RAW, false);
 	WaitUntil(11.5);
 
 	
@@ -108,24 +108,26 @@ void AutonomousTask::main() {
 	proxy->set(HIGH_PRESET_BUTTON, true);
 	proxy->set(PRESET_TYPE_AXIS, 1);
 	proxy->set("ArmOverride", true);
-	WaitUntil(9.5)
+	WaitUntil(10.3)
+	proxy->set(DRIVE_FORWARD_BACK, 0); //Stop driving
+	WaitUntil(proxy->get("ElevatorReadyPosition"));
+	//Elevator and Arm are at correct height Continue
 	proxy->set("ArmOverride", false);
+	proxy->set(HIGH_PRESET_BUTTON, false);
 	
 	timeleft = proxy->get("matchtimer");
-	lHandle->DriverStationDisplay("Time: %f", timeleft);
-	
+
 	// Drive to the wall
 	proxy->set(DRIVE_FORWARD_BACK, Autonomous_Drive_Forward_Speed);
-	WaitUntil(timeleft-0.5);
-	lHandle->DriverStationDisplay("Releasing Tube");
+	WaitUntil(timeleft-0.2);
 	
+	lHandle->DriverStationDisplay("Releasing Tube");
 	// Release the tube
 	proxy->set(GRIPPER_BUTTON_RAW, true);
 	Wait(AUTONOMOUS_WAIT_TIME);
 	proxy->set(GRIPPER_BUTTON_RAW, false);
 	
 	// Lower elevator to fully release the tube
-	proxy->set(HIGH_PRESET_BUTTON, false);
 	proxy->set(MID_PRESET_BUTTON, true);
 	WaitUntil(timeleft-1.0);
 	

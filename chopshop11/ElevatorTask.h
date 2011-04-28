@@ -46,7 +46,7 @@ private:
 #else
 	Jaguar elevator;
 #endif
-	const float speed, deadband, height_deadband;
+	const float speed, downspeed, deadband, height_deadband;
 	Solenoid brakeSolenoid;
 	Encoder Height;
 };
