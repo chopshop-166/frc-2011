@@ -32,9 +32,9 @@ public:
 	DriveLog() : MemoryLog(
 			sizeof(struct abuf166), DRIVE_TASK_CYCLE_TIME, "DriveTask",
 #if DRIVE_USES_CAN
-			"Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS, LF Faults, RF Faults, LB Faults, RB Faults\n"
+			"Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, LF WS, RF WS, LB WS, RB WS, LF Faults, RF Faults, LB Faults, RB Faults\n"
 #else
-			"Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, FLWS, FRWS, BLWS, BRWS\n"
+			"Elapsed Time,LF Speed, RF Speed, LB Speed, RB Speed, LF WS, RF WS, LB WS, RB WS\n"
 #endif
 			) {
 		return;

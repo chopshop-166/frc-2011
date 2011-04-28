@@ -158,7 +158,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	}
 	int angleSizeCounter = 0;
 	int throttle = 0;
-	bool grip = false;
+	bool grip = (gripper.Get() == DoubleSolenoid::kForward);
 	proxy->TrackNewpress("Joy3B5");
 	
     //General main loop (while in Autonomous or Tele mode)
@@ -196,7 +196,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		}
 		armJag.Set(axis);
 		proxy->set("ArmAngle",currentAngle);
-		if(proxy->get(GRIPPER_BUTTON)) {			
+		if(proxy->get(GRIPPER_BUTTON)) {
 			grip=!grip;
 		}
 		if(grip==1) {

@@ -132,15 +132,15 @@ int Proxy::Main(	int a2, int a3, int a4, int a5,
 			}
 		}
 		if(!lHandle->IsEnabled()) {
-			matchTimer.Reset();
 			// It became disabled
 			matchTimer.Stop();
+			matchTimer.Reset();
 			set("matchtimer",0);
 		} else {
 			// It became enabled
 			matchTimer.Start();
 			if(lHandle->IsAutonomous()) {
-				set("matchtimer",max( 15 - matchTimer.Get(),0));
+				set("matchtimer",max(15 - matchTimer.Get(),0));
 			} else {
 				set("matchtimer",max(120 - matchTimer.Get(),0));
 			}
