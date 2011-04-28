@@ -19,7 +19,6 @@
 #define actual_drive_speed(speed) sqrt(speed)
 const double Autonomous_Drive_Backward_Speed = actual_drive_speed(0.25);
 const double Autonomous_Arm_Down_Speed = 0.6;
-const double Autonomous_Arm_Up_Speed = 0.75;
 const double Autonomous_Drive_Forward_Speed = -actual_drive_speed(0.5);
 
 AutonomousTask::AutonomousTask() {
@@ -106,30 +105,28 @@ void AutonomousTask::main() {
 	proxy->set(DRIVE_FORWARD_BACK, Autonomous_Drive_Forward_Speed);
 	
 	// Go to the highest preset
-	/*
 	proxy->set(HIGH_PRESET_BUTTON, true);
 	proxy->set(PRESET_TYPE_AXIS, 1);
-	*/
-	while((proxy->get("matchtimer") > 9.5) && lHandle->IsAutonomous()) {
-		if(proxy->get("ArmAngle") < 1.9) {
-			proxy->set(ELBOW_AXIS, 0);
-		} else {
-			proxy->set(ELBOW_AXIS, Autonomous_Arm_Down_Speed);
-		}
-		Wait(AUTONOMOUS_WAIT_TIME);
-	}
-	WaitUntil(9.5);
+	proxy->set("ArmOverride", true);
+	WaitUntil(9.5)
+	proxy->set("ArmOverride", false);
+	
 	timeleft = proxy->get("matchtimer");
 	lHandle->DriverStationDisplay("Time: %f", timeleft);
+	
+	// Drive to the wall
 	proxy->set(DRIVE_FORWARD_BACK, Autonomous_Drive_Forward_Speed);
 	WaitUntil(timeleft-0.5);
 	lHandle->DriverStationDisplay("Releasing Tube");
+	
 	// Release the tube
 	proxy->set(GRIPPER_BUTTON_RAW, true);
 	Wait(AUTONOMOUS_WAIT_TIME);
-//	proxy->set(GRIPPER_BUTTON_RAW, false);
-//	proxy->set(HIGH_PRESET_BUTTON, false);
-//	proxy->set(MID_PRESET_BUTTON, true);
+	proxy->set(GRIPPER_BUTTON_RAW, false);
+	
+	// Lower elevator to fully release the tube
+	proxy->set(HIGH_PRESET_BUTTON, false);
+	proxy->set(MID_PRESET_BUTTON, true);
 	WaitUntil(timeleft-1.0);
 	
 	proxy->reset();

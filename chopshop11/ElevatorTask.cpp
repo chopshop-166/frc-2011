@@ -225,8 +225,8 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 				new_speed = speed;
 				proxy->set("ElevatorReadyPosition", false);
 			} else if (clicks > (height_list[(int)target_type] + height_deadband)) {
-//				new_speed = -speed;
-				new_speed = 0;
+				new_speed = -speed;
+//				new_speed = 0;
 				proxy->set("ElevatorReadyPosition", true);
 			} else {
 				target_type = hNone;

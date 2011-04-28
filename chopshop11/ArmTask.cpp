@@ -20,6 +20,7 @@
 
 // To locally enable debug printing: set true, to disable false
 #define DPRINTF if(false)dprintf
+const double Autonomous_Arm_Up_Speed = 0.75;
 
 // Sample in memory buffer
 struct abuf
@@ -150,6 +151,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	lHandle->RegisterLogger(&sl);
 	
 	proxy->add("ArmAngle");
+	proxy->add("ArmOverride");
 	float currentAngle;
 	float axis;
 	float previousAngles[ANGLE_LIST_SIZE];
@@ -170,8 +172,15 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			currentAngle+=previousAngles[i];
 		}
 		currentAngle /= ANGLE_LIST_SIZE;
-		
-		axis = -proxy->get(ELBOW_AXIS);
+		if(proxy->get("ArmOverride")) {
+			if(currentAngle >= 2.7) {
+				axis = 0;
+			} else {
+				axis = Autonomous_Arm_Up_Speed;
+			}
+		} else {
+			axis = -proxy->get(ELBOW_AXIS);
+		}
 		if(fabs(axis) < deadband) {
 			axis=0;
 		}
@@ -192,8 +201,9 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			ArmLock.Set(DISENGAGED);
 			throttle = 1;
 		} else {
-				ArmLock.Set(ENGAGED);
+			ArmLock.Set(ENGAGED);
 		}
+		
 		armJag.Set(axis);
 		proxy->set("ArmAngle",currentAngle);
 		if(proxy->get(GRIPPER_BUTTON)) {
