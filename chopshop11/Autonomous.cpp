@@ -74,22 +74,22 @@ void AutonomousTask::main() {
 	proxy->set(DRIVE_FORWARD_BACK,0);
 	// Drop the arm
 	proxy->set(ELBOW_AXIS, Autonomous_Arm_Down_Speed);
-	WaitUntil(13.5);
+	WaitUntil(13.0);
 	
 	lHandle->DriverStationDisplay("Opening Claw");
 	// Stop moving the arm
 	proxy->set(ELBOW_AXIS, 0);
 	// Open the gripper
 	proxy->set(GRIPPER_BUTTON_RAW, true);
-	Wait(AUTONOMOUS_WAIT_TIME); 
+	Wait(AUTONOMOUS_WAIT_TIME); // Autonomous cycle time lines up with the gripper task cycle time 
 	proxy->set(GRIPPER_BUTTON_RAW, false);
-	WaitUntil(13);
+	WaitUntil(12.5);
 	
 	
 	lHandle->DriverStationDisplay("Approaching Tube");
 	// Drive Forward, same speed as the backwards one
 	proxy->set(DRIVE_FORWARD_BACK, -Autonomous_Drive_Backward_Speed);
-	WaitUntil(12);
+	WaitUntil(11.5);
 	
 	lHandle->DriverStationDisplay("Gripping Tube");
 	proxy->set(DRIVE_FORWARD_BACK, 0);
@@ -97,7 +97,7 @@ void AutonomousTask::main() {
 	proxy->set(GRIPPER_BUTTON_RAW, true);
 	Wait(AUTONOMOUS_WAIT_TIME); 
 	proxy->set(GRIPPER_BUTTON_RAW, false);
-	WaitUntil(11.5);
+	WaitUntil(11.0);
 
 	
 	lHandle->DriverStationDisplay("Driving Forward");
@@ -106,11 +106,17 @@ void AutonomousTask::main() {
 	
 	// Go to the highest preset
 	proxy->set(HIGH_PRESET_BUTTON, true);
-	proxy->set(PRESET_TYPE_AXIS, 1);
+	proxy->set(PRESET_TYPE_AXIS, 1); // Positive axis is in the center
 	proxy->set("ArmOverride", true);
-	WaitUntil(10.3)
+	WaitUntil(9.6);
 	proxy->set(DRIVE_FORWARD_BACK, 0); //Stop driving
-	WaitUntil(proxy->get("ElevatorReadyPosition"));
+	while(!(proxy->get("ElevatorReadyPosition") && proxy->get("ArmReadyPosition"))) {
+		Wait(AUTONOMOUS_WAIT_TIME);
+		if(!lHandle->IsAutonomous()) {
+			lHandle->DriverStationDisplay("Auto is out of time");
+			return;
+		}
+	}
 	//Elevator and Arm are at correct height Continue
 	proxy->set("ArmOverride", false);
 	proxy->set(HIGH_PRESET_BUTTON, false);
@@ -119,7 +125,7 @@ void AutonomousTask::main() {
 
 	// Drive to the wall
 	proxy->set(DRIVE_FORWARD_BACK, Autonomous_Drive_Forward_Speed);
-	WaitUntil(timeleft-0.2);
+	WaitUntil(timeleft-0.3);
 	
 	lHandle->DriverStationDisplay("Releasing Tube");
 	// Release the tube
@@ -129,7 +135,7 @@ void AutonomousTask::main() {
 	
 	// Lower elevator to fully release the tube
 	proxy->set(MID_PRESET_BUTTON, true);
-	WaitUntil(timeleft-1.0);
+	WaitUntil(timeleft-0.6);
 	
 	proxy->reset();
 	lHandle->DriverStationDisplay("Subject terminated");

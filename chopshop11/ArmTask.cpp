@@ -116,7 +116,7 @@ ArmTask::ArmTask(void) :
 #else
 	armJag(ARM_JAGUAR_PWM),
 #endif
-	speed(0.25), deadband(0.1),
+	speed(0.25), deadband(0.15),
 	gripper(GRIPPER_OPEN,GRIPPER_CLOSE), potentiometer(ARM_POT),
 	high_limit(3.6), low_limit(1.58),
 	ArmLock(ARM_LOCK_PWM)
@@ -162,6 +162,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 	int throttle = 0;
 	bool grip = (gripper.Get() == DoubleSolenoid::kForward);
 	proxy->TrackNewpress("Joy3B5");
+	proxy->add("ArmReadyPosition");
 	
     //General main loop (while in Autonomous or Tele mode)
 	while (true) {
@@ -175,11 +176,14 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 		if(proxy->get("ArmOverride")) {
 			if(currentAngle >= 2.7) {
 				axis = 0;
+				proxy->set("ArmReadyPosition", true);
 			} else {
 				axis = Autonomous_Arm_Up_Speed;
+				proxy->set("ArmReadyPosition", false);
 			}
 		} else {
 			axis = -proxy->get(ELBOW_AXIS);
+			proxy->set("ArmReadyPosition", false);
 		}
 		if(fabs(axis) < deadband) {
 			axis=0;
