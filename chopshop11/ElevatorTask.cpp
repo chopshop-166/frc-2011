@@ -181,7 +181,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			bottom_press = 0;
 		}
 		
-		clicks=-Height.Get();//Saves value of clicks
+		clicks = Height.Get();//Saves value of clicks
 //		SmartDashboard::Log(clicks, "Clicks");
 
 		if(proxy->get(PRESET_TYPE_AXIS) < 0) {
@@ -253,8 +253,7 @@ int ElevatorTask::Main(int a2, int a3, int a4, int a5,
 			brakeSolenoid.Set(true);
 		}
 		
-		// Adjust down speed to be half as fast
-		elevator.Set(new_speed);
+		elevator.Set(-new_speed);
 		
 		SmartDashboard::Log(target_type, "TargetType");
 		if(target_type != hNone) {
