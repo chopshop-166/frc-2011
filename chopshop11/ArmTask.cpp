@@ -194,7 +194,7 @@ int ArmTask::Main(int a2, int a3, int a4, int a5,
 			axis += deadband;
 		}
 		
-		axis /= 3;
+		axis /= 2;
 		if (currentAngle >= MAXHEIGHT) {
 			if (axis >=0) {
 				axis = 0;
